@@ -83,7 +83,7 @@ parser::parser(environment const & env, io_state const & ios,
     m_verbose(true), m_use_exceptions(use_exceptions),
     m_scanner(strm, strm_name), m_local_level_decls(lds), m_local_decls(eds),
     m_pos_table(std::make_shared<pos_info_table>()),
-    m_theorem_queue(*this, num_threads > 1 ? num_threads - 1 : 0) {
+    m_theorem_queue(*this, num_threads) {
     m_scanner.set_line(line);
     m_num_threads = num_threads;
     m_no_undef_id_error    = false;
