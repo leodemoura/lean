@@ -83,7 +83,7 @@ class FlycheckItem:
         lineno    = int(items[1])
         colno     = int(items[2])
         ty        = items[3]
-        msg       = ":".join(items[4:]) + "\n" + "\n".join(lines[1:])
+        msg       = ":".join(items[4:]) + "\n " + "\n ".join(lines[1:])
         msg       = msg.strip()
         return cls(filename, lineno, colno, ty, msg)
 
