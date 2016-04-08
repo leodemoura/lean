@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 Author: Leonardo de Moura
 */
+
 #include <string>
 #include <algorithm>
 #include <vector>
@@ -18,6 +19,7 @@ Author: Leonardo de Moura
 #include "library/module.h"
 #include "library/vm/vm.h"
 #include "library/vm/vm_expr.h"
+#include "util/dynamic_library.h"
 
 namespace lean {
 void vm_obj_cell::dec_ref(vm_obj & o, buffer<vm_obj_cell*> & todelete) {
@@ -59,6 +61,10 @@ vm_obj mk_vm_constructor(unsigned cidx, unsigned sz, vm_obj const * data) {
     return mk_vm_composite(vm_obj_kind::Constructor, cidx, sz, data);
 }
 
+vm_obj mk_vm_constructor(unsigned cidx, std::initializer_list<vm_obj const> args) {
+    return mk_vm_constructor(cidx, args.size(), args.begin());
+}
+
 vm_obj mk_vm_constructor(unsigned cidx, vm_obj const & o1) {
     return mk_vm_constructor(cidx, 1, &o1);
 }
@@ -76,6 +82,15 @@ vm_obj mk_vm_constructor(unsigned cidx, vm_obj const & o1, vm_obj const & o2, vm
 vm_obj mk_vm_constructor(unsigned cidx, vm_obj const & o1, vm_obj const & o2, vm_obj const & o3, vm_obj const & o4) {
     vm_obj args[4] = {o1, o2, o3, o4};
     return mk_vm_constructor(cidx, 4, args);
+}
+
+vm_obj mk_native_closure(environment const & env, name const & n, std::initializer_list<vm_obj const> args) {
+    return mk_native_closure(env, n, args.size(), args.begin());
+}
+
+vm_obj mk_native_closure(environment const & env, name const & n, unsigned sz, vm_obj const * data) {
+      unsigned idx = *lean::get_vm_constant_idx(env, n);
+      return lean::mk_vm_closure(idx, sz, data);
 }
 
 vm_obj mk_vm_closure(unsigned fn_idx, unsigned sz, vm_obj const * data) {
@@ -2200,6 +2215,26 @@ unsigned get_vm_builtin_arity(name const & fn) {
     lean_unreachable();
 }
 
+// void* get_extern_symbol(
+//    std::string library_name,
+//    name const & n) {
+//    dynamic_library library(library_name);
+//    return library.symbol(extern_name);
+// }
+
+
+environment load_external_fn(environment & env, name const & extern_n) {
+    try {
+        dynamic_library *library = new dynamic_library("/home/jroesch/Git/muri/extern/libput_int.so");
+        auto code = library->symbol(extern_n.to_string(""));
+        lean_assert(code);
+        return add_native(env, extern_n, (vm_cfunction_2)code);
+    } catch (dynamic_linking_exception e) {
+        std::cout << e.what() << std::endl;
+        throw e;
+    }
+}
+
 void initialize_vm_core() {
     g_vm_builtins = new name_map<std::tuple<unsigned, char const *, vm_function>>();
     g_vm_cbuiltins = new name_map<std::tuple<unsigned, char const *, vm_cfunction>>();
@@ -2220,7 +2255,7 @@ void finalize_vm_core() {
 
 void initialize_vm() {
     g_ext = new vm_decls_reg();
-    g_may_update_vm_builtins = false;
+    // g_may_update_vm_builtins = false;
     g_vm_reserve_key = new std::string("VMR");
     g_vm_code_key    = new std::string("VMC");
     register_module_object_reader(*g_vm_reserve_key, reserve_reader);

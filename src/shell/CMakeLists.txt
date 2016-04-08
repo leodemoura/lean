@@ -3,7 +3,7 @@ if(${EMSCRIPTEN})
   target_link_libraries(lean.js ${EXTRA_LIBS} "--embed-file library --memory-init-file 0")
 else()
   add_executable(lean lean.cpp emscripten.cpp)
-  target_link_libraries(lean leanstatic ${EXTRA_LIBS})
+  target_link_libraries(lean leanshared ${EXTRA_LIBS})
   ADD_CUSTOM_COMMAND(TARGET lean
     POST_BUILD
     COMMAND "${CMAKE_COMMAND}" -E make_directory "${LEAN_SOURCE_DIR}/../bin"
@@ -158,6 +158,14 @@ FOREACH(T ${LEANSLOWTESTS})
            WORKING_DIRECTORY "${LEAN_SOURCE_DIR}/../tests/lean/slow"
            COMMAND bash "./test_single.sh" "${CMAKE_CURRENT_BINARY_DIR}/lean" ${T_NAME})
   set_tests_properties("leanslowtest_${T_NAME}" PROPERTIES LABELS "expensive")
+ENDFOREACH(T)
+
+file(GLOB LEANNATIVETESTS "${LEAN_SOURCE_DIR}/../tests/lean/native_run/*.lean")
+FOREACH(T ${LEANNATIVETESTS})
+  GET_FILENAME_COMPONENT(T_NAME ${T} NAME)
+  add_test(NAME "leannativetest_${T_NAME}"
+           WORKING_DIRECTORY "${LEAN_SOURCE_DIR}/../tests/lean/native_run"
+           COMMAND bash "./test_single.sh" "${CMAKE_CURRENT_BINARY_DIR}/lean" ${T_NAME})
 ENDFOREACH(T)
 
 # # LEAN DOCS

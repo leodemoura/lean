@@ -41,6 +41,9 @@ Author: Leonardo de Moura
 #include "frontends/lean/dependencies.h"
 #include "frontends/lean/opt_cmd.h"
 #include "frontends/smt2/parser.h"
+#include "library/compiler/options.h"
+#include "library/compiler/native_compiler.h"
+#include "library/trace.h"
 #include "init/init.h"
 #include "shell/emscripten.h"
 #include "shell/simple_pos_info_provider.h"
@@ -165,6 +168,7 @@ static struct option g_long_options[] = {
     {"path",         no_argument,       0, 'p'},
     {"githash",      no_argument,       0, 'g'},
     {"output",       required_argument, 0, 'o'},
+    {"native",       required_argument, 0, 'n'},
     {"export",       required_argument, 0, 'E'},
     {"export-all",   required_argument, 0, 'A'},
     {"memory",       required_argument, 0, 'M'},
@@ -172,6 +176,8 @@ static struct option g_long_options[] = {
     {"discard",      no_argument,       0, 'r'},
     {"to_axiom",     no_argument,       0, 'X'},
     {"profile",      no_argument,       0, 'P'},
+    {"compile",      optional_argument, 0, 'C'},
+    // {"main_fn",      required_argument, 0, 'M'}, optional_arg?
 #if defined(LEAN_MULTI_THREAD)
     {"server",       no_argument,       0, 'S'},
     {"threads",      required_argument, 0, 'j'},
@@ -238,6 +244,8 @@ options set_config_option(options const & opts, char const * in) {
         case lean::IntOption:
         case lean::UnsignedOption:
             return opts.update(opt, atoi(val.c_str()));
+        case lean::StringOption:
+            return opts.update(opt, val);
         default:
             throw lean::exception(lean::sstream() << "invalid -D parameter, configuration option '" << opt
                                   << "' cannot be set in the command line, use set_option command");
@@ -258,10 +266,13 @@ int main() { return 0; }
 #else
 int main(int argc, char ** argv) {
     lean::initializer init;
+    lean::set_install_path(argv[0]);
     bool export_objects     = false;
+    bool export_native_objects = false;
     unsigned trust_lvl      = LEAN_BELIEVER_TRUST_LEVEL+1;
     bool server             = false;
     bool smt2               = false;
+    bool compile            = false;
     bool only_deps          = false;
     unsigned num_threads    = 1;
     bool read_cache         = false;
@@ -270,6 +281,7 @@ int main(int argc, char ** argv) {
     keep_theorem_mode tmode = keep_theorem_mode::All;
     options opts;
     std::string output;
+    std::string native_output;
     std::string cache_name;
     std::string index_name;
     optional<unsigned> line;
@@ -324,6 +336,10 @@ int main(int argc, char ** argv) {
         case 'o':
             output         = optarg;
             export_objects = true;
+            break;
+        case 'n':
+            native_output         = optarg;
+            export_native_objects = true;
             break;
         case 'c':
             cache_name = optarg;
@@ -384,6 +400,9 @@ int main(int argc, char ** argv) {
             break;
         case 'E':
             export_txt = std::string(optarg);
+            break;
+        case 'C':
+            compile = true;
             break;
 #ifdef LEAN_DEBUG
         case 'B':
@@ -538,6 +557,20 @@ int main(int argc, char ** argv) {
                 lean::display_error(out, &pp, ex);
             }
         }
+
+        // Get the native options.
+        lean::native::scope_config scoped_native_config(ios.get_options());
+
+        if (ok && compile && default_k == input_kind::Lean) {
+            if (default_k == input_kind::Lean) {
+                // lean::scope_trace_env tracing_on(ios.get_options());
+                native_compile_binary(env, env.get(lean::name("main")));
+            } else {
+                // Not sure the right way to report this error.
+                std::cout << "can't not natively compile .hlean files" << std::endl;
+                exit(1);
+            }
+        }
         if (ok && server && (default_k == input_kind::Lean || default_k == input_kind::HLean)) {
             signal(SIGINT, on_ctrl_c);
             ios.set_option(lean::name("pp", "beta"), true);
@@ -557,6 +590,9 @@ int main(int argc, char ** argv) {
             type_checker tc(env);
             auto strm = regular(env, ios, tc);
             index.save(strm);
+        }
+        if (export_native_objects && ok && default_k == input_kind::Lean) {
+            env = lean::set_native_module_path(env, lean::name(native_output));
         }
         if (export_objects && ok) {
             exclusive_file_lock output_lock(output);
