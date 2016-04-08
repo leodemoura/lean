@@ -38,6 +38,7 @@ Author: Leonardo de Moura
 #include "frontends/lean/dependencies.h"
 #include "frontends/lean/opt_cmd.h"
 #include "frontends/smt2/parser.h"
+#include "backends/c_backend.h"
 #include "init/init.h"
 #include "shell/emscripten.h"
 #include "shell/simple_pos_info_provider.h"
@@ -131,6 +132,7 @@ static struct option g_long_options[] = {
     {"memory",       required_argument, 0, 'M'},
     {"trust",        required_argument, 0, 't'},
     {"profile",      no_argument,       0, 'P'},
+    {"compile_to_c", required_argument, 0, 'C'},
 #if defined(LEAN_MULTI_THREAD)
     {"threads",      required_argument, 0, 'j'},
 #endif
@@ -218,6 +220,7 @@ int main(int argc, char ** argv) {
     bool export_objects     = false;
     unsigned trust_lvl      = LEAN_BELIEVER_TRUST_LEVEL+1;
     bool smt2               = false;
+    bool compile            = false;
     bool only_deps          = false;
     unsigned num_threads    = 1;
     bool read_cache         = false;
@@ -227,6 +230,7 @@ int main(int argc, char ** argv) {
     std::string cache_name;
     optional<unsigned> line;
     optional<unsigned> column;
+    optional<std::string> main_fn;
     optional<std::string> export_txt;
     optional<std::string> export_all_txt;
     optional<std::string> base_dir;
@@ -316,6 +320,10 @@ int main(int argc, char ** argv) {
 #ifdef LEAN_DEBUG
         case 'B':
             lean::enable_debug(optarg);
+            break;
+        case 'C':
+            main_fn = std::string(optarg);
+            compile = true;
             break;
 #endif
         case 'A':
@@ -411,6 +419,20 @@ int main(int argc, char ** argv) {
                 auto out = diagnostic(env, ios, tc);
                 lean::display_error(out, &pp, ex);
             }
+        }
+        if (ok && compile && default_k == input_kind::Lean) {
+            // TODO : @jroesch print error if try to do
+            // extraction in the HoTT core, not sure how
+            // to implement a sophisticated usage analysis
+            // to do erasure.
+            lean::c_backend backend(env, main_fn);
+        }
+        if (ok && server && (default_k == input_kind::Lean || default_k == input_kind::HLean)) {
+            signal(SIGINT, on_ctrl_c);
+            ios.set_option(lean::name("pp", "beta"), true);
+            lean::server Sv(env, ios, base_dir, num_threads);
+            if (!Sv(std::cin))
+                ok = false;
         }
         if (save_cache) {
             exclusive_file_lock cache_lock(cache_name);
