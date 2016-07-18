@@ -13,6 +13,8 @@ constant put_str : string → IO unit
 constant put_nat : nat → IO unit
 constant get_line : IO string
 
+constant forever : IO unit -> IO unit
+
 meta constant format.print_using : format → options → IO unit
 
 meta definition format.print (fmt : format) : IO unit :=
