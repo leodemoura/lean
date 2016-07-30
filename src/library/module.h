@@ -73,6 +73,9 @@ environment add_transient_decl_pos_info(environment const & env, name const & de
 /** \brief Store/Export module using \c env to the output stream \c out. */
 void export_module(std::ostream & out, environment const & env);
 
+/** \brief Export module obtained from \c env as native code to the output stream \c out. */
+void export_native_module(std::ostream & out, environment const & env);
+
 /** \brief An asynchronous update. It goes into a task queue, and can be executed by a different execution thread. */
 typedef std::function<void(shared_environment & env)> asynch_update_fn;
 

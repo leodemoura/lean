@@ -132,12 +132,13 @@ static struct option g_long_options[] = {
     {"path",         no_argument,       0, 'p'},
     {"githash",      no_argument,       0, 'g'},
     {"output",       required_argument, 0, 'o'},
+    {"native",       required_argument, 0, 'n'},
     {"export",       required_argument, 0, 'E'},
     {"export-all",   required_argument, 0, 'A'},
     {"memory",       required_argument, 0, 'M'},
     {"trust",        required_argument, 0, 't'},
     {"profile",      no_argument,       0, 'P'},
-    {"compile-to",   required_argument, 0, 'C'},
+    {"compile",      required_argument, 0, 'C'},
     // {"main_fn",      required_argument, 0, 'M'}, optional_arg?
 #if defined(LEAN_MULTI_THREAD)
     {"threads",      required_argument, 0, 'j'},
@@ -251,6 +252,7 @@ int main(int argc, char ** argv) {
 #endif
     initializer init;
     bool export_objects     = false;
+    bool export_native_objects = false;
     unsigned trust_lvl      = LEAN_BELIEVER_TRUST_LEVEL+1;
     bool smt2               = false;
     bool compile            = false;
@@ -261,6 +263,7 @@ int main(int argc, char ** argv) {
 #endif
     options opts;
     std::string output;
+    std::string native_output;
     std::string cache_name;
     optional<unsigned> line;
     optional<unsigned> column;
@@ -297,6 +300,10 @@ int main(int argc, char ** argv) {
         case 'o':
             output         = optarg;
             export_objects = true;
+            break;
+        case 'n':
+            native_output  = optarg;
+            export_native_objects = true;
             break;
         case 'M':
             lean::set_max_memory_megabyte(atoi(optarg));
@@ -448,6 +455,11 @@ int main(int argc, char ** argv) {
             exclusive_file_lock output_lock(output);
             std::ofstream out(output, std::ofstream::binary);
             export_module(out, env);
+        }
+        if (export_native_objects && ok && default_k == input_kind::Lean) {
+            exclusive_file_lock output_lock(native_output);
+            std::ofstream out(native_output, std::ofstream::binary);
+            export_native_module(out, env);
         }
         if (export_txt) {
             exclusive_file_lock expor_lock(*export_txt);
