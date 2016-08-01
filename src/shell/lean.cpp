@@ -138,7 +138,7 @@ static struct option g_long_options[] = {
     {"memory",       required_argument, 0, 'M'},
     {"trust",        required_argument, 0, 't'},
     {"profile",      no_argument,       0, 'P'},
-    {"compile",      required_argument, 0, 'C'},
+    {"compile",      optional_argument, 0, 'C'},
     // {"main_fn",      required_argument, 0, 'M'}, optional_arg?
 #if defined(LEAN_MULTI_THREAD)
     {"threads",      required_argument, 0, 'j'},
@@ -302,7 +302,7 @@ int main(int argc, char ** argv) {
             export_objects = true;
             break;
         case 'n':
-            native_output  = optarg;
+            native_output         = optarg;
             export_native_objects = true;
             break;
         case 'M':
