@@ -353,7 +353,6 @@ int main(int argc, char ** argv) {
             lean::enable_debug(optarg);
             break;
         case 'C':
-            compiler_target = std::string(optarg);
             compile = true;
             break;
 #endif
