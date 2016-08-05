@@ -36,7 +36,7 @@ Author: Leonardo de Moura
 #include "frontends/lean/dependencies.h"
 #include "frontends/lean/opt_cmd.h"
 #include "frontends/smt2/parser.h"
-#include "library/compiler/config.h"
+#include "library/compiler/options.h"
 #include "library/compiler/native_compiler.h"
 #include "init/init.h"
 #include "shell/simple_pos_info_provider.h"
@@ -348,12 +348,13 @@ int main(int argc, char ** argv) {
         case 'E':
             export_txt = std::string(optarg);
             break;
+        case 'C':
+            // compiler_target = std::string(optarg);
+            compile = true;
+            break;
 #if defined(LEAN_DEBUG)
         case 'B':
             lean::enable_debug(optarg);
-            break;
-        case 'C':
-            compile = true;
             break;
 #endif
         case 'A':
@@ -435,8 +436,8 @@ int main(int argc, char ** argv) {
             // extraction in the HoTT core, not sure how
             // to implement a sophisticated usage analysis
             // to do erasure.
-            lean::config conf((optional<std::string>()), optional<std::string>());
-            native_compile_binary(env, conf, env.get(lean::name("main")));
+            lean::native::scope_config(ios.get_options());
+            native_compile_binary(env, env.get(lean::name("main")));
         }
         if (ok && server && (default_k == input_kind::Lean || default_k == input_kind::HLean)) {
             signal(SIGINT, on_ctrl_c);
@@ -458,6 +459,7 @@ int main(int argc, char ** argv) {
         if (export_native_objects && ok && default_k == input_kind::Lean) {
             exclusive_file_lock output_lock(native_output);
             std::ofstream out(native_output, std::ofstream::binary);
+            lean::native::scope_config(ios.get_options());
             export_native_module(out, env);
         }
         if (export_txt) {
