@@ -433,10 +433,11 @@ int main(int argc, char ** argv) {
             }
         }
 
+        // Get the native options.
+        lean::native::scope_config scoped_native_config(ios.get_options());
 
         if (ok && compile && default_k == input_kind::Lean) {
             if (default_k == input_kind::Lean) {
-                lean::native::scope_config scoped_native_config(ios.get_options());
                 // lean::scope_trace_env tracing_on(ios.get_options());
                 native_compile_binary(env, env.get(lean::name("main")));
             } else {
@@ -457,15 +458,21 @@ int main(int argc, char ** argv) {
             std::ofstream out(cache_name, std::ofstream::binary);
             cache.save(out);
         }
+        if (gen_index) {
+            exclusive_file_lock index_lock(index_name);
+            std::shared_ptr<lean::file_output_channel> out(new lean::file_output_channel(index_name.c_str()));
+            ios.set_regular_channel(out);
+            type_checker tc(env);
+            auto strm = regular(env, ios, tc);
+            index.save(strm);
+        }
+        if (export_native_objects && ok && default_k == input_kind::Lean) {
+            env = lean::set_native_module_path(env, lean::name(native_output));
+        }
         if (export_objects && ok) {
             exclusive_file_lock output_lock(output);
             std::ofstream out(output, std::ofstream::binary);
             export_module(out, env);
-        }
-        if (export_native_objects && ok && default_k == input_kind::Lean) {
-            exclusive_file_lock output_lock(native_output);
-            std::ofstream out(native_output, std::ofstream::binary);
-            export_native_module(out, env);
         }
         if (export_txt) {
             exclusive_file_lock expor_lock(*export_txt);
