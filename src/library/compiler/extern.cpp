@@ -12,7 +12,7 @@ bool has_extern_attribute(environment const & env, name const & d) {
 }
 
 void initialize_extern_attribute() {
-    register_attribute(basic_attribute("extern", "mark a constant as external to Lean"));
+    register_system_attribute(basic_attribute("extern", "mark a constant as external to Lean"));
 }
 
 void finalize_extern_attribute() {

@@ -14,7 +14,6 @@ Author: Sebastian Ullrich
 #include "library/vm/vm_name.h"
 #include "library/vm/vm_string.h"
 #include "library/tactic/tactic_state.h"
-
 namespace lean {
 
 static std::string * g_key = nullptr;
