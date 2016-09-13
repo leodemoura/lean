@@ -55,8 +55,6 @@ public:
 private:
     unsigned           m_num_ACe;
     bool               m_elim_prop;
-    // remark: if m_elim_prop == true, then inductive datatype levels == m_levels, otherwise it is tail(m_levels)
-    bool               m_dep_elim;
     level_param_names  m_elim_levels; // eliminator levels
     expr               m_elim_type;
     inductive_decl     m_decl;
@@ -70,16 +68,15 @@ private:
     environment add_core(environment const & env, bool update_ext_only) const;
     environment add_constant(environment const & env, name const & n, level_param_names const & ls, expr const & t) const;
 
-    certified_inductive_decl(unsigned num_ACe, bool elim_prop, bool dep_delim, level_param_names const & elim_levels,
+    certified_inductive_decl(unsigned num_ACe, bool elim_prop, level_param_names const & elim_levels,
                              expr const & elim_type, inductive_decl const & decl, bool K_target, unsigned nindices,
                              list<comp_rule> const & crules):
-        m_num_ACe(num_ACe), m_elim_prop(elim_prop), m_dep_elim(dep_delim),
+        m_num_ACe(num_ACe), m_elim_prop(elim_prop),
         m_elim_levels(elim_levels), m_elim_type(elim_type), m_decl(decl),
         m_K_target(K_target), m_num_indices(nindices), m_comp_rules(crules) {}
 public:
     unsigned get_num_ACe() const { return m_num_ACe; }
     bool elim_prop_only() const { return m_elim_prop; }
-    bool has_dep_elim() const { return m_dep_elim; }
     level_param_names const & get_elim_levels() const { return m_elim_levels; }
     expr const & get_elim_type() const { return m_elim_type; }
     inductive_decl const & get_decl() const { return m_decl; }
@@ -132,9 +129,6 @@ optional<unsigned> get_num_minor_premises(environment const & env, name const & 
 /** \brief Return the number of introduction rules in the given inductive datatype.
     If \c n is not an inductive datatype in \c env, then return none. */
 optional<unsigned> get_num_intro_rules(environment const & env, name const & n);
-
-/** \brief Return true if the given datatype uses dependent elimination. */
-bool has_dep_elim(environment const & env, name const & n);
 
 /** \brief Return the eliminator/recursor associated with an inductive datatype */
 name get_elim_name(name const & n);

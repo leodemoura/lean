@@ -176,7 +176,6 @@ environment mk_no_confusion(environment const & env, name const & n) {
     level v_lvl       = sort_level(tc.ensure_type(v_type));
     expr eq_v         = mk_app(mk_constant(get_eq_name(), to_list(v_lvl)), v_type);
     expr H12          = mk_local(mk_fresh_name(), "H12", mk_app(eq_v, v1, v2), binder_info());
-    lean_assert(impredicative != inductive::has_dep_elim(env, get_eq_name()));
     args.push_back(H12);
     name no_confusion_name{n, "no_confusion"};
     expr no_confusion_ty = Pi(args, range);
@@ -243,11 +242,14 @@ environment mk_no_confusion(environment const & env, name const & n) {
     //  eq.rec InductiveType v1 (fun (a : InductiveType), v1 = a -> no_confusion_type Params Indices v1 a) gen v2 H12 H12
     //
     level eq_rec_l1;
-    if (impredicative)
+    expr eq_rec;
+    if (impredicative) {
         eq_rec_l1 = head(ls);
-    else
+        eq_rec = mk_app(mk_constant(get_eq_nrec_name(), {eq_rec_l1, v_lvl}), v_type, v1);
+    } else {
         eq_rec_l1 = mk_max(head(ls), ind_lvl);
-    expr eq_rec = mk_app(mk_constant(get_eq_rec_name(), {eq_rec_l1, v_lvl}), v_type, v1);
+        eq_rec = mk_app(mk_constant(get_eq_rec_name(), {eq_rec_l1, v_lvl}), v_type, v1);
+    }
     // create eq_rec type_former
     //    (fun (a : InductiveType), v1 = a -> no_confusion_type Params Indices v1 a)
     expr a   = mk_local(mk_fresh_name(), "a",   v_type, binder_info());

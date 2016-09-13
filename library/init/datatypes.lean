@@ -29,6 +29,11 @@ inductive empty : Type₁
 inductive eq {A : Type} (a : A) : A → Prop
 | refl : eq a
 
+check @eq.rec
+
+definition eq.nrec.{l₁ l₂} {A : Type.{l₂}} {a : A} {C : A → Type.{l₁}} (h1 : C a) {b : A} (h2 : eq a b) : C b :=
+@eq.rec A a (λ a h, C a) h1 b h2
+
 inductive heq {A : Type} (a : A) : Π {B : Type}, B → Prop
 | refl : heq a
 

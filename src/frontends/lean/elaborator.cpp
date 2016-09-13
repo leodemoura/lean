@@ -250,9 +250,9 @@ auto elaborator::get_elim_info_for_builtin(name const & fn) -> elim_info {
 auto elaborator::use_elim_elab_core(name const & fn) -> optional<elim_info> {
     if (!is_elim_elab_candidate(fn))
         return optional<elim_info>();
-    if (is_aux_recursor(m_env, fn) || inductive::is_elim_rule(m_env, fn)) {
-        return optional<elim_info>(get_elim_info_for_builtin(fn));
-    }
+    // if (is_aux_recursor(m_env, fn) || inductive::is_elim_rule(m_env, fn)) {
+    // return optional<elim_info>(get_elim_info_for_builtin(fn));
+    // }
     type_context::tmp_locals locals(m_ctx);
     declaration d     = m_env.get(fn);
     expr type         = d.get_type();

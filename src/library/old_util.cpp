@@ -140,7 +140,6 @@ optional<expr> lift_down_if_hott(old_type_checker & ctx, expr const & v) {
 void mk_telescopic_eq(old_type_checker & tc, buffer<expr> const & t, buffer<expr> const & s, buffer<expr> & eqs) {
     lean_assert(t.size() == s.size());
     lean_assert(std::all_of(s.begin(), s.end(), is_local));
-    lean_assert(inductive::has_dep_elim(tc.env(), get_eq_name()));
     buffer<buffer<expr>> t_aux;
     name e_name("e");
     for (unsigned i = 0; i < t.size(); i++) {
@@ -180,7 +179,6 @@ void mk_telescopic_eq(old_type_checker & tc, buffer<expr> const & t, buffer<expr
 
 void mk_telescopic_eq(old_type_checker & tc, buffer<expr> const & t, buffer<expr> & eqs) {
     lean_assert(std::all_of(t.begin(), t.end(), is_local));
-    lean_assert(inductive::has_dep_elim(tc.env(), get_eq_name()));
     buffer<expr> s;
     for (unsigned i = 0; i < t.size(); i++) {
         expr ty = mlocal_type(t[i]);

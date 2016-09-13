@@ -42,8 +42,6 @@ meta_constant recursor_of     : environment → name → option name
 meta_constant inductive_num_params : environment → name → nat
 /- Return the number of indices of the inductive datatype -/
 meta_constant inductive_num_indices : environment → name → nat
-/- Return tt iff the inductive datatype recursor supports dependent elimination -/
-meta_constant inductive_dep_elim : environment → name → bool
 /- Fold over declarations in the environment -/
 meta_constant fold {A :Type} : environment → A → (declaration → A → A) → A
 /- (relation_info env n) returns some value if n is marked as a relation in the given environment.

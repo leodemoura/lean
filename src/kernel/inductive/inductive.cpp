@@ -110,13 +110,11 @@ struct inductive_env_ext : public environment_extension {
             satisfies these requirements when proof irrelevance is enabled.
             Another example is heterogeneous equality. */
         bool              m_K_target;
-        /** \brief m_dep_elim == true, if dependent elimination is used for this eliminator */
-        bool              m_dep_elim;
         elim_info() {}
         elim_info(name const & id_name, level_param_names const & ls, unsigned num_ps, unsigned num_ACe, unsigned num_indices,
-                  bool is_K_target, bool dep_elim):
+                  bool is_K_target):
             m_inductive_name(id_name), m_level_names(ls), m_num_params(num_ps), m_num_ACe(num_ACe),
-            m_num_indices(num_indices), m_K_target(is_K_target), m_dep_elim(dep_elim) {}
+            m_num_indices(num_indices), m_K_target(is_K_target) {}
     };
 
     struct comp_rule {
@@ -142,9 +140,8 @@ struct inductive_env_ext : public environment_extension {
     inductive_env_ext() {}
 
     void add_elim(name const & n, name const & id_name, level_param_names const & ls,
-                  unsigned num_ps, unsigned num_ace, unsigned num_indices, bool is_K_target,
-                  bool dep_elim) {
-        m_elim_info.insert(n, elim_info(id_name, ls, num_ps, num_ace, num_indices, is_K_target, dep_elim));
+                  unsigned num_ps, unsigned num_ace, unsigned num_indices, bool is_K_target) {
+        m_elim_info.insert(n, elim_info(id_name, ls, num_ps, num_ace, num_indices, is_K_target));
     }
 
     void add_comp_rhs(name const & n, name const & e, unsigned num_bu, expr const & rhs) {
@@ -208,7 +205,7 @@ environment certified_inductive_decl::add_core(environment const & env, bool upd
     if (!update_ext_only)
         new_env = add_constant(new_env, elim_name, m_elim_levels, m_elim_type);
     ext.add_elim(elim_name, m_decl.m_name, m_elim_levels, m_decl.m_num_params,
-                 m_num_ACe, m_num_indices, m_K_target, m_dep_elim);
+                 m_num_ACe, m_num_indices, m_K_target);
     list<comp_rule> rules = m_comp_rules;
     for (auto ir : m_decl.m_intro_rules) {
         comp_rule const & rule = head(rules);
@@ -239,7 +236,6 @@ struct add_inductive_fn {
     type_checker_ptr     m_tc;
 
     level                m_elim_level;   // extra universe level for eliminator.
-    bool                 m_dep_elim;     // true if using dependent elimination
 
     buffer<expr>         m_param_consts; // local constants used to represent global parameters
     level                m_it_level;     // resultant level
@@ -509,14 +505,6 @@ struct add_inductive_fn {
         }
     }
 
-    /** \brief Initialize m_dep_elim flag. */
-    void set_dep_elim() {
-        if (m_env.impredicative() && m_env.prop_proof_irrel() && is_zero(m_it_level))
-            m_dep_elim = false;
-        else
-            m_dep_elim = true;
-    }
-
     /** \brief Given t of the form (I As is) where I is the inductive datatypes being defined,
         As are the global parameters, and is the actual indices provided to it.
         Store `is` in the argument \c indices. */
@@ -546,8 +534,7 @@ struct add_inductive_fn {
         m_elim_info.m_major_premise = mk_local(mk_fresh_name(), "n",
                                                mk_app(mk_app(m_it_const, m_param_consts), m_elim_info.m_indices), binder_info());
         expr C_ty = mk_sort(m_elim_level);
-        if (m_dep_elim)
-            C_ty = Pi(m_elim_info.m_major_premise, C_ty);
+        C_ty = Pi(m_elim_info.m_major_premise, C_ty);
         C_ty = Pi(m_elim_info.m_indices, C_ty);
         name C_name("C");
         m_elim_info.m_C = mk_local(mk_fresh_name(), C_name, C_ty, binder_info());
@@ -586,10 +573,8 @@ struct add_inductive_fn {
             buffer<expr> it_indices;
             get_I_indices(t, it_indices);
             expr C_app      = mk_app(m_elim_info.m_C, it_indices);
-            if (m_dep_elim) {
-                expr intro_app  = mk_app(mk_app(mk_app(mk_constant(intro_rule_name(ir), m_levels), m_param_consts), b), u);
-                C_app = mk_app(C_app, intro_app);
-            }
+            expr intro_app  = mk_app(mk_app(mk_app(mk_constant(intro_rule_name(ir), m_levels), m_param_consts), b), u);
+            C_app = mk_app(C_app, intro_app);
             // populate v using u
             for (unsigned i = 0; i < u.size(); i++) {
                 expr u_i    = u[i];
@@ -603,10 +588,8 @@ struct add_inductive_fn {
                 buffer<expr> it_indices;
                 get_I_indices(u_i_ty, it_indices);
                 expr C_app  = mk_app(m_elim_info.m_C, it_indices);
-                if (m_dep_elim) {
-                    expr u_app  = mk_app(u_i, xs);
-                    C_app = mk_app(C_app, u_app);
-                }
+                expr u_app  = mk_app(u_i, xs);
+                C_app = mk_app(C_app, u_app);
                 expr v_i_ty = Pi(xs, C_app);
                 expr v_i    = mk_local(mk_fresh_name(), name("v").append_after(i), v_i_ty, binder_info());
                 v.push_back(v_i);
@@ -642,8 +625,7 @@ struct add_inductive_fn {
     expr declare_elim_rule_core() {
         elim_info const & info = m_elim_info;
         expr C_app   = mk_app(info.m_C, info.m_indices);
-        if (m_dep_elim)
-            C_app = mk_app(C_app, info.m_major_premise);
+        C_app = mk_app(C_app, info.m_major_premise);
         expr elim_ty = Pi(info.m_major_premise, C_app);
         elim_ty      = Pi(info.m_indices, elim_ty);
         // abstract all introduction rules
@@ -664,7 +646,6 @@ struct add_inductive_fn {
 
     /** \brief Declare the eliminator/recursor. */
     expr declare_elim_rule() {
-        set_dep_elim();
         mk_elim_level();
         mk_elim_info();
         expr r = declare_elim_rule_core();
@@ -720,7 +701,7 @@ struct add_inductive_fn {
             minor_idx++;
         }
         bool elim_Prop = !is_param(m_elim_level);
-        return certified_inductive_decl(m_decl.m_num_params + 1 + e.size(), elim_Prop, m_dep_elim,
+        return certified_inductive_decl(m_decl.m_num_params + 1 + e.size(), elim_Prop,
                                         get_elim_level_param_names(), elim_type, m_decl,
                                         m_elim_info.m_K_target, m_elim_info.m_indices.size(), to_list(comp_rules));
     }
@@ -938,14 +919,6 @@ optional<unsigned> get_num_intro_rules(environment const & env, name const & n) 
     } else {
         return optional<unsigned>();
     }
-}
-
-bool has_dep_elim(environment const & env, name const & n) {
-    inductive_env_ext const & ext = get_extension(env);
-    if (auto it = ext.m_elim_info.find(get_elim_name(n)))
-        return it->m_dep_elim;
-    else
-        return false;
 }
 
 optional<name> is_intro_rule(environment const & env, name const & n) {

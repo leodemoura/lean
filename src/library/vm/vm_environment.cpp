@@ -143,10 +143,6 @@ vm_obj environment_inductive_num_indices(vm_obj const & env, vm_obj const & n) {
         return mk_vm_nat(0);
 }
 
-vm_obj environment_inductive_dep_elim(vm_obj const & env, vm_obj const & n) {
-    return mk_vm_bool(inductive::has_dep_elim(to_env(env), to_name(n)));
-}
-
 vm_obj environment_fold(vm_obj const &, vm_obj const & env, vm_obj const & a, vm_obj const & fn) {
     vm_obj r = a;
     to_env(env).for_each_declaration([&](declaration const & d) {
@@ -206,7 +202,6 @@ void initialize_vm_environment() {
     DECLARE_VM_BUILTIN(name({"environment", "recursor_of"}),           environment_recursor_of);
     DECLARE_VM_BUILTIN(name({"environment", "inductive_num_params"}),  environment_inductive_num_params);
     DECLARE_VM_BUILTIN(name({"environment", "inductive_num_indices"}), environment_inductive_num_indices);
-    DECLARE_VM_BUILTIN(name({"environment", "inductive_dep_elim"}),    environment_inductive_dep_elim);
     DECLARE_VM_BUILTIN(name({"environment", "relation_info"}),         environment_relation_info);
     DECLARE_VM_BUILTIN(name({"environment", "refl_for"}),              environment_refl_for);
     DECLARE_VM_BUILTIN(name({"environment", "symm_for"}),              environment_symm_for);

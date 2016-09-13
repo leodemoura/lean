@@ -144,11 +144,3 @@ lean_bool lean_env_get_inductive_type_num_minor_premises(lean_env env, lean_name
     }
     LEAN_CATCH;
 }
-
-lean_bool lean_env_get_inductive_type_has_dep_elim(lean_env env, lean_name n, lean_bool * r, lean_exception * ex) {
-    LEAN_TRY;
-    check_nonnull(env);
-    check_nonnull(n);
-    *r = has_dep_elim(to_env_ref(env), to_name_ref(n));
-    LEAN_CATCH;
-}

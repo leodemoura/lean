@@ -99,7 +99,8 @@ recursor_info mk_recursor_info(environment const & env, name const & r, optional
         list<optional<unsigned>> params_pos = map2<optional<unsigned>>(mk_list_range(0, num_params),
                                                                        [](unsigned i) { return optional<unsigned>(i); });
         list<unsigned> indices_pos = mk_list_range(num_params, num_params + num_indices);
-        return recursor_info(r, *I, universe_pos, inductive::has_dep_elim(env, *I), is_rec,
+        bool has_dep_elim = true;
+        return recursor_info(r, *I, universe_pos, has_dep_elim, is_rec,
                              num_args, major_pos, params_pos, indices_pos, produce_motive);
     } else if (is_aux_recursor(env, r) &&
                (strcmp(r.get_string(), "cases_on") == 0 ||

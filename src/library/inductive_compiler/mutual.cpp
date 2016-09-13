@@ -78,7 +78,7 @@ class add_mutual_inductive_decl_fn {
         return sum;
     }
 
-    bool dep_elim() { return inductive::has_dep_elim(m_env, mlocal_name(m_basic_decl.get_ind(0))); }
+    bool dep_elim() { return true; } // return inductive::has_dep_elim(m_env, mlocal_name(m_basic_decl.get_ind(0)));
 
     void compute_index_types() {
         for (expr const & ind : m_mut_decl.get_inds()) {

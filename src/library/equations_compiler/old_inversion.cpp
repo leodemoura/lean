@@ -103,7 +103,6 @@ class inversion_tac {
     list<name>                    m_ids;
     substitution                  m_subst;
 
-    bool                          m_dep_elim;
     bool                          m_proof_irrel;
     unsigned                      m_nparams;
     unsigned                      m_nindices;
@@ -117,7 +116,6 @@ class inversion_tac {
     expr infer_type(expr const & e) { return m_tc.infer(e).first; }
 
     void init_inductive_info(name const & n) {
-        m_dep_elim       = inductive::has_dep_elim(m_env, n);
         m_nindices       = *inductive::get_num_indices(m_env, n);
         m_nparams        = *inductive::get_num_params(m_env, n);
         // This tactic is bases on cases_on construction which only has
@@ -167,7 +165,6 @@ class inversion_tac {
         1- it is *not* an indexed inductive family, OR
         2- it is an indexed inductive family, but all indices are distinct local constants,
         and all hypotheses of g different from h and indices, do not depend on the indices.
-        3- if not m_dep_elim, then the conclusion does not depend on the indices.
     */
     bool has_indep_indices(old_goal const & g, expr const & h, expr const & h_type) {
         if (m_nindices == 0)
@@ -183,11 +180,6 @@ class inversion_tac {
                 if (is_local(args[j]) && mlocal_name(args[j]) == mlocal_name(args[i]))
                     return false; // the indices must be distinct local constants
             }
-        }
-        if (!m_dep_elim) {
-            expr const & g_type = g.get_type();
-            if (depends_on(g_type, h))
-                return false;
         }
         buffer<expr> hyps;
         g.get_hyps(hyps);
@@ -278,8 +270,7 @@ class inversion_tac {
                 d           = instantiate(binding_body(d), t);
             }
             expr h_new    = mk_local(mk_fresh_name(), h_new_name, h_new_type, local_info(h));
-            if (m_dep_elim)
-                add_eq(h, h_new);
+            add_eq(h, h_new);
             hyps.push_back(h_new);
             expr new_type = Pi(eqs, g.get_type());
             expr new_meta = mk_app(mk_metavar(mk_fresh_name(), Pi(hyps, new_type)), hyps);
@@ -395,8 +386,7 @@ class inversion_tac {
         cases_on          = mk_app(cases_on, m_nparams, I_args.data());
         // add type former
         expr type_former  = g_type;
-        if (m_dep_elim)
-            type_former   = Fun(h, type_former);
+        type_former       = Fun(h, type_former);
         type_former       = Fun(m_nindices, I_args.end() - m_nindices, type_former);
         cases_on          = mk_app(cases_on, type_former);
         // add indices
@@ -914,7 +904,7 @@ class inversion_tac {
     auto unify_eqs(list<old_goal> const & gs, list<list<expr>> args, list<implementation_list> imps) ->
         std::tuple<list<old_goal>, list<list<expr>>, list<implementation_list>, list<rename_map>> {
         lean_assert(length(gs) == length(imps));
-        unsigned neqs = m_nindices + (m_dep_elim ? 1 : 0);
+        unsigned neqs = m_nindices + 1;
         buffer<old_goal>                new_goals;
         buffer<list<expr>>          new_args;
         buffer<implementation_list> new_imps;

@@ -600,7 +600,7 @@ public:
             throw app_builder_exception();
         }
         level l_1    = sort_level(binding_body(mtype));
-        name const & eqrec = is_standard(m_ctx.env()) ? get_eq_rec_name() : get_eq_nrec_name();
+        name const & eqrec = get_eq_nrec_name();
         return ::lean::mk_app({mk_constant(eqrec, {l_1, A_lvl}), A, lhs, motive, H1, rhs, H2});
     }
 
@@ -620,7 +620,7 @@ public:
             throw app_builder_exception();
         }
         level l_1    = sort_level(binding_body(binding_body(mtype)));
-        name const & eqrec = is_standard(m_ctx.env()) ? get_eq_drec_name() : get_eq_rec_name();
+        name const & eqrec = get_eq_rec_name();
         return ::lean::mk_app({mk_constant(eqrec, {l_1, A_lvl}), A, lhs, motive, H1, rhs, H2});
     }
 

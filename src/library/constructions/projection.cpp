@@ -184,7 +184,6 @@ environment mk_projections(environment const & env, name const & n, buffer<name>
     declaration rec_decl         = env.get(rec_name);
     bool is_predicate            = env.impredicative() && is_prop(ind_decl.get_type());
     bool elim_to_prop            = rec_decl.get_num_univ_params() == ind_decl.get_num_univ_params();
-    bool dep_elim                = inductive::has_dep_elim(env, n);
     level_param_names lvl_params = ind_decl.get_univ_params();
     levels lvls                  = param_names_to_levels(lvl_params);
     buffer<expr> params; // datatype parameters
@@ -221,7 +220,7 @@ environment mk_projections(environment const & env, name const & n, buffer<name>
         buffer<expr> proj_args;
         proj_args.append(params);
         proj_args.push_back(c);
-        expr type_former   = dep_elim ? Fun(c, result_type) : result_type;
+        expr type_former   = Fun(c, result_type);
         expr minor_premise = Fun(intro_type_args, mk_var(intro_type_args.size() - i - 1));
         expr major_premise = c;
         level l            = sort_level(tc.ensure_sort(tc.infer(result_type)));

@@ -64,9 +64,6 @@ lean_bool lean_env_get_inductive_type_num_indices(lean_env env, lean_name n, uns
 /** \brief Return lean_true if \c n is the name of an inductive type in the given environment, and
     store the number of minor premises in \c r. */
 lean_bool lean_env_get_inductive_type_num_minor_premises(lean_env env, lean_name n, unsigned * r, lean_exception * ex);
-/** \brief Return lean_true if \c n is the name of an inductive type in the given environment, and
-    store lean_true in \c r if the inductive type supports dependent elimination. */
-lean_bool lean_env_get_inductive_type_has_dep_elim(lean_env env, lean_name n, lean_bool * r, lean_exception * ex);
 /*@}*/
 /*@}*/
 
