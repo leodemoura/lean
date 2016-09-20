@@ -394,7 +394,7 @@ optional<expr> elaborator::mk_coercion(expr const & e, expr const & _e_type, exp
     if (!has_expr_metavar(e_type) && !has_expr_metavar(type)) {
         expr has_coe_t;
         try {
-            has_coe_t = mk_app(m_ctx, get_has_coe_t_name(), e_type, type);
+            has_coe_t = mk_app(m_ctx, get_CoeTrans_name(), e_type, type);
         } catch (app_builder_exception & ex) {
             trace_coercion_failure(e_type, type, ref,
                                    "failed create type class expression 'has_coe_t' "
@@ -581,17 +581,17 @@ expr elaborator::visit_prenum(expr const & e, optional<expr> const & expected_ty
     if (v.is_neg())
         throw elaborator_exception(ref, "invalid pre-numeral, it must be a non-negative value");
     if (v.is_zero()) {
-        expr has_zero_A = mk_app(mk_constant(get_has_zero_name(), ls), A, e_tag);
+        expr has_zero_A = mk_app(mk_constant(get_Zero_name(), ls), A, e_tag);
         expr S          = mk_instance(has_zero_A, ref);
         return mk_app(mk_app(mk_constant(get_zero_name(), ls), A, e_tag), S, e_tag);
     } else {
-        expr has_one_A = mk_app(mk_constant(get_has_one_name(), ls), A, e_tag);
+        expr has_one_A = mk_app(mk_constant(get_One_name(), ls), A, e_tag);
         expr S_one     = mk_instance(has_one_A, ref);
         expr one       = mk_app(mk_app(mk_constant(get_one_name(), ls), A, e_tag), S_one, e_tag);
         if (v == 1) {
             return one;
         } else {
-            expr has_add_A = mk_app(mk_constant(get_has_add_name(), ls), A, e_tag);
+            expr has_add_A = mk_app(mk_constant(get_Add_name(), ls), A, e_tag);
             expr S_add     = mk_instance(has_add_A, ref);
             std::function<expr(mpz const & v)> convert = [&](mpz const & v) {
                 lean_assert(v > 0);
@@ -1834,7 +1834,7 @@ expr elaborator::visit(expr const & e, optional<expr> const & expected_type) {
 
 expr elaborator::get_default_numeral_type() {
     // TODO(Leo): allow user to modify default?
-    return mk_constant(get_nat_name());
+    return mk_constant(get_Nat_name());
 }
 
 void elaborator::synthesize_numeral_types() {

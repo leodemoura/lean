@@ -337,7 +337,7 @@ struct congr_lemma_manager {
                 if (kinds[i] == congr_arg_kind::Cast && !pinfos[i].is_prop()) {
                     expr r1   = rhss1[i];
                     expr r2   = rhss[i];
-                    expr r1_eq_r2 = mk_app(m_ctx, get_subsingleton_elim_name(), r1, r2);
+                    expr r1_eq_r2 = mk_app(m_ctx, get_Subsingleton_elim_name(), r1, r2);
                     pr2 = ::lean::mk_congr(m_ctx, pr2, r1_eq_r2);
                 } else {
                     pr2 = mk_congr_fun(m_ctx, pr2, rhss[i]);

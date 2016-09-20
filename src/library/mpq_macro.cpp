@@ -70,7 +70,7 @@ class mpq_macro_definition_cell : public macro_definition_cell {
         if (!is_macro(m) || macro_num_args(m) != 1)
             throw exception(sstream() << "invalid 'mpq' macro, incorrect number of arguments");
         expr const & type = macro_arg(m, 0);
-        bool ok_type = type == mk_constant(get_nat_name()) || type == mk_constant(get_int_name()) || type == mk_constant(get_real_name());
+        bool ok_type = type == mk_constant(get_Nat_name()) || type == mk_constant(get_Int_name()) || type == mk_constant(get_Real_name());
         if (!ok_type)
             throw exception(sstream() << "invalid 'mpq' macro, only nat, int, and real accepted");
     }
@@ -89,11 +89,11 @@ public:
         check_macro(m);
         expr ty = macro_arg(m, 0);
         concrete_arith_type cty;
-        if (ty == mk_constant(get_nat_name()))
+        if (ty == mk_constant(get_Nat_name()))
             cty = concrete_arith_type::NAT;
-        else if (ty == mk_constant(get_int_name()))
+        else if (ty == mk_constant(get_Int_name()))
             cty = concrete_arith_type::INT;
-        else if (ty == mk_constant(get_real_name()))
+        else if (ty == mk_constant(get_Real_name()))
             cty = concrete_arith_type::REAL;
         else
             throw exception(sstream() << "trying to expand invalid 'mpq' macro");

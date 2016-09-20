@@ -87,8 +87,8 @@ expr mk_quote(expr const & e) {
             return none_expr();
         });
     expr r        = mk_quote_core(Fun(locals, s));
-    expr subst    = mk_constant(get_pexpr_subst_name());
-    expr to_pexpr = mk_constant(get_to_pexpr_name());
+    expr subst    = mk_constant(get_PExpr_subst_name());
+    expr to_pexpr = mk_constant(get_toPExpr_name());
     for (expr const & aq : aqs) {
         r = mk_app(subst, r, mk_app(to_pexpr, aq));
     }
@@ -98,7 +98,7 @@ expr mk_quote(expr const & e) {
 void initialize_quote() {
     g_quote_macro    = new name("quote_macro");
     g_quote_opcode   = new std::string("Quote");
-    g_pexpr          = new expr(Const(get_pexpr_name()));
+    g_pexpr          = new expr(Const(get_PExpr_name()));
 
     g_antiquote  = new name("antiquote");
     register_annotation(*g_antiquote);

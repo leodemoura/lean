@@ -120,16 +120,16 @@ string_macro const & to_string_macro(expr const & e) {
 void initialize_string() {
     g_string_macro    = new name("string_macro");
     g_string_opcode   = new std::string("Str");
-    g_nat             = new expr(Const(get_nat_name()));
-    g_char            = new expr(Const(get_char_name()));
-    g_char_of_nat     = new expr(Const(get_char_of_nat_name()));
-    g_string          = new expr(Const(get_string_name()));
-    g_empty           = new expr(Const(get_string_empty_name()));
-    g_str             = new expr(Const(get_string_str_name()));
-    g_fin_mk          = new expr(Const(get_fin_mk_name()));
-    g_list_char       = new expr(mk_app(mk_constant(get_list_name(), {mk_level_one()}), *g_char));
-    g_list_cons       = new expr(mk_constant(get_list_cons_name(), {mk_level_one()}));
-    g_list_nil_char   = new expr(mk_app(mk_constant(get_list_nil_name(), {mk_level_one()}), *g_char));
+    g_nat             = new expr(Const(get_Nat_name()));
+    g_char            = new expr(Const(get_Char_name()));
+    g_char_of_nat     = new expr(Const(get_Char_ofNat_name()));
+    g_string          = new expr(Const(get_String_name()));
+    g_empty           = new expr(Const(get_String_empty_name()));
+    g_str             = new expr(Const(get_String_str_name()));
+    g_fin_mk          = new expr(Const(get_Fin_mk_name()));
+    g_list_char       = new expr(mk_app(mk_constant(get_List_name(), {mk_level_one()}), *g_char));
+    g_list_cons       = new expr(mk_constant(get_List_cons_name(), {mk_level_one()}));
+    g_list_nil_char   = new expr(mk_app(mk_constant(get_List_nil_name(), {mk_level_one()}), *g_char));
     register_macro_deserializer(*g_string_opcode,
                                 [](deserializer & d, unsigned num, expr const *) {
                                     if (num != 0)

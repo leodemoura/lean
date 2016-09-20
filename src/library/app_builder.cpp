@@ -669,7 +669,7 @@ public:
 
     expr mk_partial_add(expr const & A) {
         level lvl = get_level(A);
-        auto A_has_add = m_ctx.mk_class_instance(::lean::mk_app(mk_constant(get_has_add_name(), {lvl}), A));
+        auto A_has_add = m_ctx.mk_class_instance(::lean::mk_app(mk_constant(get_Add_name(), {lvl}), A));
         if (!A_has_add) {
             trace_inst_failure(A, "has_add");
             throw app_builder_exception();
@@ -679,7 +679,7 @@ public:
 
     expr mk_partial_mul(expr const & A) {
         level lvl = get_level(A);
-        auto A_has_mul = m_ctx.mk_class_instance(::lean::mk_app(mk_constant(get_has_mul_name(), {lvl}), A));
+        auto A_has_mul = m_ctx.mk_class_instance(::lean::mk_app(mk_constant(get_Mul_name(), {lvl}), A));
         if (!A_has_mul) {
             trace_inst_failure(A, "has_mul");
             throw app_builder_exception();
@@ -689,7 +689,7 @@ public:
 
     expr mk_zero(expr const & A) {
         level lvl = get_level(A);
-        auto A_has_zero = m_ctx.mk_class_instance(::lean::mk_app(mk_constant(get_has_zero_name(), {lvl}), A));
+        auto A_has_zero = m_ctx.mk_class_instance(::lean::mk_app(mk_constant(get_Zero_name(), {lvl}), A));
         if (!A_has_zero) {
             trace_inst_failure(A, "has_zero");
             throw app_builder_exception();
@@ -699,7 +699,7 @@ public:
 
     expr mk_one(expr const & A) {
         level lvl = get_level(A);
-        auto A_has_one = m_ctx.mk_class_instance(::lean::mk_app(mk_constant(get_has_one_name(), {lvl}), A));
+        auto A_has_one = m_ctx.mk_class_instance(::lean::mk_app(mk_constant(get_One_name(), {lvl}), A));
         if (!A_has_one) {
             trace_inst_failure(A, "has_one");
             throw app_builder_exception();
@@ -709,7 +709,7 @@ public:
 
     expr mk_partial_left_distrib(expr const & A) {
         level lvl = get_level(A);
-        auto A_distrib = m_ctx.mk_class_instance(::lean::mk_app(mk_constant(get_distrib_name(), {lvl}), A));
+        auto A_distrib = m_ctx.mk_class_instance(::lean::mk_app(mk_constant(get_Distrib_name(), {lvl}), A));
         if (!A_distrib) {
             trace_inst_failure(A, "distrib");
             throw app_builder_exception();
@@ -719,7 +719,7 @@ public:
 
     expr mk_partial_right_distrib(expr const & A) {
         level lvl = get_level(A);
-        auto A_distrib = m_ctx.mk_class_instance(::lean::mk_app(mk_constant(get_distrib_name(), {lvl}), A));
+        auto A_distrib = m_ctx.mk_class_instance(::lean::mk_app(mk_constant(get_Distrib_name(), {lvl}), A));
         if (!A_distrib) {
             trace_inst_failure(A, "distrib");
             throw app_builder_exception();
@@ -729,7 +729,7 @@ public:
 
     expr mk_ss_elim(expr const & A, expr const & ss_inst, expr const & old_e, expr const & new_e) {
         level lvl = get_level(A);
-        return ::lean::mk_app(mk_constant(get_subsingleton_elim_name(), {lvl}), A, ss_inst, old_e, new_e);
+        return ::lean::mk_app(mk_constant(get_Subsingleton_elim_name(), {lvl}), A, ss_inst, old_e, new_e);
     }
 
     expr mk_false_rec(expr const & c, expr const & H) {
@@ -738,7 +738,7 @@ public:
             return ::lean::mk_app(mk_constant(get_false_rec_name(), {c_lvl}), c, H);
         } else {
             expr H_type = m_ctx.infer(H);
-            return ::lean::mk_app(mk_constant(get_empty_rec_name(), {c_lvl}), mk_lambda("e", H_type, c), H);
+            return ::lean::mk_app(mk_constant(get_Empty_rec_name(), {c_lvl}), mk_lambda("e", H_type, c), H);
         }
     }
 

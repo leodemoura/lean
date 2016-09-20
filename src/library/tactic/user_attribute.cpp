@@ -100,7 +100,7 @@ static environment update(environment const & env, user_attr_ext const & ext) {
 
 static environment add_user_attr(environment const & env, name const & d) {
     auto const & ty = env.get(d).get_type();
-    if (!is_constant(ty, get_user_attribute_name()) && !is_constant(ty, get_caching_user_attribute_name()))
+    if (!is_constant(ty, get_UserAttribute_name()) && !is_constant(ty, get_CachingUserAttribute_name()))
         throw exception("invalid attribute.register argument, must be name of a definition of type user_attribute");
 
     vm_state vm(env);

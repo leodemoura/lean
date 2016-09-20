@@ -33,7 +33,7 @@ environment add_structure_declaration_aux(environment const & env, options const
     ginductive_decl decl(0, lp_names, params, inds, intro_rules);
 
     environment new_env = env;
-    if (mlocal_name(ind) != get_has_sizeof_name())
+    if (mlocal_name(ind) != get_Sizeof_name())
         mk_has_sizeof(env, mlocal_name(ind));
 
     return register_ginductive_decl(new_env, decl, ginductive_kind::BASIC);

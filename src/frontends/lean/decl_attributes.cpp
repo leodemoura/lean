@@ -33,7 +33,7 @@ void decl_attributes::parse(parser & p) {
                 throw parser_error("cannot remove priority attribute", pos);
             auto pos = p.pos();
             expr pre_val = p.parse_expr();
-            pre_val = mk_typed_expr(mk_constant(get_num_name()), pre_val);
+            pre_val = mk_typed_expr(mk_constant(get_Num_name()), pre_val);
             expr val = p.elaborate(list<expr>(), pre_val).first;
             val = normalize(p.env(), val);
             if (optional<mpz> mpz_val = to_num_core(val)) {

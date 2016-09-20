@@ -2094,7 +2094,7 @@ bool type_context::is_productive(expr const & e) {
     if (!is_constant(f))
         return true;
     name const & n = const_name(f);
-    if (n == get_prod_pr1_name()) {
+    if (n == get_Prod_pr1_name()) {
         /* We use prod.pr1 when compiling recursive equations and brec_on.
            So, we should check whether the main argument of the projection
            is productive */
@@ -2933,11 +2933,7 @@ optional<expr> type_context::mk_subsingleton_instance(expr const & type) {
         return none_expr();
     }
     level lvl    = sort_level(Type);
-    expr subsingleton;
-    if (is_standard(env()))
-        subsingleton = mk_app(mk_constant(get_subsingleton_name(), {lvl}), type);
-    else
-        subsingleton = whnf(mk_app(mk_constant(get_is_trunc_is_prop_name(), {lvl}), type));
+    expr subsingleton = mk_app(mk_constant(get_Subsingleton_name(), {lvl}), type);
     auto r = mk_class_instance(subsingleton);
     m_cache->m_subsingleton_cache.insert(mk_pair(type, r));
     return r;

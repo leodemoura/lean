@@ -128,7 +128,7 @@ bool has_constructor(environment const & env, name const & c, name const & I, un
 }
 
 bool has_poly_unit_decls(environment const & env) {
-    return has_constructor(env, get_poly_unit_star_name(), get_poly_unit_name(), 0);
+    return has_constructor(env, get_PolyUnit_star_name(), get_PolyUnit_name(), 0);
 }
 
 bool has_eq_decls(environment const & env) {
@@ -140,11 +140,7 @@ bool has_heq_decls(environment const & env) {
 }
 
 bool has_prod_decls(environment const & env) {
-    return has_constructor(env, get_prod_mk_name(), get_prod_name(), 4);
-}
-
-bool has_lift_decls(environment const & env) {
-    return has_constructor(env, get_lift_up_name(), get_lift_name(), 2);
+    return has_constructor(env, get_Prod_mk_name(), get_Prod_name(), 4);
 }
 
 /* n is considered to be recursive if it is an inductive datatype and
@@ -489,17 +485,17 @@ expr mk_and_elim_right(abstract_type_context & ctx, expr const & H) {
 }
 
 expr mk_unit(level const & l) {
-    return mk_constant(get_poly_unit_name(), {l});
+    return mk_constant(get_PolyUnit_name(), {l});
 }
 
 expr mk_unit_mk(level const & l) {
-    return mk_constant(get_poly_unit_star_name(), {l});
+    return mk_constant(get_PolyUnit_star_name(), {l});
 }
 
 expr mk_prod(abstract_type_context & ctx, expr const & A, expr const & B) {
     level l1 = get_level(ctx, A);
     level l2 = get_level(ctx, B);
-    return mk_app(mk_constant(get_prod_name(), {l1, l2}), A, B);
+    return mk_app(mk_constant(get_Prod_name(), {l1, l2}), A, B);
 }
 
 expr mk_pair(abstract_type_context & ctx, expr const & a, expr const & b) {
@@ -507,33 +503,33 @@ expr mk_pair(abstract_type_context & ctx, expr const & a, expr const & b) {
     expr B = ctx.infer(b);
     level l1 = get_level(ctx, A);
     level l2 = get_level(ctx, B);
-    return mk_app(mk_constant(get_prod_mk_name(), {l1, l2}), A, B, a, b);
+    return mk_app(mk_constant(get_Prod_mk_name(), {l1, l2}), A, B, a, b);
 }
 
 expr mk_pr1(abstract_type_context & ctx, expr const & p) {
     expr AxB = ctx.whnf(ctx.infer(p));
     expr const & A = app_arg(app_fn(AxB));
     expr const & B = app_arg(AxB);
-    return mk_app(mk_constant(get_prod_pr1_name(), const_levels(get_app_fn(AxB))), A, B, p);
+    return mk_app(mk_constant(get_Prod_pr1_name(), const_levels(get_app_fn(AxB))), A, B, p);
 }
 
 expr mk_pr2(abstract_type_context & ctx, expr const & p) {
     expr AxB = ctx.whnf(ctx.infer(p));
     expr const & A = app_arg(app_fn(AxB));
     expr const & B = app_arg(AxB);
-    return mk_app(mk_constant(get_prod_pr2_name(), const_levels(get_app_fn(AxB))), A, B, p);
+    return mk_app(mk_constant(get_Prod_pr2_name(), const_levels(get_app_fn(AxB))), A, B, p);
 }
 
 expr mk_nat_zero() {
-    return mk_app(mk_constant(get_zero_name(), {mk_level_one()}), {mk_constant(get_nat_name()), mk_constant(get_nat_has_zero_name())});
+    return mk_app(mk_constant(get_zero_name(), {mk_level_one()}), {mk_constant(get_Nat_name()), mk_constant(get_zeroNat_name())});
 }
 
 expr mk_nat_one() {
-    return mk_app(mk_constant(get_one_name(), {mk_level_one()}), {mk_constant(get_nat_name()), mk_constant(get_nat_has_one_name())});
+    return mk_app(mk_constant(get_one_name(), {mk_level_one()}), {mk_constant(get_Nat_name()), mk_constant(get_oneNat_name())});
 }
 
 expr mk_nat_add(expr const & e1, expr const & e2) {
-    expr nat_add = mk_app(mk_constant(get_add_name(), {mk_level_one()}), {mk_constant(get_nat_name()), mk_constant(get_nat_has_add_name())});
+    expr nat_add = mk_app(mk_constant(get_add_name(), {mk_level_one()}), {mk_constant(get_Nat_name()), mk_constant(get_addNat_name())});
     return mk_app(nat_add, e1, e2);
 }
 
@@ -670,12 +666,7 @@ expr mk_congr_arg(abstract_type_context & ctx, expr const & f, expr const & H) {
 expr mk_subsingleton_elim(abstract_type_context & ctx, expr const & h, expr const & x, expr const & y) {
     expr A  = ctx.infer(x);
     level l = get_level(ctx, A);
-    expr r;
-    if (is_standard(ctx.env())) {
-        r = mk_constant(get_subsingleton_elim_name(), {l});
-    } else {
-        r = mk_constant(get_is_trunc_is_prop_elim_name(), {l});
-    }
+    expr r  = mk_constant(get_Subsingleton_elim_name(), {l});
     return mk_app({r, A, h, x, y});
 }
 
@@ -768,11 +759,7 @@ expr mk_false() {
 }
 
 expr mk_empty() {
-    return mk_constant(get_empty_name());
-}
-
-expr mk_false(environment const & env) {
-    return is_standard(env) ? mk_false() : mk_empty();
+    return mk_constant(get_Empty_name());
 }
 
 bool is_false(expr const & e) {
@@ -780,21 +767,12 @@ bool is_false(expr const & e) {
 }
 
 bool is_empty(expr const & e) {
-    return is_constant(e) && const_name(e) == get_empty_name();
-}
-
-bool is_false(environment const & env, expr const & e) {
-    return is_standard(env) ? is_false(e) : is_empty(e);
+    return is_constant(e) && const_name(e) == get_Empty_name();
 }
 
 expr mk_false_rec(abstract_type_context & ctx, expr const & f, expr const & t) {
     level t_lvl = get_level(ctx, t);
-    if (is_standard(ctx.env())) {
-        return mk_app(mk_constant(get_false_rec_name(), {t_lvl}), t, f);
-    } else {
-        expr f_type = ctx.infer(f);
-        return mk_app(mk_constant(get_empty_rec_name(), {t_lvl}), mk_lambda("e", f_type, t), f);
-    }
+    return mk_app(mk_constant(get_false_rec_name(), {t_lvl}), t, f);
 }
 
 bool is_or(expr const & e) {
@@ -810,23 +788,6 @@ bool is_or(expr const & e, expr & A, expr & B) {
     if (is_constant(fn) && const_name(fn) == get_or_name() && args.size() == 2) {
         A = args[0];
         B = args[1];
-        return true;
-    } else {
-        return false;
-    }
-}
-
-bool is_not(environment const & env, expr const & e, expr & a) {
-    if (is_app(e)) {
-        expr const & f = app_fn(e);
-        if (!is_constant(f) || const_name(f) != get_not_name())
-            return false;
-        a = app_arg(e);
-        return true;
-    } else if (is_pi(e)) {
-        if (!is_false(env, binding_body(e)))
-            return false;
-        a = binding_domain(e);
         return true;
     } else {
         return false;
@@ -850,38 +811,28 @@ bool is_not(expr const & e, expr & a) {
     }
 }
 
-bool is_not(environment const & env, expr const & e) {
+bool is_not(expr const & e) {
     if (is_app(e)) {
         expr const & f = app_fn(e);
         if (!is_constant(f) || const_name(f) != get_not_name())
             return false;
         return true;
     } else if (is_pi(e)) {
-        if (!is_false(env, binding_body(e))) return false;
+        if (!is_false(binding_body(e))) return false;
         return true;
     } else {
         return false;
     }
 }
 
-expr mk_not(abstract_type_context & ctx, expr const & e) {
-    if (is_standard(ctx.env())) {
-        return mk_app(mk_constant(get_not_name()), e);
-    } else {
-        level l = get_level(ctx, e);
-        return mk_app(mk_constant(get_not_name(), {l}), e);
-    }
+expr mk_not(expr const & e) {
+    return mk_app(mk_constant(get_not_name()), e);
 }
 
 expr mk_absurd(abstract_type_context & ctx, expr const & t, expr const & e, expr const & not_e) {
     level t_lvl  = get_level(ctx, t);
     expr  e_type = ctx.infer(e);
-    if (is_standard(ctx.env())) {
-        return mk_app(mk_constant(get_absurd_name(), {t_lvl}), e_type, t, e, not_e);
-    } else {
-        level e_lvl = get_level(ctx, e_type);
-        return mk_app(mk_constant(get_absurd_name(), {e_lvl, t_lvl}), e_type, t, e, not_e);
-    }
+    return mk_app(mk_constant(get_absurd_name(), {t_lvl}), e_type, t, e, not_e);
 }
 
 optional<expr> get_binary_op(expr const & e) {
@@ -912,20 +863,6 @@ expr mk_nary_app(expr const & op, unsigned num_nary_args, expr const * nary_args
         e = mk_app(op, nary_args[i], e);
     }
     return e;
-}
-
-optional<expr> lift_down_if_hott(abstract_type_context & ctx, expr const & v) {
-    if (is_standard(ctx.env())) {
-        return some_expr(v);
-    } else {
-        expr v_type = ctx.whnf(ctx.infer(v));
-        if (!is_app(v_type))
-            return none_expr();
-        expr const & lift = app_fn(v_type);
-        if (!is_constant(lift) || const_name(lift) != get_lift_name())
-            return none_expr();
-        return some_expr(mk_app(mk_constant(get_lift_down_name(), const_levels(lift)), app_arg(v_type), v));
-    }
 }
 
 format pp_type_mismatch(formatter const & fmt, expr const & v, expr const & v_type, expr const & t) {

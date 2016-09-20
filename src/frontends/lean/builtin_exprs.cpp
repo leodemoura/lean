@@ -149,7 +149,7 @@ static expr parse_let_expr(parser & p, unsigned, expr const *, pos_info const & 
 }
 
 static expr parse_unit(parser & p, unsigned, expr const *, pos_info const & pos) {
-    return p.save_pos(mk_constant(get_unit_star_name()), pos);
+    return p.save_pos(mk_constant(get_Unit_star_name()), pos);
 }
 
 static expr parse_by(parser & p, unsigned, expr const *, pos_info const & pos) {
@@ -157,7 +157,7 @@ static expr parse_by(parser & p, unsigned, expr const *, pos_info const & pos) {
     parser::local_scope scope(p);
     p.clear_locals();
     expr tac  = p.parse_expr();
-    expr type = mk_app(mk_constant(get_tactic_name()), mk_constant(get_unit_name()));
+    expr type = mk_app(mk_constant(get_Tactic_name()), mk_constant(get_Unit_name()));
     p.update_pos(tac, pos);
     expr r    = p.save_pos(mk_typed_expr(type, tac), pos);
     return p.save_pos(mk_by(r), pos);
@@ -539,7 +539,7 @@ static expr parse_do(parser & p, unsigned, expr const *, pos_info const &) {
         --i;
         if (auto lhs = lhss[i]) {
             if (is_local(*lhs)) {
-                r = p.rec_save_pos(mk_app(p.save_pos(mk_constant(get_monad_bind_name()), ps[i]), es[i], Fun(*lhs, r)), ps[i]);
+                r = p.rec_save_pos(mk_app(p.save_pos(mk_constant(get_Monad_bind_name()), ps[i]), es[i], Fun(*lhs, r)), ps[i]);
             } else {
                 // must introduce a "fake" match
                 auto pos   = ps[i];
@@ -562,13 +562,13 @@ static expr parse_do(parser & p, unsigned, expr const *, pos_info const &) {
                 expr eqns  = p.save_pos(mk_equations(h, eqs.size(), eqs.data()), pos);
                 expr local = mk_local("p", mk_expr_placeholder());
                 expr match = p.mk_app(eqns, local, pos);
-                r = p.rec_save_pos(mk_app(p.save_pos(mk_constant(get_monad_bind_name()), ps[i]),
+                r = p.rec_save_pos(mk_app(p.save_pos(mk_constant(get_Monad_bind_name()), ps[i]),
                                           es[i],
                                           p.save_pos(Fun(local, match), pos)),
                                    pos);
             }
         } else {
-            r = p.rec_save_pos(mk_app(p.save_pos(mk_constant(get_monad_bind_name()), ps[i]),
+            r = p.rec_save_pos(mk_app(p.save_pos(mk_constant(get_Monad_bind_name()), ps[i]),
                                       es[i],
                                       p.save_pos(mk_lambda("x", mk_expr_placeholder(), r), p.pos_of(r))),
                                ps[i]);
@@ -596,11 +596,11 @@ static expr parse_antiquote_expr(parser & p, unsigned, expr const *, pos_info co
 
 static expr quote_name(name const & n) {
     if (n.is_anonymous()) {
-        return mk_constant(get_name_anonymous_name());
+        return mk_constant(get_Name_anonymous_name());
     } else if (n.is_string()) {
         expr prefix = quote_name(n.get_prefix());
         expr str    = from_string(n.get_string());
-        return mk_app(mk_constant(get_name_mk_string_name()), str, prefix);
+        return mk_app(mk_constant(get_Name_mkString_name()), str, prefix);
     } else {
         lean_unreachable();
     }

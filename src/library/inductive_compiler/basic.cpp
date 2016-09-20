@@ -77,7 +77,6 @@ class add_basic_inductive_decl_fn {
         bool has_eq   = has_eq_decls(m_env);
         bool has_heq  = has_heq_decls(m_env);
         bool has_prod = has_prod_decls(m_env);
-        bool has_lift = has_lift_decls(m_env);
 
         bool gen_rec_on       = get_inductive_rec_on(m_opts);
         bool gen_brec_on      = get_inductive_brec_on(m_opts);
@@ -87,31 +86,26 @@ class add_basic_inductive_decl_fn {
         if (gen_rec_on)
             m_env = mk_rec_on(m_env, ind_name);
 
-        if (gen_rec_on && m_env.impredicative())
+        if (gen_rec_on)
             m_env = mk_induction_on(m_env, ind_name);
 
         if (has_unit) {
             if (gen_cases_on)
                 m_env = mk_cases_on(m_env, ind_name);
 
-            if (gen_cases_on && gen_no_confusion && has_eq
-                && ((m_env.prop_proof_irrel() && has_heq) || (!m_env.prop_proof_irrel() && has_lift))) {
+            if (gen_cases_on && gen_no_confusion && has_eq && has_heq) {
                 m_env = mk_no_confusion(m_env, ind_name);
             }
 
             if (gen_brec_on && has_prod) {
                 m_env = mk_below(m_env, ind_name);
-                if (m_env.impredicative()) {
-                    m_env = mk_ibelow(m_env, ind_name);
-                }
+                m_env = mk_ibelow(m_env, ind_name);
             }
         }
 
         if (gen_brec_on && has_unit && has_prod) {
             m_env = mk_brec_on(m_env, ind_name);
-            if (m_env.impredicative()) {
-                m_env = mk_binduction_on(m_env, ind_name);
-            }
+            m_env = mk_binduction_on(m_env, ind_name);
         }
 
         m_env = mk_has_sizeof(m_env, ind_name);

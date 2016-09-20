@@ -57,7 +57,7 @@ class mk_has_sizeof_fn {
 
     optional<expr> mk_has_sizeof(expr const & type) {
         level l = get_level(m_tctx, type);
-        expr inst_type = mk_app(mk_constant(get_has_sizeof_name(), {l}), type);
+        expr inst_type = mk_app(mk_constant(get_Sizeof_name(), {l}), type);
         return m_tctx.mk_class_instance(inst_type);
     }
 
@@ -72,7 +72,7 @@ class mk_has_sizeof_fn {
         if (!is_sort(ty))
             return none_expr();
         level l = sort_level(ty);
-        return some_expr(Pi(locals, mk_app(mk_constant(get_has_sizeof_name(), {l}),
+        return some_expr(Pi(locals, mk_app(mk_constant(get_Sizeof_name(), {l}),
                                            mk_app(param, locals))));
     }
 
@@ -149,7 +149,7 @@ class mk_has_sizeof_fn {
         expr motive;
         {
             expr x = mk_local_pp("x", mk_app(c_ind, indices));
-            motive = m_tctx.mk_lambda(indices, Fun(x, mk_constant(get_nat_name())));
+            motive = m_tctx.mk_lambda(indices, Fun(x, mk_constant(get_Nat_name())));
         }
 
         buffer<expr> minor_premises;
@@ -181,7 +181,7 @@ class mk_has_sizeof_fn {
 
             // Introduce locals for the recursive arguments of type nat
             for (buffer<expr> const & arg_args : rec_arg_args) {
-                expr local = mk_local_pp("IH", Pi(arg_args, mk_constant(get_nat_name())));
+                expr local = mk_local_pp("IH", Pi(arg_args, mk_constant(get_Nat_name())));
                 locals.push_back(local);
                 if (arg_args.empty())
                     result = mk_nat_add(result, local);
@@ -200,12 +200,12 @@ class mk_has_sizeof_fn {
                 indices);
 
         expr has_sizeof_type = m_tctx.mk_pi(indices,
-                                            mk_app(mk_constant(get_has_sizeof_name(), {get_datatype_level(ind_type)}),
+                                            mk_app(mk_constant(get_Sizeof_name(), {get_datatype_level(ind_type)}),
                                                    mk_app(c_ind, indices)));
 
         expr has_sizeof_val = m_tctx.mk_lambda(indices,
                                                mk_app(
-                                                   mk_app(mk_constant(get_has_sizeof_mk_name(), {get_datatype_level(ind_type)}),
+                                                   mk_app(mk_constant(get_Sizeof_mk_name(), {get_datatype_level(ind_type)}),
                                                           mk_app(c_ind, indices)),
                                                    recursor_application));
 
@@ -283,7 +283,7 @@ public:
         m_env(env), m_tctx(env), m_ind_name(ind_name) {}
 
     environment operator()() {
-        if (m_env.find(get_has_sizeof_name()))
+        if (m_env.find(get_Sizeof_name()))
             define_instance();
         return m_env;
     }

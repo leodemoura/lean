@@ -498,11 +498,11 @@ static environment vm_eval_cmd(parser & p) {
     if (!is_IO) {
         /* Check if resultant type has an instance of has_to_string */
         level lvl  = sort_level(tc.whnf(tc.infer(type)));
-        expr has_to_string_type = mk_app(mk_constant(get_has_to_string_name(), {lvl}), type0);
+        expr has_to_string_type = mk_app(mk_constant(get_ToString_name(), {lvl}), type0);
         optional<expr> to_string_instance = tc.mk_class_instance(has_to_string_type);
         if (to_string_instance) {
             /* Modify the 'program' to (to_string e) */
-            e         = mk_app(mk_constant(get_to_string_name(), {lvl}), type0, *to_string_instance, e);
+            e         = mk_app(mk_constant(get_ToString_name(), {lvl}), type0, *to_string_instance, e);
             type      = tc.infer(e);
             is_string = true;
         }
@@ -560,8 +560,8 @@ static environment run_command_cmd(parser & p) {
     options opts         = p.get_options();
     metavar_context mctx;
     expr tactic          = p.parse_expr();
-    expr try_constructor = mk_app(mk_constant(get_tactic_try_name()), mk_constant(get_tactic_constructor_name()));
-    tactic               = mk_app(mk_constant(get_monad_and_then_name()), tactic, try_constructor);
+    expr try_constructor = mk_app(mk_constant(get_Tactic_try_name()), mk_constant(get_Tactic_constructor_name()));
+    tactic               = mk_app(mk_constant(get_Monad_andThen_name()), tactic, try_constructor);
     expr val             = mk_typed_expr(mk_true(), mk_by(tactic));
     bool check_unassigned = false;
     elaborate(env, opts, mctx, local_context(), val, check_unassigned);

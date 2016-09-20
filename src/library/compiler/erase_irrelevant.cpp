@@ -283,7 +283,7 @@ class erase_irrelevant_fn : public compiler_step_visitor {
     }
 
     expr visit_monad_bind(expr const & e, buffer<expr> const & args) {
-        if (args.size() == 6 && is_constant(args[1], get_monadIO_name())) {
+        if (args.size() == 6 && is_constant(args[1], get_MonadIO_name())) {
             /* Remark: morally the IO monad is
 
                 IO a := State -> (a, State)
@@ -319,7 +319,7 @@ class erase_irrelevant_fn : public compiler_step_visitor {
     }
 
     expr visit_monad_return(expr const & e, buffer<expr> const & args) {
-        if (args.size() == 4 && is_constant(args[1], get_monadIO_name())) {
+        if (args.size() == 4 && is_constant(args[1], get_MonadIO_name())) {
             /* IO monad return
                return v := fun s, v
 
@@ -349,15 +349,15 @@ class erase_irrelevant_fn : public compiler_step_visitor {
                 return visit_eq_rec(args);
             } else if (n == get_acc_cases_on_name()) {
                 return visit_acc_cases_on(args);
-            } else if (n == get_quot_lift_name()) {
+            } else if (n == get_Quot_lift_name()) {
                 return visit_quot_lift(args);
-            } else if (n == get_quot_mk_name()) {
+            } else if (n == get_Quot_mk_name()) {
                 return visit_quot_mk(args);
-            } else if (n == get_subtype_rec_name()) {
+            } else if (n == get_Subtype_rec_name()) {
                 return visit_subtype_rec(args);
-            } else if (n == get_monad_bind_name()) {
+            } else if (n == get_Monad_bind_name()) {
                 return visit_monad_bind(e, args);
-            } else if (n == get_monad_ret_name()) {
+            } else if (n == get_Monad_ret_name()) {
                 return visit_monad_return(e, args);
             } else if (is_cases_on_recursor(env(), n)) {
                 return visit_cases_on(fn, args);
@@ -365,9 +365,9 @@ class erase_irrelevant_fn : public compiler_step_visitor {
                 return visit_rec(fn, args);
             } else if (is_no_confusion(env(), n)) {
                 return visit_no_confusion(fn, args);
-            } else if (n == get_subtype_tag_name()) {
+            } else if (n == get_Subtype_tag_name()) {
                 return visit_subtype_tag(args);
-            } else if (n == get_subtype_elt_of_name()) {
+            } else if (n == get_Subtype_elt_of_name()) {
                 return visit_subtype_elt_of(args);
             }
         }

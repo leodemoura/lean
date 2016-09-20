@@ -79,11 +79,11 @@ class nat_numeral_pp {
     expr m_nat_succ;
 public:
     nat_numeral_pp():
-        m_num_type(mk_constant(get_num_name())),
-        m_nat(get_nat_name()),
-        m_nat_of_num(mk_constant(get_nat_of_num_name())),
-        m_nat_zero(mk_constant(get_nat_zero_name())),
-        m_nat_succ(mk_constant(get_nat_succ_name())) {
+        m_num_type(mk_constant(get_Num_name())),
+        m_nat(get_Nat_name()),
+        m_nat_of_num(mk_constant(get_Nat_ofNum_name())),
+        m_nat_zero(mk_constant(get_Nat_zero_name())),
+        m_nat_succ(mk_constant(get_Nat_succ_name())) {
     }
 
     // Return an unsigned if \c e if of the form (succ^k zero), and k
@@ -637,7 +637,7 @@ auto pretty_fn::pp_const(expr const & e, optional<unsigned> const & num_ref_univ
     if (is_unreachable_expr(e) && m_unicode)
         return format("⊥");
     name n = const_name(e);
-    if (m_notation && n == get_unit_star_name())
+    if (m_notation && n == get_Unit_star_name())
         return format("()");
     if (!num_ref_univ_params) {
         if (auto r = pp_local_ref(e))

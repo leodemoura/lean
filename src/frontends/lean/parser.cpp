@@ -1922,7 +1922,7 @@ expr parser::parse_char_expr() {
     std::string v = get_str_val();
     lean_assert(v.size() == 1);
     next();
-    return mk_app(save_pos(mk_constant(get_char_of_nat_name()), p),
+    return mk_app(save_pos(mk_constant(get_Char_ofNat_name()), p),
                   save_pos(mk_prenum(mpz(static_cast<unsigned>(v[0]))), p),
                   p);
 }

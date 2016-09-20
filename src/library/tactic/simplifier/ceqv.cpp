@@ -54,7 +54,7 @@ class to_ceqvs_fn {
         expr c, Hdec, A, arg1, arg2;
         if (is_relation(e)) {
             return mk_singleton(e, H);
-        } else if (is_standard(m_env) && is_not(m_env, e, arg1)) {
+        } else if (is_standard(m_env) && is_not(e, arg1)) {
             expr new_e = mk_iff(arg1, mk_false());
             expr new_H = mk_app(mk_constant(get_iff_false_intro_name()), arg1, H);
             return mk_singleton(new_e, new_H);

@@ -150,7 +150,7 @@ private:
         buffer<expr> new_args;
         new_args.push_back(mk_constant(get_ite_name(), {l1()}));
         new_args.push_back(args[1]);
-        new_args.push_back(mk_app(mk_constant(get_classical_prop_decidable_name()), args[1]));
+        new_args.push_back(mk_app(mk_constant(get_Classical_prop_decidable_name()), args[1]));
         new_args.push_back(ty);
         new_args.push_back(args[2]);
         new_args.push_back(args[3]);
@@ -186,8 +186,8 @@ private:
         expr ty = m_tctx.infer(args[1]);
         buffer<expr> array_args;
         expr array = get_app_args(ty, array_args);
-        lean_assert(is_constant(array) && const_name(array) == get_smt_array_name());
-        args[0] = mk_app(mk_constant(get_smt_select_name(), {l1(), l1()}), array_args[0], array_args[1]);
+        lean_assert(is_constant(array) && const_name(array) == get_SMT_array_name());
+        args[0] = mk_app(mk_constant(get_SMT_select_name(), {l1(), l1()}), array_args[0], array_args[1]);
         return mk_app(args);
     }
 
@@ -196,20 +196,20 @@ private:
         expr ty = m_tctx.infer(args[1]);
         buffer<expr> array_args;
         expr array = get_app_args(ty, array_args);
-        lean_assert(is_constant(array) && const_name(array) == get_smt_array_name());
-        expr dec_eq = mk_app(mk_constant(get_classical_type_decidable_eq_name(), {l1()}), array_args[0]);
-        args[0] = mk_app(mk_constant(get_smt_store_name(), {l1(), l1()}), array_args[0], array_args[1], dec_eq);
+        lean_assert(is_constant(array) && const_name(array) == get_SMT_array_name());
+        expr dec_eq = mk_app(mk_constant(get_Classical_type_decidable_eq_name(), {l1()}), array_args[0]);
+        args[0] = mk_app(mk_constant(get_SMT_store_name(), {l1(), l1()}), array_args[0], array_args[1], dec_eq);
         return mk_app(args);
     }
 
     expr elaborate_arith(buffer<expr> & args, arith_app_info const & info) {
         lean_assert(args.size() > 1);
         expr ty = m_tctx.infer(args[1]);
-        if (ty == mk_constant(get_int_name())) {
-            args[0] = mk_app(mk_constant(info.get_op_name(), {mk_level_one()}), mk_constant(get_int_name()), mk_constant(info.get_int_inst_name()));
+        if (ty == mk_constant(get_Int_name())) {
+            args[0] = mk_app(mk_constant(info.get_op_name(), {mk_level_one()}), mk_constant(get_Int_name()), mk_constant(info.get_int_inst_name()));
         } else {
-            lean_assert(ty == mk_constant(get_real_name()));
-            args[0] = mk_app(mk_constant(info.get_op_name(), {mk_level_one()}), mk_constant(get_real_name()), mk_constant(info.get_real_inst_name()));
+            lean_assert(ty == mk_constant(get_Real_name()));
+            args[0] = mk_app(mk_constant(info.get_op_name(), {mk_level_one()}), mk_constant(get_Real_name()), mk_constant(info.get_real_inst_name()));
         }
         return mk_app_attrs(args, info.get_fun_attr());
     }
@@ -224,11 +224,11 @@ private:
 
         for (unsigned i = 1; i < args.size(); ++i) {
             expr ty = m_tctx.infer(args[i]);
-            if (ty == mk_constant(get_int_name())) {
+            if (ty == mk_constant(get_Int_name())) {
                 is_int.push_back(true);
                 is_real.push_back(false);
                 found_int = true;
-            } else if (ty == mk_constant(get_real_name())) {
+            } else if (ty == mk_constant(get_Real_name())) {
                 is_int.push_back(false);
                 is_real.push_back(true);
                 found_real = true;
@@ -242,7 +242,7 @@ private:
         if (found_int && (found_real || coerce_all_ints)) {
             for (unsigned i = 0; i < is_real.size(); ++i) {
                 if (is_int[i]) {
-                    args[i+1] = mk_app(mk_constant(get_real_of_int_name()), args[i+1]);
+                    args[i+1] = mk_app(mk_constant(get_Real_ofInt_name()), args[i+1]);
                 }
             }
         }
@@ -262,7 +262,7 @@ private:
         // Special case
         // (the map stores "-" ==> sub)
         if (n == "-" && args.size() == 2) {
-            arith_app_info info(get_neg_name(), get_int_has_neg_name(), get_real_has_neg_name());
+            arith_app_info info(get_neg_name(), get_negInt_name(), get_negReal_name());
             return elaborate_arith(args, info);
         }
 
@@ -308,12 +308,12 @@ void initialize_elaborator() {
             {"true", mk_constant(get_true_name())},
             {"false", mk_constant(get_false_name())},
             {"not", mk_constant(get_not_name())},
-            {"Int", mk_constant(get_int_name())},
-            {"Real", mk_constant(get_real_name())},
-            {"Array", mk_constant(get_smt_array_name(), {l1(), l1()})},
-            {"to_real", mk_constant(get_real_of_int_name())},
-            {"to_int", mk_constant(get_real_to_int_name())},
-            {"is_int", mk_constant(get_real_is_int_name())}
+            {"Int", mk_constant(get_Int_name())},
+            {"Real", mk_constant(get_Real_name())},
+            {"Array", mk_constant(get_SMT_array_name(), {l1(), l1()})},
+            {"to_real", mk_constant(get_Real_ofInt_name())},
+            {"to_int", mk_constant(get_Real_toInt_name())},
+            {"is_int", mk_constant(get_Real_isInt_name())}
         });
 
     g_constant_fun_attr_map = new name_hash_map<pair<expr, fun_attr>>({
@@ -324,22 +324,22 @@ void initialize_elaborator() {
 
     g_arith_symbol_map = new name_hash_map<arith_app_info>({
             // Int-specific
-            {"mod", arith_app_info(get_mod_name(), get_int_has_mod_name())},
-            {"abs", arith_app_info(get_abs_name(), get_int_decidable_linear_ordered_comm_group_name())},
-            {"div", arith_app_info(get_div_name(), get_int_has_div_name(), name(), fun_attr::LEFT_ASSOC)},
+            {"mod", arith_app_info(get_mod_name(), get_modInt_name())},
+            {"abs", arith_app_info(get_abs_name(), get_decidableLinearOrderedCommGroupInt_name())},
+            {"div", arith_app_info(get_div_name(), get_divInt_name(), name(), fun_attr::LEFT_ASSOC)},
 
             // Real-specific
-            {"/", arith_app_info(get_div_name(), name(), get_real_has_div_name(), fun_attr::LEFT_ASSOC)},
+            {"/", arith_app_info(get_div_name(), name(), get_divReal_name(), fun_attr::LEFT_ASSOC)},
 
             // Overloaded operators
-            {"+", arith_app_info(get_add_name(), get_int_has_add_name(), get_real_has_add_name(), fun_attr::LEFT_ASSOC)},
-            {"*", arith_app_info(get_mul_name(), get_int_has_mul_name(), get_real_has_mul_name(), fun_attr::LEFT_ASSOC)},
-            {"-", arith_app_info(get_sub_name(), get_int_has_sub_name(), get_real_has_sub_name(), fun_attr::LEFT_ASSOC)},
+            {"+", arith_app_info(get_add_name(), get_addInt_name(), get_addReal_name(), fun_attr::LEFT_ASSOC)},
+            {"*", arith_app_info(get_mul_name(), get_mulInt_name(), get_mulReal_name(), fun_attr::LEFT_ASSOC)},
+            {"-", arith_app_info(get_sub_name(), get_subInt_name(), get_subReal_name(), fun_attr::LEFT_ASSOC)},
 
-            {"<", arith_app_info(get_lt_name(), get_int_has_lt_name(), get_real_has_lt_name(), fun_attr::CHAINABLE)},
-            {"<=", arith_app_info(get_le_name(), get_int_has_le_name(), get_real_has_le_name(), fun_attr::CHAINABLE)},
-            {">", arith_app_info(get_gt_name(), get_int_has_lt_name(), get_real_has_lt_name(), fun_attr::CHAINABLE)},
-            {">=", arith_app_info(get_ge_name(), get_int_has_le_name(), get_real_has_le_name(), fun_attr::CHAINABLE)},
+            {"<", arith_app_info(get_lt_name(), get_ltInt_name(), get_ltReal_name(), fun_attr::CHAINABLE)},
+            {"<=", arith_app_info(get_le_name(), get_leInt_name(), get_leReal_name(), fun_attr::CHAINABLE)},
+            {">", arith_app_info(get_gt_name(), get_ltInt_name(), get_ltReal_name(), fun_attr::CHAINABLE)},
+            {">=", arith_app_info(get_ge_name(), get_leInt_name(), get_leReal_name(), fun_attr::CHAINABLE)},
                 });
 
     g_special_map = new name_hash_map<special_app_kind>({

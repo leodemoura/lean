@@ -303,9 +303,9 @@ private:
             break;
         case scanner::token_kind::INT:
             // TODO(dhs): Lean's bv may want a Nat instead of an Int
-            return mk_mpq_macro(curr_numeral_next(), mk_constant(get_int_name()));
+            return mk_mpq_macro(curr_numeral_next(), mk_constant(get_Int_name()));
         case scanner::token_kind::FLOAT:
-            return mk_mpq_macro(curr_numeral_next(), mk_constant(get_real_name()));
+            return mk_mpq_macro(curr_numeral_next(), mk_constant(get_Real_name()));
         case scanner::token_kind::BV:
             // TODO(dhs): bit vectors
             // (Already getting the value in the scanner, just don't have a good Lean target yet)
@@ -482,7 +482,7 @@ private:
 
         vm_state state(env());
         scope_vm_state scope(state);
-        vm_obj result = state.invoke(get_smt_prove_name(), s);
+        vm_obj result = state.invoke(get_SMT_prove_name(), s);
         if (optional<tactic_state> s_new = is_tactic_success(result)) {
             mctx = s_new->mctx();
             expr proof = mctx.instantiate_mvars(goal_mvar);

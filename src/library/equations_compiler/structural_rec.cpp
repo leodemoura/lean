@@ -413,7 +413,7 @@ struct structural_rec_fn {
         optional<expr> to_below(expr const & d, expr const & a, expr const & F) {
             expr const & fn = get_app_fn(d);
             trace_struct_aux(tout() << "d: " << d << ", a: " << a << ", F: " << F << "\n";);
-            if (is_constant(fn, get_prod_name())) {
+            if (is_constant(fn, get_Prod_name())) {
                 expr d_arg1 = m_ctx.whnf(app_arg(app_fn(d)));
                 expr d_arg2 = m_ctx.whnf(app_arg(d));
                 if (auto r = to_below(d_arg1, a, mk_pr1(m_ctx, F)))
@@ -657,11 +657,11 @@ struct structural_rec_fn {
             buffer<expr> args;
             expr const & fn = get_app_args(e, args);
             if (args.size() == 3) {
-                if (is_constant(fn, get_prod_pr1_name())) {
+                if (is_constant(fn, get_Prod_pr1_name())) {
                     bool r = is_F_instance(args[2], path);
                     path.push_back(1);
                     return r;
-                } else if (is_constant(fn, get_prod_pr2_name())) {
+                } else if (is_constant(fn, get_Prod_pr2_name())) {
                     bool r = is_F_instance(args[2], path);
                     path.push_back(2);
                     return r;
@@ -764,7 +764,7 @@ struct structural_rec_fn {
         virtual expr visit_app(expr const & e) {
             buffer<expr> args;
             expr const & fn = get_app_args(e, args);
-            if (is_constant(fn, get_prod_pr1_name()) && args.size() >= 3) {
+            if (is_constant(fn, get_Prod_pr1_name()) && args.size() >= 3) {
                 buffer<unsigned> path;
                 if (is_F_instance(args[2], path)) {
                     path.push_back(1);

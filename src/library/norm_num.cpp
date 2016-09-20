@@ -41,7 +41,7 @@ bool norm_num_context::is_div(expr const & e) const {
 Takes A : Type, and tries to synthesize has_add A.
 */
 expr norm_num_context::mk_has_add(expr const & e) {
-    auto l_name = get_has_add_name();
+    auto l_name = get_Add_name();
     if (instances.find(l_name) != instances.end()) {
         return instances[l_name];
     }
@@ -56,7 +56,7 @@ expr norm_num_context::mk_has_add(expr const & e) {
 }
 
 expr norm_num_context::mk_has_mul(expr const & e) {
-    auto l_name = get_has_mul_name();
+    auto l_name = get_Mul_name();
     if (instances.find(l_name) != instances.end()) {
         return instances[l_name];
     }
@@ -71,7 +71,7 @@ expr norm_num_context::mk_has_mul(expr const & e) {
 }
 
 expr norm_num_context::mk_has_one(expr const & e) {
-    auto l_name = get_has_one_name();
+    auto l_name = get_One_name();
     if (instances.find(l_name) != instances.end()) {
         return instances[l_name];
     }
@@ -86,7 +86,7 @@ expr norm_num_context::mk_has_one(expr const & e) {
 }
 
 expr norm_num_context::mk_has_zero(expr const & e) {
-    auto l_name = get_has_zero_name();
+    auto l_name = get_Zero_name();
     if (instances.find(l_name) != instances.end()) {
         return instances[l_name];
     }
@@ -101,7 +101,7 @@ expr norm_num_context::mk_has_zero(expr const & e) {
 }
 
 expr norm_num_context::mk_add_monoid(expr const & e) {
-    auto l_name = get_add_monoid_name();
+    auto l_name = get_AddMonoid_name();
     if (instances.find(l_name) != instances.end()) {
         return instances[l_name];
     }
@@ -116,7 +116,7 @@ expr norm_num_context::mk_add_monoid(expr const & e) {
 }
 
 expr norm_num_context::mk_monoid(expr const & e) {
-    auto l_name = get_monoid_name();
+    auto l_name = get_Monoid_name();
     if (instances.find(l_name) != instances.end()) {
         return instances[l_name];
     }
@@ -131,7 +131,7 @@ expr norm_num_context::mk_monoid(expr const & e) {
 }
 
 expr norm_num_context::mk_field(expr const & e) {
-    expr t = mk_app(mk_constant(get_field_name(), m_lvls), e);
+    expr t = mk_app(mk_constant(get_Field_name(), m_lvls), e);
     optional<expr> inst = m_type_ctx.mk_class_instance(t);
     if (inst) {
         return *inst;
@@ -141,7 +141,7 @@ expr norm_num_context::mk_field(expr const & e) {
 }
 
 expr norm_num_context::mk_add_comm(expr const & e) {
-    auto l_name = get_add_comm_semigroup_name();
+    auto l_name = get_AddCommSemigroup_name();
     if (instances.find(l_name) != instances.end()) {
         return instances[l_name];
     }
@@ -156,7 +156,7 @@ expr norm_num_context::mk_add_comm(expr const & e) {
 }
 
 expr norm_num_context::mk_add_group(expr const & e) {
-    auto l_name = get_add_group_name();
+    auto l_name = get_AddGroup_name();
     if (instances.find(l_name) != instances.end()) {
         return instances[l_name];
     }
@@ -171,7 +171,7 @@ expr norm_num_context::mk_add_group(expr const & e) {
 }
 
 expr norm_num_context::mk_has_distrib(expr const & e) {
-    auto l_name = get_distrib_name();
+    auto l_name = get_Distrib_name();
     if (instances.find(l_name) != instances.end()) {
         return instances[l_name];
     }
@@ -201,7 +201,7 @@ expr norm_num_context::mk_mul_zero_class(expr const & e) {
 }
 
 expr norm_num_context::mk_semiring(expr const & e) {
-    auto l_name = get_semiring_name();
+    auto l_name = get_Semiring_name();
     if (instances.find(l_name) != instances.end()) {
         return instances[l_name];
     }
@@ -216,7 +216,7 @@ expr norm_num_context::mk_semiring(expr const & e) {
 }
 
 expr norm_num_context::mk_has_neg(expr const & e) {
-    auto l_name = get_has_neg_name();
+    auto l_name = get_Neg_name();
     if (instances.find(l_name) != instances.end()) {
         return instances[l_name];
     }
@@ -231,7 +231,7 @@ expr norm_num_context::mk_has_neg(expr const & e) {
 }
 
 expr norm_num_context::mk_has_sub(expr const & e) {
-    auto l_name = get_has_sub_name();
+    auto l_name = get_Sub_name();
     if (instances.find(l_name) != instances.end()) {
         return instances[l_name];
     }
@@ -246,7 +246,7 @@ expr norm_num_context::mk_has_sub(expr const & e) {
 }
 
 expr norm_num_context::mk_has_div(expr const & e) {
-    auto l_name = get_has_div_name();
+    auto l_name = get_Div_name();
     if (instances.find(l_name) != instances.end()) {
         return instances[l_name];
     }
@@ -261,7 +261,7 @@ expr norm_num_context::mk_has_div(expr const & e) {
 }
 
 expr norm_num_context::mk_add_comm_group(expr const & e) {
-    auto l_name = get_add_comm_group_name();
+    auto l_name = get_AddCommGroup_name();
     if (instances.find(l_name) != instances.end()) {
         return instances[l_name];
     }
@@ -291,7 +291,7 @@ expr norm_num_context::mk_ring(expr const & e) {
 }
 
 expr norm_num_context::mk_lin_ord_ring(expr const & e) {
-    auto l_name = get_linear_ordered_ring_name();
+    auto l_name = get_LinearOrderedRing_name();
     if (instances.find(l_name) != instances.end()) {
         return instances[l_name];
     }
@@ -306,7 +306,7 @@ expr norm_num_context::mk_lin_ord_ring(expr const & e) {
 }
 
 expr norm_num_context::mk_lin_ord_semiring(expr const & e) {
-    auto l_name = get_linear_ordered_semiring_name();
+    auto l_name = get_LinearOrderedSemiring_name();
     if (instances.find(l_name) != instances.end()) {
         return instances[l_name];
     }
@@ -321,7 +321,7 @@ expr norm_num_context::mk_lin_ord_semiring(expr const & e) {
 }
 
 expr norm_num_context::mk_wk_order(expr const & e) {
-    auto l_name = get_weak_order_name();
+    auto l_name = get_WeakOrder_name();
     if (instances.find(l_name) != instances.end()) {
         return instances[l_name];
     }
@@ -341,7 +341,7 @@ expr norm_num_context::mk_const(name const & n) {
 
 expr norm_num_context::mk_cong(expr const & op, expr const & type, expr const & a,
                                expr const & b, expr const & eq) {
-    return mk_app({mk_const(get_norm_num_mk_cong_name()), type, op, a, b, eq});
+    return mk_app({mk_const(get_NormNum_mk_cong_name()), type, op, a, b, eq});
 }
 
 // returns <t, p> such that p is a proof that lhs + rhs = t.
@@ -360,52 +360,52 @@ pair<expr, expr> norm_num_context::mk_norm_add(expr const & lhs, expr const & rh
     if (is_bit0(lhs) && is_bit0(rhs)) { // typec is has_add
         auto p = mk_norm_add(args_lhs[2], args_rhs[2]);
         rv = mk_app(lhs_head, type, typec, p.first);
-        prf = mk_app({mk_const(get_norm_num_bit0_add_bit0_helper_name()), type, mk_add_comm(type),
+        prf = mk_app({mk_const(get_NormNum_bit0_add_bit0_helper_name()), type, mk_add_comm(type),
                     args_lhs[2], args_rhs[2], p.first, p.second});
     } else if (is_bit0(lhs) && is_bit1(rhs)) {
         auto p = mk_norm_add(args_lhs[2], args_rhs[3]);
         rv = mk_app({rhs_head, type, args_rhs[1], args_rhs[2], p.first});
-        prf = mk_app({mk_const(get_norm_num_bit0_add_bit1_helper_name()), type, mk_add_comm(type), args_rhs[1],
+        prf = mk_app({mk_const(get_NormNum_bit0_add_bit1_helper_name()), type, mk_add_comm(type), args_rhs[1],
                     args_lhs[2], args_rhs[3], p.first, p.second});
     } else if (is_bit0(lhs) && is_one(rhs)) {
         rv = mk_app({mk_const(get_bit1_name()), type, args_rhs[1], args_lhs[1], args_lhs[2]});
-        prf = mk_app({mk_const(get_norm_num_bit0_add_one_name()), type, typec, args_rhs[1], args_lhs[2]});
+        prf = mk_app({mk_const(get_NormNum_bit0_add_one_name()), type, typec, args_rhs[1], args_lhs[2]});
     } else if (is_bit1(lhs) && is_bit0(rhs)) { // typec is has_one
         auto p = mk_norm_add(args_lhs[3], args_rhs[2]);
         rv = mk_app(lhs_head, type, typec, args_lhs[2], p.first);
-        prf = mk_app({mk_const(get_norm_num_bit1_add_bit0_helper_name()), type, mk_add_comm(type), typec,
+        prf = mk_app({mk_const(get_NormNum_bit1_add_bit0_helper_name()), type, mk_add_comm(type), typec,
                     args_lhs[3], args_rhs[2], p.first, p.second});
     } else if (is_bit1(lhs) && is_bit1(rhs)) { // typec is has_one
         auto add_ts = mk_norm_add(args_lhs[3], args_rhs[3]);
-        expr add1 = mk_app({mk_const(get_norm_num_add1_name()), type, args_lhs[2], typec, add_ts.first});
+        expr add1 = mk_app({mk_const(get_NormNum_add1_name()), type, args_lhs[2], typec, add_ts.first});
         auto p = mk_norm_add1(add1);
         rv = mk_app({mk_const(get_bit0_name()), type, args_lhs[2], p.first});
-        prf = mk_app({mk_const(get_norm_num_bit1_add_bit1_helper_name()), type, mk_add_comm(type), typec,
+        prf = mk_app({mk_const(get_NormNum_bit1_add_bit1_helper_name()), type, mk_add_comm(type), typec,
                     args_lhs[3], args_rhs[3], add_ts.first, p.first, add_ts.second, p.second});
     } else if (is_bit1(lhs) && is_one(rhs)) { // typec is has_one
-        expr add1 = mk_app({mk_const(get_norm_num_add1_name()), type, args_lhs[2], typec, lhs});
+        expr add1 = mk_app({mk_const(get_NormNum_add1_name()), type, args_lhs[2], typec, lhs});
         auto p = mk_norm_add1(add1);
         rv = p.first;
-        prf = mk_app({mk_const(get_norm_num_bit1_add_one_helper_name()), type, args_lhs[2], typec,
+        prf = mk_app({mk_const(get_NormNum_bit1_add_one_helper_name()), type, args_lhs[2], typec,
                     args_lhs[3], p.first, p.second});
     } else if (is_one(lhs) && is_bit0(rhs)) { // typec is has_one
         rv = mk_app({mk_const(get_bit1_name()), type, typec, args_rhs[1], args_rhs[2]});
-        prf = mk_app({mk_const(get_norm_num_one_add_bit0_name()), type, mk_add_comm(type), typec, args_rhs[2]});
+        prf = mk_app({mk_const(get_NormNum_one_add_bit0_name()), type, mk_add_comm(type), typec, args_rhs[2]});
     } else if (is_one(lhs) && is_bit1(rhs)) { // typec is has_one
-        expr add1 = mk_app({mk_const(get_norm_num_add1_name()), type, args_rhs[2], args_rhs[1], rhs});
+        expr add1 = mk_app({mk_const(get_NormNum_add1_name()), type, args_rhs[2], args_rhs[1], rhs});
         auto p = mk_norm_add1(add1);
         rv = p.first;
-        prf = mk_app({mk_const(get_norm_num_one_add_bit1_helper_name()), type, mk_add_comm(type), typec,
+        prf = mk_app({mk_const(get_NormNum_one_add_bit1_helper_name()), type, mk_add_comm(type), typec,
                     args_rhs[3], p.first, p.second});
     } else if (is_one(lhs) && is_one(rhs)) {
       rv = mk_app({mk_const(get_bit0_name()), type, mk_has_add(type), lhs});
-      prf = mk_app({mk_const(get_norm_num_one_add_one_name()), type, mk_has_add(type), typec});
+      prf = mk_app({mk_const(get_NormNum_one_add_one_name()), type, mk_has_add(type), typec});
     } else if (is_zero(lhs)) {
         rv = rhs;
-        prf = mk_app({mk_const(get_norm_num_bin_zero_add_name()), type, mk_add_monoid(type), rhs});
+        prf = mk_app({mk_const(get_NormNum_bin_zero_add_name()), type, mk_add_monoid(type), rhs});
     } else if (is_zero(rhs)) {
         rv = lhs;
-        prf = mk_app({mk_const(get_norm_num_bin_add_zero_name()), type, mk_add_monoid(type), lhs});
+        prf = mk_app({mk_const(get_NormNum_bin_add_zero_name()), type, mk_add_monoid(type), lhs});
     } else {
         throw exception("mk_norm_add got malformed args");
     }
@@ -424,19 +424,19 @@ pair<expr, expr> norm_num_context::mk_norm_add1(expr const & e) {
     if (is_bit0(p)) {
         auto has_one = args[2];
         rv = mk_app({mk_const(get_bit1_name()), args[0], args[2], args[1], ne_args[2]});
-        prf = mk_app({mk_const(get_norm_num_add1_bit0_name()), args[0], args[1], args[2], ne_args[2]});
+        prf = mk_app({mk_const(get_NormNum_add1_bit0_name()), args[0], args[1], args[2], ne_args[2]});
     } else if (is_bit1(p)) { // ne_args : has_one, has_add
-        auto np = mk_norm_add1(mk_app({mk_const(get_norm_num_add1_name()), args[0], args[1], args[2], ne_args[3]}));
+        auto np = mk_norm_add1(mk_app({mk_const(get_NormNum_add1_name()), args[0], args[1], args[2], ne_args[3]}));
         rv = mk_app({mk_const(get_bit0_name()), args[0], args[1], np.first});
-        prf = mk_app({mk_const(get_norm_num_add1_bit1_helper_name()), args[0], mk_add_comm(args[0]),
+        prf = mk_app({mk_const(get_NormNum_add1_bit1_helper_name()), args[0], mk_add_comm(args[0]),
                     args[2], ne_args[3], np.first, np.second});
     } else if (is_zero(p)) {
         rv = mk_app({mk_const(get_one_name()), args[0], args[2]});
-        prf = mk_app({mk_const(get_norm_num_add1_zero_name()), args[0], mk_add_monoid(args[0]), args[2]});
+        prf = mk_app({mk_const(get_NormNum_add1_zero_name()), args[0], mk_add_monoid(args[0]), args[2]});
     } else if (is_one(p)) {
         rv = mk_app({mk_const(get_bit0_name()), args[0], args[1],
                     mk_app({mk_const(get_one_name()), args[0], args[2]})});
-        prf = mk_app({mk_const(get_norm_num_add1_one_name()), args[0], args[1], args[2]});
+        prf = mk_app({mk_const(get_NormNum_add1_one_name()), args[0], args[1], args[2]});
     } else {
         throw exception("malformed add1");
     }
@@ -467,14 +467,14 @@ pair<expr, expr> norm_num_context::mk_norm_mul(expr const & lhs, expr const & rh
     } else if (is_bit0(rhs)) {
         auto mtp = mk_norm_mul(lhs, args_rhs[2]);
         rv = mk_app({rhs_head, type, typec, mtp.first});
-        prf = mk_app({mk_const(get_norm_num_mul_bit0_helper_name()), type, mk_has_distrib(type), lhs,
+        prf = mk_app({mk_const(get_NormNum_mul_bit0_helper_name()), type, mk_has_distrib(type), lhs,
                     args_rhs[2], mtp.first, mtp.second});
     } else if (is_bit1(rhs)) {
         auto mtp = mk_norm_mul(lhs, args_rhs[3]);
         auto atp = mk_norm_add(mk_app({mk_const(get_bit0_name()), type, args_rhs[2], mtp.first}),
                                lhs);
         rv = atp.first;
-        prf = mk_app({mk_const(get_norm_num_mul_bit1_helper_name()), type, mk_semiring(type), lhs, args_rhs[3],
+        prf = mk_app({mk_const(get_NormNum_mul_bit1_helper_name()), type, mk_semiring(type), lhs, args_rhs[3],
               mtp.first, atp.first, mtp.second, atp.second});
     } else {
       throw exception("mk_norm_mul got malformed args");
@@ -560,7 +560,7 @@ expr norm_num_context::mk_norm_eq_neg_add_neg(expr & s_lhs, expr & s_rhs, expr &
     auto rhs_v = get_type_and_arg_of_neg(rhs);
     expr type = rhs_v.first;
     auto sum_pr = mk_norm(mk_add(type, s_lhs_v, s_rhs_v)).second;
-    return mk_app({mk_const(get_norm_num_neg_add_neg_helper_name()), type, mk_add_comm_group(type),
+    return mk_app({mk_const(get_NormNum_neg_add_neg_helper_name()), type, mk_add_comm_group(type),
                 s_lhs_v, s_rhs_v, rhs_v.second, sum_pr});
 }
 
@@ -572,11 +572,11 @@ expr norm_num_context::mk_norm_eq_neg_add_pos(expr & s_lhs, expr & s_rhs, expr &
     if (is_neg_app(rhs)) {
         auto rhs_v = get_type_and_arg_of_neg(rhs).second;
         auto sum_pr = mk_norm(mk_add(type, s_rhs, rhs_v)).second;
-        return mk_app({mk_const(get_norm_num_neg_add_pos_helper1_name()), type, mk_add_comm_group(type),
+        return mk_app({mk_const(get_NormNum_neg_add_pos_helper1_name()), type, mk_add_comm_group(type),
                     s_lhs_v.second, s_rhs, rhs_v, sum_pr});
     } else {
         auto sum_pr = mk_norm(mk_add(type, s_lhs_v.second, rhs)).second;
-        return mk_app({mk_const(get_norm_num_neg_add_pos_helper2_name()), type, mk_add_comm_group(type),
+        return mk_app({mk_const(get_NormNum_neg_add_pos_helper2_name()), type, mk_add_comm_group(type),
                     s_lhs_v.second, s_rhs, rhs, sum_pr});
     }
 }
@@ -586,7 +586,7 @@ expr norm_num_context::mk_norm_eq_pos_add_neg(expr & s_lhs, expr & s_rhs, expr &
     lean_assert(!is_neg_app(s_lhs));
     expr prf = mk_norm_eq_neg_add_pos(s_rhs, s_lhs, rhs);
     expr type = get_type_and_arg_of_neg(s_rhs).first;
-    return mk_app({mk_const(get_norm_num_pos_add_neg_helper_name()), type, mk_add_comm_group(type), s_lhs,
+    return mk_app({mk_const(get_NormNum_pos_add_neg_helper_name()), type, mk_add_comm_group(type), s_lhs,
                 s_rhs, rhs, prf});
 }
 
@@ -609,7 +609,7 @@ expr norm_num_context::mk_norm_eq_neg_mul_neg(expr & s_lhs, expr & s_rhs, expr &
     std::tie(type, s_rhs_v) = get_type_and_arg_of_neg(s_rhs);
     auto prod_pr = mk_norm(mk_mul(type, s_lhs_v, s_rhs_v));
     lean_assert(to_num(rhs) == to_num(prod_pr.first));
-    return mk_app({mk_const(get_norm_num_neg_mul_neg_helper_name()), type, mk_ring(type), s_lhs_v,
+    return mk_app({mk_const(get_NormNum_neg_mul_neg_helper_name()), type, mk_ring(type), s_lhs_v,
                 s_rhs_v, rhs, prod_pr.second});
 }
 
@@ -621,7 +621,7 @@ expr norm_num_context::mk_norm_eq_neg_mul_pos(expr & s_lhs, expr & s_rhs, expr &
     std::tie(type, s_lhs_v) = get_type_and_arg_of_neg(s_lhs);
     auto rhs_v = get_type_and_arg_of_neg(rhs).second;
     auto prod_pr = mk_norm(mk_mul(type, s_lhs_v, s_rhs));
-    return mk_app({mk_const(get_norm_num_neg_mul_pos_helper_name()), type, mk_ring(type), s_lhs_v, s_rhs,
+    return mk_app({mk_const(get_NormNum_neg_mul_pos_helper_name()), type, mk_ring(type), s_lhs_v, s_rhs,
                 rhs_v, prod_pr.second});
 }
 
@@ -633,7 +633,7 @@ expr norm_num_context::mk_norm_eq_pos_mul_neg(expr & s_lhs, expr & s_rhs, expr &
     std::tie(type, s_rhs_v) = get_type_and_arg_of_neg(s_rhs);
     auto rhs_v = get_type_and_arg_of_neg(rhs).second;
     auto prod_pr = mk_norm(mk_mul(type, s_lhs, s_rhs_v));
-    return mk_app({mk_const(get_norm_num_pos_mul_neg_helper_name()), type, mk_ring(type), s_lhs, s_rhs_v,
+    return mk_app({mk_const(get_NormNum_pos_mul_neg_helper_name()), type, mk_ring(type), s_lhs, s_rhs_v,
                 rhs_v, prod_pr.second});
 }
 
@@ -713,7 +713,7 @@ expr norm_num_context::mk_norm_div_add(expr & s_lhs, expr & s_rhs, expr & rhs) {
     auto npr_r = mk_norm(mk_mul(type, rhs, den));
     lean_assert(to_mpq(npr_l.first) == to_mpq(npr_r.first));
     expr den_neq_zero = mk_nonzero_prf(den);
-    return mk_app({mk_const(get_norm_num_div_add_helper_name()), type, mk_field(type), num, den, s_rhs, rhs,
+    return mk_app({mk_const(get_NormNum_div_add_helper_name()), type, mk_field(type), num, den, s_rhs, rhs,
                 npr_l.first, den_neq_zero, npr_l.second, npr_r.second});
 }
 
@@ -728,7 +728,7 @@ expr norm_num_context::mk_norm_add_div(expr & s_lhs, expr & s_rhs, expr & rhs) {
     auto npr_r = mk_norm(mk_mul(type, den, rhs));
     lean_assert(to_mpq(npr_l.first) == to_mpq(npr_r.first));
     expr den_neq_zero = mk_nonzero_prf(den);
-    return mk_app({mk_const(get_norm_num_add_div_helper_name()), type, mk_field(type), num, den, s_lhs, rhs,
+    return mk_app({mk_const(get_NormNum_add_div_helper_name()), type, mk_field(type), num, den, s_lhs, rhs,
                 npr_l.first, den_neq_zero, npr_l.second, npr_r.second});
 }
 
@@ -737,14 +737,14 @@ expr norm_num_context::mk_nonzero_prf(expr const & e) {
     buffer<expr> args;
     expr f = get_app_args(e, args);
     if (const_name(f) == get_neg_name()) {
-        return mk_app({mk_const(get_norm_num_nonzero_of_neg_helper_name()), args[0], mk_lin_ord_ring(args[0]),
+        return mk_app({mk_const(get_NormNum_nonzero_of_neg_helper_name()), args[0], mk_lin_ord_ring(args[0]),
                     args[2], mk_nonzero_prf(args[2])});
     } else if (const_name(f) == get_div_name()) {
         expr num_pr = mk_nonzero_prf(args[2]), den_pr = mk_nonzero_prf(args[3]);
-        return mk_app({mk_const(get_norm_num_nonzero_of_div_helper_name()), args[0], mk_field(args[0]), args[2],
+        return mk_app({mk_const(get_NormNum_nonzero_of_div_helper_name()), args[0], mk_field(args[0]), args[2],
                     args[3], num_pr, den_pr});
     } else {
-        return mk_app({mk_const(get_norm_num_nonzero_of_pos_helper_name()), args[0], mk_lin_ord_semiring(args[0]),
+        return mk_app({mk_const(get_NormNum_nonzero_of_pos_helper_name()), args[0], mk_lin_ord_semiring(args[0]),
                     e, mk_pos_prf(e)});
     }
 }
@@ -757,10 +757,10 @@ expr norm_num_context::mk_pos_prf(expr const & e) {
     expr prf;
     if (is_bit0(e)) {
         prf = mk_pos_prf(args[2]);
-        return mk_app({mk_const(get_norm_num_pos_bit0_helper_name()), type, mk_lin_ord_semiring(type), args[2], prf});
+        return mk_app({mk_const(get_NormNum_pos_bit0_helper_name()), type, mk_lin_ord_semiring(type), args[2], prf});
     } else if (is_bit1(e)) {
         prf = mk_nonneg_prf(args[3]);
-        return mk_app({mk_const(get_norm_num_pos_bit1_helper_name()), type, mk_lin_ord_semiring(type), args[3], prf});
+        return mk_app({mk_const(get_NormNum_pos_bit1_helper_name()), type, mk_lin_ord_semiring(type), args[3], prf});
     } else if (is_one(e)) {
         return mk_app({mk_const(get_zero_lt_one_name()), type, mk_lin_ord_semiring(type)});
     } else {
@@ -775,10 +775,10 @@ expr norm_num_context::mk_nonneg_prf(expr const & e) {
     expr prf;
     if (is_bit0(e)) {
         prf = mk_nonneg_prf(args[2]);
-        return mk_app({mk_const(get_norm_num_nonneg_bit0_helper_name()), type, mk_lin_ord_semiring(type), args[2], prf});
+        return mk_app({mk_const(get_NormNum_nonneg_bit0_helper_name()), type, mk_lin_ord_semiring(type), args[2], prf});
     } else if (is_bit1(e)) {
         prf = mk_nonneg_prf(args[3]);
-        return mk_app({mk_const(get_norm_num_nonneg_bit1_helper_name()), type, mk_lin_ord_semiring(type), args[3], prf});
+        return mk_app({mk_const(get_NormNum_nonneg_bit1_helper_name()), type, mk_lin_ord_semiring(type), args[3], prf});
     } else if (is_one(e)) {
         return mk_app({mk_const(get_zero_le_one_name()), type, mk_lin_ord_ring(type)});
     } else if (is_zero(e)) {
@@ -798,7 +798,7 @@ expr norm_num_context::mk_norm_div_mul(expr & s_lhs, expr & s_rhs, expr & rhs) {
     auto prf = mk_norm(mk_div(type, new_num, args[3]));
     lean_assert(to_mpq(prf.first) == to_mpq(rhs));
     expr den_ne_zero = mk_nonzero_prf(args[3]);
-    return mk_app({mk_const(get_norm_num_div_mul_helper_name()), type, mk_field(type), args[2], args[3], s_rhs,
+    return mk_app({mk_const(get_NormNum_div_mul_helper_name()), type, mk_field(type), args[2], args[3], s_rhs,
                 rhs, den_ne_zero, prf.second});
 }
 
@@ -810,7 +810,7 @@ expr norm_num_context::mk_norm_mul_div(expr & s_lhs, expr & s_rhs, expr & rhs) {
     auto prf = mk_norm(mk_div(type, new_num, args[3]));
     lean_assert(to_mpq(prf.first) == to_mpq(rhs));
     expr den_ne_zero = mk_nonzero_prf(args[3]);
-    return mk_app({mk_const(get_norm_num_mul_div_helper_name()), type, mk_field(type), s_lhs, args[2], args[3],
+    return mk_app({mk_const(get_NormNum_mul_div_helper_name()), type, mk_field(type), s_lhs, args[2], args[3],
                 rhs, den_ne_zero, prf.second});
 }
 
@@ -856,21 +856,21 @@ pair<expr, expr> norm_num_context::mk_norm(expr const & e) {
                 }
             }
         }
-        expr rprf = mk_app({mk_const(get_norm_num_subst_into_sum_name()), type, mk_has_add(type), args[2], args[3],
+        expr rprf = mk_app({mk_const(get_NormNum_subst_into_sum_name()), type, mk_has_add(type), args[2], args[3],
                     lhs_p.first, rhs_p.first, nval, lhs_p.second, rhs_p.second, prf});
         return pair<expr, expr>(nval, rprf);
 
     } else if (const_name(f) == get_sub_name() && args.size() == 4) {
         expr sum = mk_add(args[0], args[2], mk_neg(args[0], args[3]));
         auto anprf = mk_norm(sum);
-        expr rprf = mk_app({mk_const(get_norm_num_subst_into_subtr_name()), type, mk_add_group(type), args[2],
+        expr rprf = mk_app({mk_const(get_NormNum_subst_into_subtr_name()), type, mk_add_group(type), args[2],
                     args[3], anprf.first, anprf.second});
         return pair<expr, expr>(nval, rprf);
     } else if (const_name(f) == get_neg_name()  && args.size() == 3) {
         auto prf = mk_norm(args[2]);
         lean_assert(mpq_of_expr(prf.first) == neg(val));
         if (is_zero(prf.first)) {
-            expr rprf = mk_app({mk_const(get_norm_num_neg_zero_helper_name()), type, mk_add_group(type), args[2],
+            expr rprf = mk_app({mk_const(get_NormNum_neg_zero_helper_name()), type, mk_add_group(type), args[2],
                         prf.second});
             return pair<expr, expr>(prf.first, rprf);
         }
@@ -882,7 +882,7 @@ pair<expr, expr> norm_num_context::mk_norm(expr const & e) {
                                 nval_args[2], prf.second);
             return pair<expr, expr>(nval, rprf);
         } else {
-            expr rprf = mk_app({mk_const(get_norm_num_neg_neg_helper_name()), type, mk_add_group(type),
+            expr rprf = mk_app({mk_const(get_NormNum_neg_neg_helper_name()), type, mk_add_group(type),
                         args[2], nval, prf.second});
             return pair<expr, expr>(nval, rprf);
         }
@@ -909,7 +909,7 @@ pair<expr, expr> norm_num_context::mk_norm(expr const & e) {
                 prf = mk_norm_eq_pos_mul_pos(lhs_p.first, rhs_p.first, nval);
             }
         }
-        expr rprf = mk_app({mk_const(get_norm_num_subst_into_prod_name()), type, mk_has_mul(args[0]), args[2], args[3],
+        expr rprf = mk_app({mk_const(get_NormNum_subst_into_prod_name()), type, mk_has_mul(args[0]), args[2], args[3],
                           lhs_p.first, rhs_p.first, nval, lhs_p.second, rhs_p.second, prf});
         return pair<expr, expr>(nval, rprf);
     } else if (const_name(f) == get_div_name() && args.size() == 4) {
@@ -924,7 +924,7 @@ pair<expr, expr> norm_num_context::mk_norm(expr const & e) {
             auto rhs_mul = mk_norm(mk_mul(type, nval_num, rhs_p.first));
             expr den_nonzero = mk_nonzero_prf(rhs_p.first);
             expr nval_den_nonzero = mk_nonzero_prf(nval_den);
-            prf = mk_app({mk_const(get_norm_num_div_eq_div_helper_name()), type, mk_field(type),
+            prf = mk_app({mk_const(get_NormNum_div_eq_div_helper_name()), type, mk_field(type),
                         lhs_p.first, rhs_p.first, nval_num, nval_den, lhs_mul.first,
                         lhs_mul.second, rhs_mul.second, den_nonzero, nval_den_nonzero});
         } else {
@@ -934,10 +934,10 @@ pair<expr, expr> norm_num_context::mk_norm(expr const & e) {
                 lean_assert(*val1 == *val2);
             }
             expr den_nonzero = mk_nonzero_prf(rhs_p.first);
-            prf = mk_app({mk_const(get_norm_num_div_helper_name()), type, mk_field(type),
+            prf = mk_app({mk_const(get_NormNum_div_helper_name()), type, mk_field(type),
                         lhs_p.first, rhs_p.first, nval, den_nonzero, prod.second});
         }
-        expr rprf = mk_app({mk_const(get_norm_num_subst_into_div_name()), type, mk_has_div(type),
+        expr rprf = mk_app({mk_const(get_NormNum_subst_into_div_name()), type, mk_has_div(type),
                     lhs_p.first, rhs_p.first, args[2], args[3], nval, prf,
                     lhs_p.second, rhs_p.second});
         return pair<expr, expr>(nval, rprf);

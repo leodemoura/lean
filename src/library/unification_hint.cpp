@@ -49,7 +49,7 @@ struct unification_hint_state {
     void validate_type(expr const & decl_type) {
         expr type = decl_type;
         while (is_pi(type)) type = binding_body(type);
-        if (!is_app_of(type, get_unification_hint_name(), 0)) {
+        if (!is_app_of(type, get_UnificationHint_name(), 0)) {
             throw exception("invalid unification hint, must return element of type `unification hint`");
         }
     }
@@ -64,7 +64,7 @@ struct unification_hint_state {
             num_vars++;
         }
 
-        if (!is_app_of(e_hint, get_unification_hint_mk_name(), 2)) {
+        if (!is_app_of(e_hint, get_UnificationHint_mk_name(), 2)) {
             throw exception("invalid unification hint, body must be application of 'unification_hint.mk' to two arguments");
         }
 
@@ -86,7 +86,7 @@ struct unification_hint_state {
         name_pair key = mk_pair(const_name(e_pattern_lhs_fn), const_name(e_pattern_rhs_fn));
 
         buffer<expr_pair> constraints;
-        while (is_app_of(e_constraints, get_list_cons_name(), 3)) {
+        while (is_app_of(e_constraints, get_List_cons_name(), 3)) {
             // e_constraints := cons _ constraint rest
             expr e_constraint = app_arg(app_fn(e_constraints));
             expr e_constraint_lhs = app_arg(app_fn(e_constraint));
@@ -95,7 +95,7 @@ struct unification_hint_state {
             e_constraints = app_arg(e_constraints);
         }
 
-        if (!is_app_of(e_constraints, get_list_nil_name(), 1)) {
+        if (!is_app_of(e_constraints, get_List_nil_name(), 1)) {
             throw exception("invalid unification hint, must provide list of constraints explicitly");
         }
 

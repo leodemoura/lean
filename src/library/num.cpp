@@ -92,12 +92,12 @@ optional<mpz> to_num(expr const & e) {
 }
 
 optional<mpz> to_pos_num(expr const & e) {
-    if (is_constant(e, get_pos_num_one_name())) {
+    if (is_constant(e, get_PosNum_one_name())) {
          return some(mpz(1));
-    } else if (is_const_app(e, get_pos_num_bit0_name(), 1)) {
+    } else if (is_const_app(e, get_PosNum_bit0_name(), 1)) {
         if (auto r = to_pos_num(app_arg(e)))
             return some(2*(*r));
-    } else if (is_const_app(e, get_pos_num_bit1_name(), 1)) {
+    } else if (is_const_app(e, get_PosNum_bit1_name(), 1)) {
         if (auto r = to_pos_num(app_arg(e)))
             return some(2*(*r) + 1);
     }
@@ -105,9 +105,9 @@ optional<mpz> to_pos_num(expr const & e) {
 }
 
 optional<mpz> to_num_core(expr const & e) {
-    if (is_constant(e, get_num_zero_name()))
+    if (is_constant(e, get_Num_zero_name()))
         return some(mpz(0));
-    else if (is_const_app(e, get_num_pos_name(), 1))
+    else if (is_const_app(e, get_Num_pos_name(), 1))
         return to_pos_num(app_arg(e));
     else
         return optional<mpz>();
@@ -117,8 +117,8 @@ bool is_num_leaf_constant(name const & n) {
     return
         n == get_zero_name() ||
         n == get_one_name() ||
-        n == get_has_zero_zero_name() ||
-        n == get_has_one_one_name();
+        n == get_Zero_zero_name() ||
+        n == get_One_one_name();
 }
 
 static expr * g_bit0_nat = nullptr;
@@ -144,10 +144,10 @@ expr to_nat_expr(mpz const & n) {
 }
 
 void initialize_num() {
-    expr nat          = Const(get_nat_name());
-    expr nat_has_add  = Const(get_nat_has_add_name());
-    expr nat_has_one  = Const(get_nat_has_one_name());
-    expr nat_has_zero = Const(get_nat_has_zero_name());
+    expr nat          = Const(get_Nat_name());
+    expr nat_has_add  = Const(get_addNat_name());
+    expr nat_has_one  = Const(get_oneNat_name());
+    expr nat_has_zero = Const(get_zeroNat_name());
 
     g_bit0_nat = new expr(mk_app(mk_constant(get_bit0_name(), {mk_level_one()}), nat, nat_has_add));
     g_bit1_nat = new expr(mk_app(mk_constant(get_bit1_name(), {mk_level_one()}), nat, nat_has_one, nat_has_add));

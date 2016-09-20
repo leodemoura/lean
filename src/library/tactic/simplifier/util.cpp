@@ -45,9 +45,9 @@ optional<pair<expr, expr> > is_assoc(type_context & tctx, expr const & e) {
     if (!op)
         return optional<pair<expr, expr> >();
     try {
-        expr assoc_class = mk_app(tctx, get_is_associative_name(), *op);
+        expr assoc_class = mk_app(tctx, get_Associative_name(), *op);
         if (auto assoc_inst = tctx.mk_class_instance(assoc_class))
-            return optional<pair<expr, expr> >(mk_pair(mk_app(tctx, get_is_associative_op_assoc_name(), 3, *op, *assoc_inst), *op));
+            return optional<pair<expr, expr> >(mk_pair(mk_app(tctx, get_Associative_op_name(), 3, *op, *assoc_inst), *op));
         else
             return optional<pair<expr, expr> >();
     } catch (app_builder_exception ex) {
@@ -62,7 +62,7 @@ expr mk_congr_bin_op(abstract_type_context & tctx, expr const & H, expr const & 
     lean_assert(is_pi(A_op));
     expr A = binding_domain(A_op);
     level lvl  = get_level(tctx, A);
-    return ::lean::mk_app({mk_constant(get_simplifier_congr_bin_op_name(), {lvl}), A, op1, op2, H, arg1, arg2});
+    return ::lean::mk_app({mk_constant(get_Simplifier_congr_bin_op_name(), {lvl}), A, op1, op2, H, arg1, arg2});
 }
 
 expr mk_congr_bin_arg1(abstract_type_context & tctx, expr const & op, expr const & H1, expr const & arg2) {
@@ -70,7 +70,7 @@ expr mk_congr_bin_arg1(abstract_type_context & tctx, expr const & op, expr const
     expr A, arg11, arg12;
     lean_verify(is_eq(eq, A, arg11, arg12));
     level lvl  = get_level(tctx, A);
-    return ::lean::mk_app({mk_constant(get_simplifier_congr_bin_arg1_name(), {lvl}), A, op, arg11, arg12, arg2, H1});
+    return ::lean::mk_app({mk_constant(get_Simplifier_congr_bin_arg1_name(), {lvl}), A, op, arg11, arg12, arg2, H1});
 }
 
 expr mk_congr_bin_arg2(abstract_type_context & tctx, expr const & op, expr const & arg1, expr const & H2) {
@@ -78,7 +78,7 @@ expr mk_congr_bin_arg2(abstract_type_context & tctx, expr const & op, expr const
     expr A, arg21, arg22;
     lean_verify(is_eq(eq, A, arg21, arg22));
     level lvl  = get_level(tctx, A);
-    return ::lean::mk_app({mk_constant(get_simplifier_congr_bin_arg2_name(), {lvl}), A, op, arg1, arg21, arg22, H2});
+    return ::lean::mk_app({mk_constant(get_Simplifier_congr_bin_arg2_name(), {lvl}), A, op, arg1, arg21, arg22, H2});
 }
 
 expr mk_congr_bin_args(abstract_type_context & tctx, expr const & op, expr const & H1, expr const & H2) {
@@ -89,7 +89,7 @@ expr mk_congr_bin_args(abstract_type_context & tctx, expr const & op, expr const
     lean_verify(is_eq(eq2, A0, arg21, arg22));
     lean_assert(tctx.is_def_eq(A, A0));
     level lvl  = get_level(tctx, A);
-    return ::lean::mk_app({mk_constant(get_simplifier_congr_bin_args_name(), {lvl}), A, op, arg11, arg12, arg21, arg22, H1, H2});
+    return ::lean::mk_app({mk_constant(get_Simplifier_congr_bin_args_name(), {lvl}), A, op, arg11, arg12, arg21, arg22, H1, H2});
 }
 
 expr mk_assoc_subst(abstract_type_context & tctx, expr const & old_op, expr const & new_op, expr const & pf_op, expr const & assoc) {
@@ -97,7 +97,7 @@ expr mk_assoc_subst(abstract_type_context & tctx, expr const & old_op, expr cons
     lean_assert(is_pi(A_op));
     expr A = binding_domain(A_op);
     level lvl  = get_level(tctx, A);
-    return ::lean::mk_app({mk_constant(get_simplifier_assoc_subst_name(), {lvl}), A, old_op, new_op, pf_op, assoc});
+    return ::lean::mk_app({mk_constant(get_Simplifier_assoc_subst_name(), {lvl}), A, old_op, new_op, pf_op, assoc});
 }
 
 // flat macro

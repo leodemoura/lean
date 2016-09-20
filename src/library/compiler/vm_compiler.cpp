@@ -83,7 +83,7 @@ class vm_compiler_fn {
             emit(mk_sconstructor_instr(0));
         } else if (is_unreachable_expr(e)) {
             emit(mk_unreachable_instr());
-        } else if (n == get_nat_zero_name()) {
+        } else if (n == get_Nat_zero_name()) {
             emit(mk_num_instr(mpz(0)));
         } else if (auto idx = is_internal_cnstr(e)) {
             emit(mk_sconstructor_instr(*idx));
@@ -106,7 +106,7 @@ class vm_compiler_fn {
         name const & fn_name = const_name(fn);
         unsigned num;
         optional<unsigned> builtin_cases_idx;
-        if (fn_name == get_nat_cases_on_name()) {
+        if (fn_name == get_Nat_cases_on_name()) {
             num = 2;
         } else {
             builtin_cases_idx = get_vm_builtin_cases_idx(m_env, fn_name);
@@ -126,7 +126,7 @@ class vm_compiler_fn {
         buffer<unsigned> cases_args;
         buffer<unsigned> goto_pcs;
         cases_args.resize(num, 0);
-        if (fn_name == get_nat_cases_on_name()) {
+        if (fn_name == get_Nat_cases_on_name()) {
             emit(mk_nat_cases_instr(0, 0));
         } else if (builtin_cases_idx) {
             #if defined(__GNUC__) && !defined(__CLANG__)
@@ -224,7 +224,7 @@ class vm_compiler_fn {
 
     void compile_app(expr const & e, unsigned bpz, name_map<unsigned> const & m) {
         expr const & fn = get_app_fn(e);
-        if (is_internal_cases(fn) || is_constant(fn, get_nat_cases_on_name()) || is_builtin_cases(fn)) {
+        if (is_internal_cases(fn) || is_constant(fn, get_Nat_cases_on_name()) || is_builtin_cases(fn)) {
             compile_cases_on(e, bpz, m);
         } else if (is_internal_cnstr(fn)) {
             compile_cnstr(e, bpz, m);

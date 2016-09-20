@@ -33,7 +33,7 @@ public:
 
     static expr convert(mpz const & n, expr const & one, expr const & add) {
         if (n == 0) {
-            return mk_constant(get_nat_zero_name());
+            return mk_constant(get_Nat_zero_name());
         } else if (n == 1) {
             return one;
         } else {
@@ -47,8 +47,8 @@ public:
     }
 
     virtual optional<expr> expand(expr const &, abstract_type_context &) const {
-        expr one = mk_app(mk_constant(get_nat_succ_name()), mk_constant(get_nat_zero_name()));
-        expr add = mk_constant(get_nat_add_name());
+        expr one = mk_app(mk_constant(get_Nat_succ_name()), mk_constant(get_Nat_zero_name()));
+        expr add = mk_constant(get_Nat_add_name());
         expr r = convert(m_value, one, add);
         return optional<expr>(r);
     }
@@ -85,7 +85,7 @@ mpz const & get_nat_value_value(expr const & e) {
 optional<expr> to_nat_value(type_context & ctx, expr const & e) {
     if (optional<mpz> v = to_num(e)) {
         expr type = ctx.whnf(ctx.infer(e));
-        if (is_constant(type, get_nat_name())) {
+        if (is_constant(type, get_Nat_name())) {
             return some_expr(mk_nat_value(*v));
         }
     }
@@ -109,7 +109,7 @@ expr find_nat_values(environment const & env, expr const & e) {
 
 void initialize_nat_value() {
     g_nat_macro  = new name("nat_value_macro");
-    g_nat        = new expr(Const(get_nat_name()));
+    g_nat        = new expr(Const(get_Nat_name()));
     g_nat_opcode = new std::string("CNatM");
     register_macro_deserializer(*g_nat_opcode,
                                 [](deserializer & d, unsigned num, expr const *) {
