@@ -446,25 +446,10 @@ int main(int argc, char ** argv) {
                 exit(1);
             }
         }
-        if (ok && server && (default_k == input_kind::Lean || default_k == input_kind::HLean)) {
-            signal(SIGINT, on_ctrl_c);
-            ios.set_option(lean::name("pp", "beta"), true);
-            lean::server Sv(env, ios, base_dir, num_threads);
-            if (!Sv(std::cin))
-                ok = false;
-        }
         if (save_cache) {
             exclusive_file_lock cache_lock(cache_name);
             std::ofstream out(cache_name, std::ofstream::binary);
             cache.save(out);
-        }
-        if (gen_index) {
-            exclusive_file_lock index_lock(index_name);
-            std::shared_ptr<lean::file_output_channel> out(new lean::file_output_channel(index_name.c_str()));
-            ios.set_regular_channel(out);
-            type_checker tc(env);
-            auto strm = regular(env, ios, tc);
-            index.save(strm);
         }
         if (export_native_objects && ok && default_k == input_kind::Lean) {
             env = lean::set_native_module_path(env, lean::name(native_output));
