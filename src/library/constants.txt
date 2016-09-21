@@ -253,9 +253,9 @@ Prod.pr2
 propext
 PExpr
 PExpr.subst
-putStr
-putNat
-toPExpr
+put_str
+put_nat
+to_pexpr
 Quot.mk
 Quot.lift
 Rat.divide

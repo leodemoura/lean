@@ -729,7 +729,7 @@ public:
 
     expr mk_ss_elim(expr const & A, expr const & ss_inst, expr const & old_e, expr const & new_e) {
         level lvl = get_level(A);
-        return ::lean::mk_app(mk_constant(get_Subsingleton_elim_name(), {lvl}), A, ss_inst, old_e, new_e);
+        return ::lean::mk_app(mk_constant(get_subsingleton_elim_name(), {lvl}), A, ss_inst, old_e, new_e);
     }
 
     expr mk_false_rec(expr const & c, expr const & H) {

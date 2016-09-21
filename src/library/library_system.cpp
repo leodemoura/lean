@@ -13,8 +13,8 @@ bool is_system_builtin(name const & n) {
         n == get_IO_name() ||
         n == get_FunctorIO_name() ||
         n == get_MonadIO_name() ||
-        n == get_putStr_name() ||
-        n == get_putNat_name() ||
-        n == get_getLine_name();
+        n == get_put_str_name() ||
+        n == get_put_nat_name() ||
+        n == get_get_line_name();
 }
 }

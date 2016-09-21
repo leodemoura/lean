@@ -6,16 +6,16 @@ Author: Leonardo de Moura
 prelude
 import init.logic
 
-theorem unit_eq (a b : unit) : a = b :=
-unit.rec_on a (unit.rec_on b rfl)
+theorem unit_eq (a b : Unit) : a = b :=
+Unit.rec_on a (Unit.rec_on b rfl)
 
-theorem unit_eq_unit (a : unit) : a = () :=
+theorem unit_eq_unit (a : Unit) : a = () :=
 unit_eq a ()
 
 attribute [instance]
-definition unit_subsingleton : subsingleton unit :=
+definition subsingletonUnit : subsingleton Unit :=
 subsingleton.intro unit_eq
 
 attribute [instance]
-definition unit_is_inhabited : inhabited unit :=
+definition inhabitedUnit : Inhabited Unit :=
 ⟨()⟩

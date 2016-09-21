@@ -7,16 +7,16 @@ prelude
 import init.functor
 universe variables u v
 
-structure [class] applicative (F : Type u → Type v) extends functor F : Type (max u+1 v):=
+structure [class] Applicative (F : Type u → Type v) extends Functor F : Type (max u+1 v):=
 (pure : Π {A : Type u}, A → F A)
 (seq  : Π {A B : Type u}, F (A → B) → F A → F B)
 
 attribute [inline]
-definition pure {F : Type u → Type v} [applicative F] {A : Type u} : A → F A :=
-applicative.pure F
+definition pure {F : Type u → Type v} [Applicative F] {A : Type u} : A → F A :=
+Applicative.pure F
 
 attribute [inline]
-definition seq_app {A B : Type u} {F : Type u → Type v} [applicative F] : F (A → B) → F A → F B :=
-applicative.seq
+definition seqApp {A B : Type u} {F : Type u → Type v} [Applicative F] : F (A → B) → F A → F B :=
+Applicative.seq
 
-infixr ` <*> `:2 := seq_app
+infixr ` <*> `:2 := seqApp

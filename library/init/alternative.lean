@@ -7,20 +7,20 @@ prelude
 import init.logic init.applicative
 universe variables u v
 
-structure [class] alternative (F : Type u → Type v) extends applicative F : Type (max u+1 v) :=
+structure [class] Alternative (F : Type u → Type v) extends Applicative F : Type (max u+1 v) :=
 (failure : Π {A : Type u}, F A)
 (orelse  : Π {A : Type u}, F A → F A → F A)
 
 attribute [inline]
-definition failure {F : Type u → Type v} [alternative F] {A : Type u} : F A :=
-alternative.failure F
+definition failure {F : Type u → Type v} [Alternative F] {A : Type u} : F A :=
+Alternative.failure F
 
 attribute [inline]
-definition orelse {F : Type u → Type v} [alternative F] {A : Type u} : F A → F A → F A :=
-alternative.orelse
+definition orelse {F : Type u → Type v} [Alternative F] {A : Type u} : F A → F A → F A :=
+Alternative.orelse
 
 infixr ` <|> `:2 := orelse
 
 attribute [inline]
-definition guard {F : Type → Type v} [alternative F] (P : Prop) [decidable P] : F unit :=
+definition guard {F : Type → Type v} [Alternative F] (P : Prop) [Decidable P] : F Unit :=
 if P then pure () else failure

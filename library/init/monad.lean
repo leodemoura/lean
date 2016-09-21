@@ -7,26 +7,26 @@ prelude
 import init.applicative init.string init.trace
 universe variables u v
 
-structure [class] monad (M : Type u → Type v) extends functor M : Type (max u+1 v) :=
+structure [class] Monad (M : Type u → Type v) extends Functor M : Type (max u+1 v) :=
 (ret  : Π {A : Type u}, A → M A)
 (bind : Π {A B : Type u}, M A → (A → M B) → M B)
 
 attribute [inline]
-definition return {M : Type u → Type v} [monad M] {A : Type u} : A → M A :=
-monad.ret M
+definition return {M : Type u → Type v} [Monad M] {A : Type u} : A → M A :=
+Monad.ret M
 
-definition fapp {M : Type u → Type v} [monad M] {A B : Type u} (f : M (A → B)) (a : M A) : M B :=
+definition fapp {M : Type u → Type v} [Monad M] {A B : Type u} (f : M (A → B)) (a : M A) : M B :=
 do g ← f,
    b ← a,
    return (g b)
 
 attribute [inline, instance]
-definition monad_is_applicative (M : Type u → Type v) [monad M] : applicative M :=
-applicative.mk (@fmap _ _) (@return _ _) (@fapp _ _)
+definition Monad.applicative (M : Type u → Type v) [Monad M] : Applicative M :=
+Applicative.mk (@fmap _ _) (@return _ _) (@fapp _ _)
 
 attribute [inline]
-definition monad.and_then {A B : Type u} {M : Type u → Type v} [monad M] (a : M A) (b : M B) : M B :=
+definition Monad.andThen {A B : Type u} {M : Type u → Type v} [Monad M] (a : M A) (b : M B) : M B :=
 do a, b
 
-infixl ` >>= `:2 := monad.bind
-infixl ` >> `:2  := monad.and_then
+infixl ` >>= `:2 := Monad.bind
+infixl ` >> `:2  := Monad.andThen

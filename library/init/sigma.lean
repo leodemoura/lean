@@ -6,15 +6,14 @@ Author: Leonardo de Moura, Jeremy Avigad, Floris van Doorn
 prelude
 import init.datatypes init.num init.wf init.logic
 
-definition dpair := @sigma.mk
-notation `Σ` binders `, ` r:(scoped P, sigma P) := r
+notation `Σ` binders `, ` r:(scoped P, Sigma P) := r
 
 universe variables u v
 
 lemma ex_of_sig {A : Type u} {P : A → Prop} : (Σ x, P x) → ∃ x, P x
 | ⟨x, hx⟩ := ⟨x, hx⟩
 
-namespace sigma
+namespace Sigma
   notation `pr₁`  := pr1
   notation `pr₂`  := pr2
 
@@ -30,4 +29,4 @@ namespace sigma
   protected theorem eq : ∀ {p₁ p₂ : Σ a : A, B a} (H₁ : p₁.1 = p₂.1), (eq.rec_on H₁ p₁.2 : B p₂.1) = p₂.2 → p₁ = p₂
   | ⟨a, b⟩ ⟨.a, .b⟩ rfl rfl := rfl
 
-end sigma
+end Sigma

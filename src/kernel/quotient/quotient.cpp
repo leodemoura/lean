@@ -139,11 +139,11 @@ bool is_quotient_decl(environment const & env, name const & n) {
 void initialize_quotient_module() {
     g_quotient_extension = new name("quotient_extension");
     g_propext            = new name{"propext"};
-    g_quotient           = new name{"quot"};
-    g_quotient_lift      = new name{"quot", "lift"};
-    g_quotient_ind       = new name{"quot", "ind"};
-    g_quotient_mk        = new name{"quot", "mk"};
-    g_quotient_sound     = new name{"quot", "sound"};
+    g_quotient           = new name{"Quot"};
+    g_quotient_lift      = new name{"Quot", "lift"};
+    g_quotient_ind       = new name{"Quot", "ind"};
+    g_quotient_mk        = new name{"Quot", "mk"};
+    g_quotient_sound     = new name{"Quot", "sound"};
     g_ext                = new quotient_env_ext_reg();
 }
 

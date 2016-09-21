@@ -27,135 +27,125 @@ prelude
 import init.list init.subtype init.prod
 universe variables u v
 
-structure [class] has_lift (A : Type u) (B : Type v) :=
+structure [class] Lift (A : Type u) (B : Type v) :=
 (lift : A → B)
 
 /- Auxiliary class that contains the transitive closure of has_lift. -/
-structure [class] has_lift_t (A : Type u) (B : Type v) :=
+structure [class] LiftTrans (A : Type u) (B : Type v) :=
 (lift : A → B)
 
-structure [class] has_coe (A : Type u) (B : Type v) :=
+structure [class] Coe (A : Type u) (B : Type v) :=
 (coe : A → B)
 
 /- Auxiliary class that contains the transitive closure of has_coe. -/
-structure [class] has_coe_t (A : Type u) (B : Type v) :=
+structure [class] CoeTrans (A : Type u) (B : Type v) :=
 (coe : A → B)
 
-structure [class] has_coe_to_fun (A : Type u) : Type (max u (v+1)) :=
+structure [class] CoeToFun (A : Type u) : Type (max u (v+1)) :=
 (F : Type v) (coe : A → F)
 
-structure [class] has_coe_to_sort (A : Type u) : Type (max u (v+1)) :=
+structure [class] CoeToSort (A : Type u) : Type (max u (v+1)) :=
 (S : Type v) (coe : A → S)
 
-definition lift {A : Type u} {B : Type v} [has_lift A B] : A → B :=
-@has_lift.lift A B _
+definition lift {A : Type u} {B : Type v} [Lift A B] : A → B :=
+@Lift.lift A B _
 
-definition lift_t {A : Type u} {B : Type v} [has_lift_t A B] : A → B :=
-@has_lift_t.lift A B _
-
-definition coe_b {A : Type u} {B : Type v} [has_coe A B] : A → B :=
-@has_coe.coe A B _
-
-definition coe_t {A : Type u} {B : Type v} [has_coe_t A B] : A → B :=
-@has_coe_t.coe A B _
-
-set_option pp.all true
-definition coe_fn_b {A : Type u} [has_coe_to_fun.{u v} A] : A → has_coe_to_fun.F.{u v} A :=
-has_coe_to_fun.coe
+definition coeFnBase {A : Type u} [CoeToFun.{u v} A] : A → CoeToFun.F.{u v} A :=
+CoeToFun.coe
 
 /- User level coercion operators -/
 
-definition coe {A : Type u} {B : Type v} [has_lift_t A B] : A → B :=
-lift_t
+definition coe {A : Type u} {B : Type v} [LiftTrans A B] : A → B :=
+@LiftTrans.lift A B _
 
-definition coe_fn {A : Type u} [has_coe_to_fun.{u v} A] : A → has_coe_to_fun.F.{u v} A :=
-has_coe_to_fun.coe
+definition coeFn {A : Type u} [CoeToFun.{u v} A] : A → CoeToFun.F.{u v} A :=
+CoeToFun.coe
 
-definition coe_sort {A : Type u} [has_coe_to_sort.{u v} A] : A → has_coe_to_sort.S.{u v} A :=
-has_coe_to_sort.coe
+definition coeSort {A : Type u} [CoeToSort.{u v} A] : A → CoeToSort.S.{u v} A :=
+CoeToSort.coe
 
 /- Notation -/
 
 notation `↑`:max a:max := coe a
 
-notation `⇑`:max a:max := coe_fn a
+notation `⇑`:max a:max := coeFn a
 
-notation `↥`:max a:max := coe_sort a
+notation `↥`:max a:max := coeSort a
 
 /- Transitive closure for has_lift, has_coe, has_coe_to_fun -/
 
 attribute [instance]
-definition {u₁ u₂ u₃} lift_trans {A : Type u₁} {B : Type u₂} {C : Type u₃} [has_lift A B] [has_lift_t B C] : has_lift_t A C :=
-⟨λ a, lift_t (lift a : B)⟩
+definition {u₁ u₂ u₃} liftTrans {A : Type u₁} {B : Type u₂} {C : Type u₃} [Lift A B] [LiftTrans B C] : LiftTrans A C :=
+⟨λ a, coe (lift a : B)⟩
 
 attribute [instance]
-definition lift_base {A : Type u} {B : Type v} [has_lift A B] : has_lift_t A B :=
+definition liftBase {A : Type u} {B : Type v} [Lift A B] : LiftTrans A B :=
 ⟨lift⟩
 
 attribute [instance]
-definition {u₁ u₂ u₃} coe_trans {A : Type u₁} {B : Type u₂} {C : Type u₃} [has_coe A B] [has_coe_t B C] : has_coe_t A C :=
-⟨λ a, coe_t (coe_b a : B)⟩
+definition {u₁ u₂ u₃} coeTrans {A : Type u₁} {B : Type u₂} {C : Type u₃} [Coe A B] [CoeTrans B C] : CoeTrans A C :=
+⟨λ a, CoeTrans.coe C (@Coe.coe A B _ a)⟩
 
 attribute [instance]
-definition coe_base {A : Type u} {B : Type v} [has_coe A B] : has_coe_t A B :=
-⟨coe_b⟩
+definition coeBase {A : Type u} {B : Type v} [Coe A B] : CoeTrans A B :=
+⟨@Coe.coe A B _⟩
 
 attribute [instance]
-definition {u₁ u₂ u₃} coe_fn_trans {A : Type u₁} {B : Type u₂} [has_lift_t A B] [has_coe_to_fun.{u₂ u₃} B] : has_coe_to_fun.{u₁ u₃} A :=
-⟨has_coe_to_fun.F B, λ a, coe_fn (coe a)⟩
+definition {u₁ u₂ u₃} coeToFunTrans {A : Type u₁} {B : Type u₂} [LiftTrans A B] [CoeToFun.{u₂ u₃} B] : CoeToFun.{u₁ u₃} A :=
+⟨CoeToFun.F B, λ a, coeFn (coe a)⟩
 
 attribute [instance]
-definition {u₁ u₂ u₃} coe_sort_trans {A : Type u₁} {B : Type u₂} [has_lift_t A B] [has_coe_to_sort.{u₂ u₃} B] : has_coe_to_sort.{u₁ u₃} A :=
-⟨has_coe_to_sort.S B, λ a, coe_sort (coe a)⟩
+definition {u₁ u₂ u₃} coeToSortTrans {A : Type u₁} {B : Type u₂} [LiftTrans A B] [CoeToSort.{u₂ u₃} B] : CoeToSort.{u₁ u₃} A :=
+⟨CoeToSort.S B, λ a, coeSort (coe a)⟩
 
 /- Every coercion is also a lift -/
 
 attribute [instance]
-definition coe_to_lift {A : Type u} {B : Type v} [has_coe_t A B] : has_lift_t A B :=
-⟨coe_t⟩
+definition coeToLift {A : Type u} {B : Type v} [CoeTrans A B] : LiftTrans A B :=
+⟨@CoeTrans.coe A B _⟩
 
 /- Basic coercions -/
 
 attribute [instance]
-definition coe_bool_to_Prop : has_coe bool Prop :=
+definition coeBoolProp : Coe Bool Prop :=
 ⟨λ b, b = tt⟩
 
 attribute [instance]
-definition coe_decidable_eq (b : bool) : decidable (coe b) :=
-show decidable (b = tt), from bool.has_decidable_eq b tt
+definition decidableCoeEq (b : Bool) : Decidable (coe b) :=
+show Decidable (b = tt), from decidableEqBool b tt
 
 attribute [instance]
-definition coe_subtype {A : Type u} {P : A → Prop} : has_coe {a \ P a} A :=
-⟨λ s, subtype.elt_of s⟩
+definition coeSubtype {A : Type u} {P : A → Prop} : Coe {a \ P a} A :=
+⟨λ s, Subtype.elt_of s⟩
 
 /- Basic lifts -/
 
 /- Remark: we can't use [has_lift_t A₂ A₁] since it will produce non-termination whenever a type class resolution
    problem does not have a solution. -/
 attribute [instance]
-definition {ua₁ ua₂ ub₁ ub₂} lift_fn {A₁ : Type ua₁} {A₂ : Type ua₂} {B₁ : Type ub₁} {B₂ : Type ub₂} [has_lift A₂ A₁] [has_lift_t B₁ B₂] : has_lift (A₁ → B₁) (A₂ → B₂) :=
+definition {ua₁ ua₂ ub₁ ub₂} liftFn {A₁ : Type ua₁} {A₂ : Type ua₂} {B₁ : Type ub₁} {B₂ : Type ub₂} [Lift A₂ A₁] [LiftTrans B₁ B₂] : Lift (A₁ → B₁) (A₂ → B₂) :=
 ⟨λ f a, ↑(f ↑a)⟩
 
 attribute [instance]
-definition {ua ub₁ ub₂} lift_fn_range {A : Type ua} {B₁ : Type ub₁} {B₂ : Type ub₂} [has_lift_t B₁ B₂] : has_lift (A → B₁) (A → B₂) :=
+definition {ua ub₁ ub₂} liftRange {A : Type ua} {B₁ : Type ub₁} {B₂ : Type ub₂} [LiftTrans B₁ B₂] : Lift (A → B₁) (A → B₂) :=
 ⟨λ f a, ↑(f a)⟩
 
 attribute [instance]
-definition {ua₁ ua₂ ub} lift_fn_dom {A₁ : Type ua₁} {A₂ : Type ua₂} {B : Type ub} [has_lift A₂ A₁] : has_lift (A₁ → B) (A₂ → B) :=
+definition {ua₁ ua₂ ub} liftDomain {A₁ : Type ua₁} {A₂ : Type ua₂} {B : Type ub} [Lift A₂ A₁] : Lift (A₁ → B) (A₂ → B) :=
 ⟨λ f a, f ↑a⟩
 
 attribute [instance]
-definition {ua₁ ua₂ ub₁ ub₂} lift_pair {A₁ : Type ua₁} {A₂ : Type ub₂} {B₁ : Type ub₁} {B₂ : Type ub₂} [has_lift_t A₁ A₂] [has_lift_t B₁ B₂] : has_lift (A₁ × B₁) (A₂ × B₂) :=
-⟨λ p, prod.cases_on p (λ a b, (↑a, ↑b))⟩
+definition {ua₁ ua₂ ub₁ ub₂} liftPair {A₁ : Type ua₁} {A₂ : Type ub₂} {B₁ : Type ub₁} {B₂ : Type ub₂} [LiftTrans A₁ A₂] [LiftTrans B₁ B₂] : Lift (A₁ × B₁) (A₂ × B₂) :=
+⟨λ p, Prod.cases_on p (λ a b, (↑a, ↑b))⟩
 
 attribute [instance]
-definition {ua₁ ua₂ ub} lift_pair₁ {A₁ : Type ua₁} {A₂ : Type ua₂} {B : Type ub} [has_lift_t A₁ A₂] : has_lift (A₁ × B) (A₂ × B) :=
-⟨λ p, prod.cases_on p (λ a b, (↑a, b))⟩
+definition {ua₁ ua₂ ub} liftPairLeft {A₁ : Type ua₁} {A₂ : Type ua₂} {B : Type ub} [LiftTrans A₁ A₂] : Lift (A₁ × B) (A₂ × B) :=
+⟨λ p, Prod.cases_on p (λ a b, (↑a, b))⟩
 
 attribute [instance]
-definition {ua ub₁ ub₂} lift_pair₂ {A : Type ua} {B₁ : Type ub₁} {B₂ : Type ub₂} [has_lift_t B₁ B₂] : has_lift (A × B₁) (A × B₂) :=
-⟨λ p, prod.cases_on p (λ a b, (a, ↑b))⟩
+definition {ua ub₁ ub₂} liftPairRight {A : Type ua} {B₁ : Type ub₁} {B₂ : Type ub₂} [LiftTrans B₁ B₂] : Lift (A × B₁) (A × B₂) :=
+⟨λ p, Prod.cases_on p (λ a b, (a, ↑b))⟩
 
 attribute [instance]
-definition lift_list {A : Type u} {B : Type v} [has_lift_t A B] : has_lift (list A) (list B) :=
-⟨λ l, list.map (@coe A B _) l⟩
+definition lift_li {A : Type u} {B : Type v} [LiftTrans A B] : Lift (List A) (List B) :=
+⟨λ l, List.map (@coe A B _) l⟩

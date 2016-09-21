@@ -521,15 +521,15 @@ expr mk_pr2(abstract_type_context & ctx, expr const & p) {
 }
 
 expr mk_nat_zero() {
-    return mk_app(mk_constant(get_zero_name(), {mk_level_one()}), {mk_constant(get_Nat_name()), mk_constant(get_zeroNat_name())});
+    return mk_app(mk_constant(get_zero_name(), {mk_level_one()}), {mk_constant(get_Nat_name()), mk_constant(get_zero_nat_name())});
 }
 
 expr mk_nat_one() {
-    return mk_app(mk_constant(get_one_name(), {mk_level_one()}), {mk_constant(get_Nat_name()), mk_constant(get_oneNat_name())});
+    return mk_app(mk_constant(get_one_name(), {mk_level_one()}), {mk_constant(get_Nat_name()), mk_constant(get_one_nat_name())});
 }
 
 expr mk_nat_add(expr const & e1, expr const & e2) {
-    expr nat_add = mk_app(mk_constant(get_add_name(), {mk_level_one()}), {mk_constant(get_Nat_name()), mk_constant(get_addNat_name())});
+    expr nat_add = mk_app(mk_constant(get_add_name(), {mk_level_one()}), {mk_constant(get_Nat_name()), mk_constant(get_add_nat_name())});
     return mk_app(nat_add, e1, e2);
 }
 
@@ -666,7 +666,7 @@ expr mk_congr_arg(abstract_type_context & ctx, expr const & f, expr const & H) {
 expr mk_subsingleton_elim(abstract_type_context & ctx, expr const & h, expr const & x, expr const & y) {
     expr A  = ctx.infer(x);
     level l = get_level(ctx, A);
-    expr r  = mk_constant(get_Subsingleton_elim_name(), {l});
+    expr r  = mk_constant(get_subsingleton_elim_name(), {l});
     return mk_app({r, A, h, x, y});
 }
 

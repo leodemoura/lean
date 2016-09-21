@@ -2933,7 +2933,7 @@ optional<expr> type_context::mk_subsingleton_instance(expr const & type) {
         return none_expr();
     }
     level lvl    = sort_level(Type);
-    expr subsingleton = mk_app(mk_constant(get_Subsingleton_name(), {lvl}), type);
+    expr subsingleton = mk_app(mk_constant(get_subsingleton_name(), {lvl}), type);
     auto r = mk_class_instance(subsingleton);
     m_cache->m_subsingleton_cache.insert(mk_pair(type, r));
     return r;

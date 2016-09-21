@@ -6,38 +6,38 @@ Author: Leonardo de Moura
 prelude
 import init.char init.list
 attribute [reducible]
-definition string := list char
+definition String := List Char
 
-namespace string
-
-attribute [pattern]
-definition empty : string := list.nil
+namespace String
 
 attribute [pattern]
-definition str : char → string → string := list.cons
+definition empty : String := List.nil
 
-definition concat (a b : string) : string :=
-list.append b a
-end string
+attribute [pattern]
+definition str : Char → String → String := List.cons
+
+definition concat (a b : String) : String :=
+List.append b a
+end String
 
 attribute [instance]
-definition string.has_append : has_append string :=
-⟨string.concat⟩
+definition appendString: Append String :=
+⟨String.concat⟩
 
-open list
+open List
 
-private definition utf8_length_aux : nat → nat → string → nat
+private definition utf8LengthAux : Nat → Nat → String → Nat
 | 0 r (c::s) :=
-  let n := char.to_nat c in
-  if                 n < 0x80 then utf8_length_aux 0 (r+1) s
-  else if 0xC0 ≤ n ∧ n < 0xE0 then utf8_length_aux 1 (r+1) s
-  else if 0xE0 ≤ n ∧ n < 0xF0 then utf8_length_aux 2 (r+1) s
-  else if 0xF0 ≤ n ∧ n < 0xF8 then utf8_length_aux 3 (r+1) s
-  else if 0xF8 ≤ n ∧ n < 0xFC then utf8_length_aux 4 (r+1) s
-  else if 0xFC ≤ n ∧ n < 0xFE then utf8_length_aux 5 (r+1) s
-  else                             utf8_length_aux 0 (r+1) s
-| (n+1) r (c::s) := utf8_length_aux n r s
+  let n := Char.toNat c in
+  if                 n < 0x80 then utf8LengthAux 0 (r+1) s
+  else if 0xC0 ≤ n ∧ n < 0xE0 then utf8LengthAux 1 (r+1) s
+  else if 0xE0 ≤ n ∧ n < 0xF0 then utf8LengthAux 2 (r+1) s
+  else if 0xF0 ≤ n ∧ n < 0xF8 then utf8LengthAux 3 (r+1) s
+  else if 0xF8 ≤ n ∧ n < 0xFC then utf8LengthAux 4 (r+1) s
+  else if 0xFC ≤ n ∧ n < 0xFE then utf8LengthAux 5 (r+1) s
+  else                             utf8LengthAux 0 (r+1) s
+| (n+1) r (c::s) := utf8LengthAux n r s
 | n     r []     := r
 
-definition utf8_length : string → nat
-| s := utf8_length_aux 0 0 (reverse s)
+definition utf8Length : String → Nat
+| s := utf8LengthAux 0 0 (reverse s)

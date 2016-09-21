@@ -5,32 +5,32 @@ Author: Leonardo de Moura, Jeremy Avigad
 -/
 prelude
 import init.num init.relation
-notation A × B := prod A B
--- notation for n-ary tuples
-notation `(` h `, ` t:(foldr `, ` (e r, prod.mk e r)) `)` := prod.mk h t
+universe variables u v
 
-namespace prod
+notation A × B := Prod A B
+-- notation for n-ary tuples
+notation `(` h `, ` t:(foldr `, ` (e r, Prod.mk e r)) `)` := Prod.mk h t
+
+namespace Prod
   notation `pr₁` := pr1
   notation `pr₂` := pr2
   postfix `.1`:(max+1) := pr1
   postfix `.2`:(max+1) := pr2
 
-end prod
-
-universe variables u v
+end Prod
 
 attribute [instance]
-protected definition prod.is_inhabited {A : Type u} {B : Type v} [inhabited A] [inhabited B] : inhabited (prod A B) :=
+protected definition inhabitedProd {A : Type u} {B : Type v} [Inhabited A] [Inhabited B] : Inhabited (Prod A B) :=
 ⟨(default A, default B)⟩
 
 attribute [instance]
-protected definition prod.has_decidable_eq {A : Type u} {B : Type v} [h₁ : decidable_eq A] [h₂ : decidable_eq B] : ∀ p₁ p₂ : A × B, decidable (p₁ = p₂)
+protected definition decidableEqProd {A : Type u} {B : Type v} [h₁ : DecidableEq A] [h₂ : DecidableEq B] : DecidableEq (Prod A B)
 | (a, b) (a', b') :=
   match (h₁ a a') with
   | (is_true e₁) :=
     match (h₂ b b') with
     | (is_true e₂)  := is_true (eq.rec_on e₁ (eq.rec_on e₂ rfl))
-    | (is_false n₂) := is_false (assume h, prod.no_confusion h (λ e₁' e₂', absurd e₂' n₂))
+    | (is_false n₂) := is_false (assume h, Prod.no_confusion h (λ e₁' e₂', absurd e₂' n₂))
     end
-  | (is_false n₁) := is_false (assume h, prod.no_confusion h (λ e₁' e₂', absurd e₁' n₁))
+  | (is_false n₁) := is_false (assume h, Prod.no_confusion h (λ e₁' e₂', absurd e₁' n₁))
   end
