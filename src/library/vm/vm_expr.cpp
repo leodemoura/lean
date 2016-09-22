@@ -23,8 +23,6 @@ Author: Leonardo de Moura
 #include "library/vm/vm_option.h"
 #include "library/vm/vm_level.h"
 #include "library/vm/vm_list.h"
-#include "library/compiler/simp_inductive.h"
-#include "library/compiler/nat_value.h"
 
 namespace lean {
 struct vm_macro_definition : public vm_external {
@@ -420,9 +418,6 @@ void initialize_vm_expr() {
     DECLARE_VM_BUILTIN(name({"expr", "hash"}),             expr_hash);
     DECLARE_VM_BUILTIN(name({"expr", "copy_pos_info"}),    expr_copy_pos_info);
     DECLARE_VM_CASES_BUILTIN(name({"expr", "cases_on"}),   expr_cases_on);
-    // Not sure if we should expose these or what?
-    DECLARE_VM_BUILTIN(name({"expr", "is_internal_cnstr"}), expr_is_internal_cnstr);
-    DECLARE_VM_BUILTIN(name({"expr", "get_nat_value"}), expr_get_nat_value);
 }
 
 void finalize_vm_expr() {
