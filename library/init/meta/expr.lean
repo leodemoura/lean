@@ -81,6 +81,9 @@ meta constant expr.has_meta_var : expr → bool
 meta constant expr.lift_vars    : expr → nat → nat → expr
 meta constant expr.lower_vars   : expr → nat → nat → expr
 
+meta_constant expr.is_internal_cnstr : expr → option unsigned
+meta_constant expr.get_nat_value : expr → option nat
+
 namespace expr
 open decidable
 
