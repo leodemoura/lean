@@ -23,6 +23,8 @@ Author: Leonardo de Moura
 #include "library/vm/vm_option.h"
 #include "library/vm/vm_level.h"
 #include "library/vm/vm_list.h"
+#include "library/compiler/simp_inductive.h"
+#include "library/compiler/nat_value.h"
 
 namespace lean {
 struct vm_macro_definition : public vm_external {
@@ -326,6 +328,64 @@ vm_obj expr_copy_pos_info(vm_obj const & src, vm_obj const & tgt) {
     return to_obj(copy_tag(to_expr(src), copy(to_expr(tgt))));
 }
 
+vm_obj expr_is_internal_cnstr(vm_obj const & e) {
+    std::cout << "!!!!!!!!" << to_expr(e) << std::endl;
+    auto opt_unsigned = is_internal_cnstr(to_expr(e));
+    if (opt_unsigned) {
+        std::cout << *opt_unsigned << std::endl;
+        vm_obj u = to_obj(*opt_unsigned);
+        return mk_vm_constructor(1, { u });
+    } else {
+        return mk_vm_constructor(0, {});
+    }
+}
+
+vm_obj expr_is_internal_cases(vm_obj const & e) {
+    std::cout << "!!!!!!!!" << to_expr(e) << std::endl;
+    auto opt_unsigned = is_internal_cnstr(to_expr(e));
+    if (opt_unsigned) {
+        std::cout << *opt_unsigned << std::endl;
+        vm_obj u = to_obj(*opt_unsigned);
+        return mk_vm_constructor(1, { u });
+    } else {
+        return mk_vm_constructor(0, {});
+    }
+}
+
+vm_obj expr_is_internal_proj(vm_obj const & e) {
+    std::cout << "!!!!!!!!" << to_expr(e) << std::endl;
+    auto opt_unsigned = is_internal_proj(to_expr(e));
+    if (opt_unsigned) {
+        std::cout << *opt_unsigned << std::endl;
+        vm_obj u = to_obj(*opt_unsigned);
+        return mk_vm_constructor(1, { u });
+    } else {
+        return mk_vm_constructor(0, {});
+    }
+}
+
+vm_obj expr_is_internal_cases(vm_obj const & e) {
+    std::cout << "!!!!!!!!" << to_expr(e) << std::endl;
+    auto opt_unsigned = is_internal_cases(to_expr(e));
+    if (opt_unsigned) {
+        std::cout << *opt_unsigned << std::endl;
+        vm_obj u = to_obj(*opt_unsigned);
+        return mk_vm_constructor(1, { u });
+    } else {
+        return mk_vm_constructor(0, {});
+    }
+}
+
+vm_obj expr_get_nat_value(vm_obj const & o) {
+    expr e = to_expr(o);
+    if (is_nat_value(e)) {
+        auto n = mk_vm_nat(get_nat_value_value(e));
+        return mk_vm_constructor(1, { n });
+    } else {
+        return mk_vm_simple(0);
+    }
+}
+
 void initialize_vm_expr() {
     DECLARE_VM_BUILTIN(name({"expr", "var"}),              expr_var);
     DECLARE_VM_BUILTIN(name({"expr", "sort"}),             expr_sort);
@@ -360,6 +420,9 @@ void initialize_vm_expr() {
     DECLARE_VM_BUILTIN(name({"expr", "hash"}),             expr_hash);
     DECLARE_VM_BUILTIN(name({"expr", "copy_pos_info"}),    expr_copy_pos_info);
     DECLARE_VM_CASES_BUILTIN(name({"expr", "cases_on"}),   expr_cases_on);
+    // Not sure if we should expose these or what?
+    DECLARE_VM_BUILTIN(name({"expr", "is_internal_cnstr"}), expr_is_internal_cnstr);
+    DECLARE_VM_BUILTIN(name({"expr", "get_nat_value"}), expr_get_nat_value);
 }
 
 void finalize_vm_expr() {
