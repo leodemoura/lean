@@ -28,7 +28,7 @@ meta instance : inhabited expr :=
 ⟨expr.sort level.zero⟩
 
 meta constant expr.mk_macro (d : macro_def) : list expr → expr
-meta_constant expr.macro_def_name (d : macro_def) : name
+meta constant expr.macro_def_name (d : macro_def) : name
 meta definition expr.mk_var (n : nat) : expr :=
 expr.var (unsigned.of_nat n)
 
@@ -81,8 +81,8 @@ meta constant expr.has_meta_var : expr → bool
 meta constant expr.lift_vars    : expr → nat → nat → expr
 meta constant expr.lower_vars   : expr → nat → nat → expr
 
-meta_constant expr.is_internal_cnstr : expr → option unsigned
-meta_constant expr.get_nat_value : expr → option nat
+meta constant expr.is_internal_cnstr : expr → option unsigned
+meta constant expr.get_nat_value : expr → option nat
 
 namespace expr
 open decidable

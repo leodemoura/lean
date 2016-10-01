@@ -619,21 +619,21 @@ struct import_modules_fn {
 };
 
 void decls_to_native_compile(environment const & env, buffer<declaration> & decls) {
-    module_ext const & ext = get_extension(env);
-
-    // Collect all the declarations that should be compiled from this
-    // module.
-    for (auto decl_name : ext.m_module_decls) {
-        auto decl = env.get(decl_name);
-        if (is_noncomputable(env, decl_name) ||
-            !decl.is_definition() ||
-            is_vm_builtin_function(decl_name)) {
-                continue;
-        } else {
-            std::cout << decl.get_name() << std::endl;
-            decls.push_back(decl);
-        }
-    }
+    // module_ext const & ext = get_extension(env);
+    //
+    // // Collect all the declarations that should be compiled from this
+    // // module.
+    // for (auto decl_name : ext.m_module_decls) {
+    //     auto decl = env.get(decl_name);
+    //     if (is_noncomputable(env, decl_name) ||
+    //         !decl.is_definition() ||
+    //         is_vm_builtin_function(decl_name)) {
+    //             continue;
+    //     } else {
+    //         std::cout << decl.get_name() << std::endl;
+    //         decls.push_back(decl);
+    //     }
+    // }
 }
 
 environment import_modules(environment const & env, std::string const & base, unsigned num_modules, module_name const * modules,
