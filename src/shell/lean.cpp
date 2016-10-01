@@ -436,22 +436,15 @@ int main(int argc, char ** argv) {
         // Get the native options.
         lean::native::scope_config scoped_native_config(ios.get_options());
 
-        if (ok && compile && default_k == input_kind::Lean) {
-            if (default_k == input_kind::Lean) {
-                // lean::scope_trace_env tracing_on(ios.get_options());
-                native_compile_binary(env, env.get(lean::name("main")));
-            } else {
-                // Not sure the right way to report this error.
-                std::cout << "can't not natively compile .hlean files" << std::endl;
-                exit(1);
-            }
+        if (ok && compile) {
+            native_compile_binary(env, env.get(lean::name("main")));
         }
         if (save_cache) {
             exclusive_file_lock cache_lock(cache_name);
             std::ofstream out(cache_name, std::ofstream::binary);
             cache.save(out);
         }
-        if (export_native_objects && ok && default_k == input_kind::Lean) {
+        if (export_native_objects && ok) {
             env = lean::set_native_module_path(env, lean::name(native_output));
         }
         if (export_objects && ok) {
