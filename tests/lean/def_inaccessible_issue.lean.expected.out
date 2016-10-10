@@ -1,10 +1,138 @@
 map2._main.equations.eqn_2 :
-  ∀ (f : bool → bool → bool) (n : ℕ) (b1 : bool) (v1 : bv (nat.rec n (λ (b₁ r : ℕ), succ r) 0)) (b2 : bool)
-  (v2 : bv (nat.rec n (λ (b₁ r : ℕ), succ r) 0)),
-    map2._main f (cons (nat.rec n (λ (b₁ r : ℕ), succ r) 0) b1 v1)
-      (cons (nat.rec n (λ (b₁ r : ℕ), succ r) 0) b2 v2) = cons n (f b1 b2) (map2._main f v1 v2)
+  ∀ (f : bool → bool → bool) (n : ℕ) (b1 : bool)
+  (v1 :
+    bv
+      (prod.fst
+         (prod.fst
+            (nat.rec
+              (λ (a : ℕ),
+                nat.cases_on 0 (λ (_F : nat.below 0), a)
+                  (λ (a_1 : ℕ) (_F : nat.below (succ a_1)), succ (prod.fst (prod.fst _F) a))
+                  poly_unit.star, poly_unit.star)
+              (λ (a : ℕ) (ih_1 : (ℕ → ℕ) × nat.below a),
+                 (λ (a_1 : ℕ),
+                   nat.cases_on (succ a) (λ (_F : nat.below 0), a_1)
+                     (λ (a : ℕ) (_F : nat.below (succ a)), succ (prod.fst (prod.fst _F) a_1))
+                     (ih_1, poly_unit.star), ih_1, poly_unit.star))
+              0, poly_unit.star))
+         n)) (b2 : bool)
+  (v2 :
+    bv
+      (prod.fst
+         (prod.fst
+            (nat.rec
+              (λ (a : ℕ),
+                nat.cases_on 0 (λ (_F : nat.below 0), a)
+                  (λ (a_1 : ℕ) (_F : nat.below (succ a_1)), succ (prod.fst (prod.fst _F) a))
+                  poly_unit.star, poly_unit.star)
+              (λ (a : ℕ) (ih_1 : (ℕ → ℕ) × nat.below a),
+                 (λ (a_1 : ℕ),
+                   nat.cases_on (succ a) (λ (_F : nat.below 0), a_1)
+                     (λ (a : ℕ) (_F : nat.below (succ a)), succ (prod.fst (prod.fst _F) a_1))
+                     (ih_1, poly_unit.star), ih_1, poly_unit.star))
+              0, poly_unit.star))
+         n)),
+    map2._main f
+      (cons
+         (prod.fst
+            (prod.fst
+               (nat.rec
+                 (λ (a : ℕ),
+                   nat.cases_on 0 (λ (_F : nat.below 0), a)
+                     (λ (a_1 : ℕ) (_F : nat.below (succ a_1)), succ (prod.fst (prod.fst _F) a))
+                     poly_unit.star, poly_unit.star)
+                 (λ (a : ℕ) (ih_1 : (ℕ → ℕ) × nat.below a),
+                    (λ (a_1 : ℕ),
+                      nat.cases_on (succ a) (λ (_F : nat.below 0), a_1)
+                        (λ (a : ℕ) (_F : nat.below (succ a)), succ (prod.fst (prod.fst _F) a_1))
+                        (ih_1, poly_unit.star), ih_1, poly_unit.star))
+                 0, poly_unit.star))
+            n)
+         b1
+         v1)
+      (cons
+         (prod.fst
+            (prod.fst
+               (nat.rec
+                 (λ (a : ℕ),
+                   nat.cases_on 0 (λ (_F : nat.below 0), a)
+                     (λ (a_1 : ℕ) (_F : nat.below (succ a_1)), succ (prod.fst (prod.fst _F) a))
+                     poly_unit.star, poly_unit.star)
+                 (λ (a : ℕ) (ih_1 : (ℕ → ℕ) × nat.below a),
+                    (λ (a_1 : ℕ),
+                      nat.cases_on (succ a) (λ (_F : nat.below 0), a_1)
+                        (λ (a : ℕ) (_F : nat.below (succ a)), succ (prod.fst (prod.fst _F) a_1))
+                        (ih_1, poly_unit.star), ih_1, poly_unit.star))
+                 0, poly_unit.star))
+            n)
+         b2
+         v2) = cons n (f b1 b2) (map2._main f v1 v2)
 map2'._main.equations.eqn_2 :
-  ∀ (f : bool → bool → bool) (n : ℕ) (b1 : bool) (v1 : bv (nat.rec n (λ (b₁ r : ℕ), succ r) 0)) (b2 : bool)
-  (v2 : bv (nat.rec n (λ (b₁ r : ℕ), succ r) 0)),
-    map2'._main f (cons (nat.rec n (λ (b₁ r : ℕ), succ r) 0) b1 v1)
-      (cons (nat.rec n (λ (b₁ r : ℕ), succ r) 0) b2 v2) = cons n (f b1 b2) (map2'._main f v1 v2)
+  ∀ (f : bool → bool → bool) (n : ℕ) (b1 : bool)
+  (v1 :
+    bv
+      (prod.fst
+         (prod.fst
+            (nat.rec
+              (λ (a : ℕ),
+                nat.cases_on 0 (λ (_F : nat.below 0), a)
+                  (λ (a_1 : ℕ) (_F : nat.below (succ a_1)), succ (prod.fst (prod.fst _F) a))
+                  poly_unit.star, poly_unit.star)
+              (λ (a : ℕ) (ih_1 : (ℕ → ℕ) × nat.below a),
+                 (λ (a_1 : ℕ),
+                   nat.cases_on (succ a) (λ (_F : nat.below 0), a_1)
+                     (λ (a : ℕ) (_F : nat.below (succ a)), succ (prod.fst (prod.fst _F) a_1))
+                     (ih_1, poly_unit.star), ih_1, poly_unit.star))
+              0, poly_unit.star))
+         n)) (b2 : bool)
+  (v2 :
+    bv
+      (prod.fst
+         (prod.fst
+            (nat.rec
+              (λ (a : ℕ),
+                nat.cases_on 0 (λ (_F : nat.below 0), a)
+                  (λ (a_1 : ℕ) (_F : nat.below (succ a_1)), succ (prod.fst (prod.fst _F) a))
+                  poly_unit.star, poly_unit.star)
+              (λ (a : ℕ) (ih_1 : (ℕ → ℕ) × nat.below a),
+                 (λ (a_1 : ℕ),
+                   nat.cases_on (succ a) (λ (_F : nat.below 0), a_1)
+                     (λ (a : ℕ) (_F : nat.below (succ a)), succ (prod.fst (prod.fst _F) a_1))
+                     (ih_1, poly_unit.star), ih_1, poly_unit.star))
+              0, poly_unit.star))
+         n)),
+    map2'._main f
+      (cons
+         (prod.fst
+            (prod.fst
+               (nat.rec
+                 (λ (a : ℕ),
+                   nat.cases_on 0 (λ (_F : nat.below 0), a)
+                     (λ (a_1 : ℕ) (_F : nat.below (succ a_1)), succ (prod.fst (prod.fst _F) a))
+                     poly_unit.star, poly_unit.star)
+                 (λ (a : ℕ) (ih_1 : (ℕ → ℕ) × nat.below a),
+                    (λ (a_1 : ℕ),
+                      nat.cases_on (succ a) (λ (_F : nat.below 0), a_1)
+                        (λ (a : ℕ) (_F : nat.below (succ a)), succ (prod.fst (prod.fst _F) a_1))
+                        (ih_1, poly_unit.star), ih_1, poly_unit.star))
+                 0, poly_unit.star))
+            n)
+         b1
+         v1)
+      (cons
+         (prod.fst
+            (prod.fst
+               (nat.rec
+                 (λ (a : ℕ),
+                   nat.cases_on 0 (λ (_F : nat.below 0), a)
+                     (λ (a_1 : ℕ) (_F : nat.below (succ a_1)), succ (prod.fst (prod.fst _F) a))
+                     poly_unit.star, poly_unit.star)
+                 (λ (a : ℕ) (ih_1 : (ℕ → ℕ) × nat.below a),
+                    (λ (a_1 : ℕ),
+                      nat.cases_on (succ a) (λ (_F : nat.below 0), a_1)
+                        (λ (a : ℕ) (_F : nat.below (succ a)), succ (prod.fst (prod.fst _F) a_1))
+                        (ih_1, poly_unit.star), ih_1, poly_unit.star))
+                 0, poly_unit.star))
+            n)
+         b2
+         v2) = cons n (f b1 b2) (map2'._main f v1 v2)
