@@ -1,4 +1,12 @@
 open nat
+-- set_option trace.type_context.eqn_lemmas true
+
+def add2 : nat → nat → nat
+| a 0            := a
+| a (nat.succ b) := nat.succ (add2 a b)
+
+instance inst2 : has_add nat :=
+⟨add2⟩
 
 definition fib : nat → nat
 | 0     := 1

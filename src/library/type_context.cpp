@@ -29,6 +29,7 @@ Author: Leonardo de Moura
 #include "library/attribute_manager.h"
 #include "library/unification_hint.h"
 #include "library/delayed_abstraction.h"
+#include "library/eqn_lemmas.h"
 #include "library/fun_info.h"
 
 #ifndef LEAN_DEFAULT_CLASS_INSTANCE_MAX_DEPTH
@@ -231,8 +232,11 @@ void type_context::init_core(transparency_mode m) {
     m_is_def_eq_depth             = 0;
     m_tmp_uassignment             = nullptr;
     m_tmp_eassignment             = nullptr;
+    m_tmp_uvar_start_idx          = 0;
+    m_tmp_mvar_start_idx          = 0;
     m_unfold_pred                 = nullptr;
     m_approximate                 = false;
+    m_refl_lemmas                 = true;
     if (auto instance_fingerprint = m_lctx.get_instance_fingerprint()) {
         if (m_cache->m_instance_fingerprint == instance_fingerprint) {
             lean_trace("type_context_cache", tout() << "reusing instance cache, fingerprint: " << *instance_fingerprint << "\n";);
@@ -493,30 +497,142 @@ optional<declaration> type_context::is_transparent(name const & n) {
     return is_transparent(m_transparency_mode, n);
 }
 
-/* Unfold \c e if it is a constant */
-optional<expr> type_context::unfold_definition_core(expr const & e) {
-    if (is_constant(e)) {
-        if (auto d = is_transparent(const_name(e))) {
-            if (length(const_levels(e)) == d->get_num_univ_params())
-                return some_expr(instantiate_value_univ_params(*d, const_levels(e)));
+optional<expr> type_context::unfold_using_refl_lemma(expr const & e, simp_lemma const & refl_lemma) {
+    lean_assert(in_tmp_mode());
+    scope S(*this);
+    m_tmp_uassignment->resize(m_tmp_uvar_start_idx + refl_lemma.get_num_umeta());
+    m_tmp_eassignment->resize(m_tmp_mvar_start_idx + refl_lemma.get_num_emeta());
+    expr const & lhs = refl_lemma.get_lhs();
+    buffer<expr> lhs_args;
+    expr const & lhs_fn = get_app_args(lhs, lhs_args);
+    buffer<expr> args;
+    expr const & fn = get_app_args(e, args);
+    lean_assert(is_constant(lhs_fn) && is_constant(fn) && const_name(lhs_fn) == const_name(fn));
+    if (args.size() < lhs_args.size())
+        return none_expr(); // partial application
+    /* Match Levels */
+    buffer<level> lhs_fn_lvls;
+    buffer<level> fn_lvls;
+    to_buffer(const_levels(lhs_fn), lhs_fn_lvls);
+    to_buffer(const_levels(fn), fn_lvls);
+    if (lhs_fn_lvls.size() != fn_lvls.size())
+        return none_expr();
+    for (unsigned i = 0; i < lhs_fn_lvls.size(); i++) {
+        level lhs_lvl = lhs_fn_lvls[i];
+        if (is_idx_metauniv(lhs_lvl)) {
+            /* Try to avoid lift */
+            unsigned uidx = m_tmp_uvar_start_idx + to_meta_idx(lhs_lvl);
+            lean_assert(uidx < m_tmp_uassignment->size());
+            if (auto v = get_tmp_uvar_assignment(uidx)) {
+                if (!is_def_eq(*v, fn_lvls[i]))
+                    return none_expr();
+            } else {
+                (*m_tmp_uassignment)[uidx] = fn_lvls[i];
+            }
+        } else {
+            lhs_lvl = lift_idx_metaunivs(lhs_lvl, m_tmp_uvar_start_idx);
+            if (!is_def_eq(lhs_lvl, fn_lvls[i]))
+                return none_expr();
         }
+    }
+    /* Match arguments */
+    for (unsigned i = 0; i < lhs_args.size(); i++) {
+        expr lhs_arg = lift_idx_metavars(lhs_args[i], m_tmp_uvar_start_idx, m_tmp_mvar_start_idx);
+        lhs_args[i]  = lhs_arg;
+        if (!is_def_eq(lhs_arg, args[i])) {
+            lean_trace(name({"type_context", "eqn_lemmas"}),
+                       scope_trace_env scope(env(), *this);
+                       tout() << "failed to reduce using " << refl_lemma.get_id() << ", argument #" << (i+1) << " did not match\n" << e << "\n";);
+            return none_expr();
+        }
+    }
+    expr rhs = instantiate_mvars(lift_idx_metavars(refl_lemma.get_rhs(), m_tmp_uvar_start_idx, m_tmp_mvar_start_idx));
+    expr new_e = mk_app(rhs, args.size() - lhs_args.size(), args.data() + lhs_args.size());
+    lean_trace(name({"type_context", "eqn_lemmas"}),
+               scope_trace_env scope(env(), *this);
+               tout() << "reduced using refl-lemma " << refl_lemma.get_id() << "\n" <<
+               e << "\n==>\n" << new_e << "\n";);
+    return some_expr(new_e);
+}
+
+optional<expr> type_context::unfold_using_refl_lemmas_core(expr const & e, buffer<simp_lemma> const & refl_lemmas) {
+    lean_assert(in_tmp_mode());
+    for (simp_lemma const & refl_lemma : refl_lemmas) {
+        if (auto r = unfold_using_refl_lemma(e, refl_lemma))
+            return r;
     }
     return none_expr();
 }
 
-/* Unfold head(e) if it is a constant */
+optional<expr> type_context::unfold_using_refl_lemmas(expr const & e, buffer<simp_lemma> const & refl_lemmas) {
+    if (is_refl_lemma_stuck(e)) {
+        expr new_e = try_to_unstuck_using_complete_instance(e);
+        if (new_e != e) {
+            tout() << "UNSTUCK: " << e << " ==> " << new_e << "\n";
+            return unfold_using_refl_lemmas(new_e, refl_lemmas);
+        }
+    }
+
+    if (in_tmp_mode()) {
+        flet<unsigned> set_uvar_idx(m_tmp_uvar_start_idx, m_tmp_uassignment->size());
+        flet<unsigned> set_mvar_idx(m_tmp_mvar_start_idx, m_tmp_eassignment->size());
+        return unfold_using_refl_lemmas_core(e, refl_lemmas);
+    } else {
+        tmp_mode_scope scope(*this);
+        return unfold_using_refl_lemmas_core(e, refl_lemmas);
+    }
+}
+
+void type_context::get_refl_lemmas(name const & fn_name, buffer<simp_lemma> & refl_lemmas) {
+    if (m_refl_lemmas) {
+        bool refl_only = true;
+        get_eqn_lemmas_for(env(), fn_name, refl_only, refl_lemmas);
+    }
+}
+
+/* Return true iff we should use vanilla delta-reduction to unfold cname */
+bool type_context::use_default_unfolding(name const & cname) {
+    if (!m_refl_lemmas) {
+        /* refl-lemma unfolding is disabled */
+        return true;
+    }
+    if (has_eqn_lemmas(env(), cname)) {
+        /* cname has equational lemmas associated with it.
+           So, we don't use default unfolding even if none of these
+           lemmas is a refl lemma. */
+        return false;
+    }
+    return true;
+}
+
+/* Unfold e if it is a constant or a constant application */
 optional<expr> type_context::unfold_definition(expr const & e) {
     if (is_app(e)) {
         expr f0 = get_app_fn(e);
-        if (auto f  = unfold_definition_core(f0)) {
+        if (!is_constant(f0)) return none_expr();
+        auto d = is_transparent(const_name(f0));
+        if (!d) return none_expr();
+        if (length(const_levels(f0)) != d->get_num_univ_params()) return none_expr();
+        buffer<simp_lemma> refl_lemmas;
+        get_refl_lemmas(const_name(f0), refl_lemmas);
+        if (!refl_lemmas.empty()) {
+            return unfold_using_refl_lemmas(e, refl_lemmas);
+        } else if (use_default_unfolding(const_name(f0))) {
+            expr f = instantiate_value_univ_params(*d, const_levels(f0));
             buffer<expr> args;
             get_app_rev_args(e, args);
-            return some_expr(apply_beta(*f, args.size(), args.data()));
+            return some_expr(apply_beta(f, args.size(), args.data()));
         } else {
             return none_expr();
         }
     } else {
-        return unfold_definition_core(e);
+        if (!is_constant(e)) return none_expr();
+        auto d = is_transparent(const_name(e));
+        if (!d) return none_expr();
+        if (use_default_unfolding(const_name(e)))
+            return some_expr(instantiate_value_univ_params(*d, const_levels(e)));
+        else
+            return none_expr();
     }
 }
 
@@ -727,13 +843,44 @@ optional<expr> type_context::is_stuck_projection(expr const & e) {
     return is_stuck(mk);
 }
 
+optional<expr> type_context::is_refl_lemma_stuck(expr const & e) {
+    tout() << "is_refl_lemma_stuck: " << e << "\n";
+    if (!m_refl_lemmas || !is_app(e)) return none_expr();
+    expr const & fn = get_app_fn(e);
+    if (!is_constant(fn) || !has_eqn_lemmas(env(), const_name(fn))) return none_expr();
+    if (!is_transparent(const_name(fn))) return none_expr();
+    buffer<simp_lemma> refl_lemmas;
+    get_refl_lemmas(const_name(fn), refl_lemmas);
+    buffer<expr> args;
+    get_app_args(e, args);
+    for (simp_lemma const & sl : refl_lemmas) {
+        if (!sl.is_refl()) continue;
+        buffer<expr> lhs_args;
+        get_app_args(sl.get_lhs(), lhs_args);
+        if (args.size() < lhs_args.size()) continue;
+        for (unsigned i = 0; i < lhs_args.size(); i++) {
+            if (!is_metavar(lhs_args[i])) {
+                auto r = is_stuck(args[i]);
+                if (r) {
+                    tout() << "STUCK: " << e << " @ " << *r << "\n";
+                    return r;
+                }
+            }
+        }
+    }
+    return none_expr();
+}
+
 optional<expr> type_context::is_stuck(expr const & e) {
     if (is_meta(e)) {
         return some_expr(e);
-    } else if (auto r = is_stuck_projection(e)) {
-        return r;
     } else if (is_annotation(e)) {
         return is_stuck(get_annotation_arg(e));
+    } else if (auto r = is_stuck_projection(e)) {
+        tout() << "stuck_projection: " << *r << "\n";
+        return r;
+    } else if (auto r = is_refl_lemma_stuck(e)) {
+        return r;
     } else {
         return env().norm_ext().is_stuck(e, *this);
     }
@@ -1116,14 +1263,14 @@ void type_context::clear_tmp_eassignment() {
 
 bool type_context::is_mvar(level const & l) const {
     if (in_tmp_mode())
-        return is_idx_metauniv(l);
+        return is_idx_metauniv(l) && (m_tmp_uvar_start_idx == 0 || to_meta_idx(l) >= m_tmp_uvar_start_idx);
     else
         return is_metavar_decl_ref(l);
 }
 
 bool type_context::is_mvar(expr const & e) const {
     if (in_tmp_mode())
-        return is_idx_metavar(e);
+        return is_idx_metavar(e) && (m_tmp_mvar_start_idx == 0 || to_meta_idx(e) >= m_tmp_mvar_start_idx);
     else
         return is_metavar_decl_ref(e);
 }
@@ -2279,11 +2426,17 @@ lbool type_context::is_def_eq_lazy_delta(expr & t, expr & s) {
         } else if (d_t && !d_s) {
             /* only t_n can be delta reduced */
             lean_trace(name({"type_context", "is_def_eq_detail"}), tout() << "unfold left: " << d_t->get_name() << "\n";);
-            t = whnf_core(*unfold_definition(t));
+            if (auto new_t = unfold_definition(t))
+                t = whnf_core(*new_t);
+            else
+                return l_undef;
         } else if (!d_t && d_s) {
             /* only s_n can be delta reduced */
             lean_trace(name({"type_context", "is_def_eq_detail"}), tout() << "unfold right: " << d_s->get_name() << "\n";);
-            s = whnf_core(*unfold_definition(s));
+            if (auto new_s = unfold_definition(s))
+                s = whnf_core(*new_s);
+            else
+                return l_undef;
         } else {
             /* both t and s can be delta reduced */
             if (is_eqp(*d_t, *d_s)) {
@@ -2297,12 +2450,21 @@ lbool type_context::is_def_eq_lazy_delta(expr & t, expr & s) {
                             process_postponed(S)) {
                             S.commit();
                             return l_true;
+                        } else {
+                            tout() << "failed: " << t << " =?= " << s << "\n";
                         }
                     }
                     /* Heuristic failed, then unfold both of them */
-                    lean_trace(name({"type_context", "is_def_eq_detail"}), tout() << "unfold left&right: " << d_t->get_name() << "\n";);
-                    t = whnf_core(*unfold_definition(t));
-                    s = whnf_core(*unfold_definition(s));
+                    auto new_t = unfold_definition(t);
+                    auto new_s = unfold_definition(s);
+                    if (!new_t && !new_s)
+                        return l_undef;
+                    if (new_t)
+                        t = whnf_core(*new_t);
+                    if (new_s)
+                        s = whnf_core(*new_s);
+                    lean_trace(name({"type_context", "is_def_eq_detail"}), tout() << "unfold left&right: " << d_t->get_name() << "\n";
+                               scope_trace_env scope(env(), *this); tout() << t << " =?= " << s << "\n";);
                 } else if (!is_app(t) && !is_app(s)) {
                     return to_lbool(is_def_eq(const_levels(t), const_levels(s)));
                 } else {
@@ -2323,13 +2485,17 @@ lbool type_context::is_def_eq_lazy_delta(expr & t, expr & s) {
                     auto rd_t = is_transparent(transparency_mode::Reducible, d_t->get_name());
                     auto rd_s = is_transparent(transparency_mode::Reducible, d_s->get_name());
                     if (rd_t && !rd_s) {
-                        progress = true;
-                        lean_trace(name({"type_context", "is_def_eq_detail"}), tout() << "unfold (reducible) left: " << d_t->get_name() << "\n";);
-                        t = whnf_core(*unfold_definition(t));
+                        if (auto new_t = unfold_definition(t)) {
+                            lean_trace(name({"type_context", "is_def_eq_detail"}), tout() << "unfold (reducible) left: " << d_t->get_name() << "\n";);
+                            t = whnf_core(*new_t);
+                            progress = true;
+                        }
                     } else if (!rd_t && rd_s) {
-                        progress = true;
-                        lean_trace(name({"type_context", "is_def_eq_detail"}), tout() << "unfold (reducible) right: " << d_s->get_name() << "\n";);
-                        s = whnf_core(*unfold_definition(s));
+                        if (auto new_s = unfold_definition(s)) {
+                            lean_trace(name({"type_context", "is_def_eq_detail"}), tout() << "unfold (reducible) right: " << d_s->get_name() << "\n";);
+                            s = whnf_core(*new_s);
+                            progress = true;
+                        }
                     }
                 }
                 /* If we haven't reduced t nor s, and they do not contain metavariables,
@@ -2338,11 +2504,15 @@ lbool type_context::is_def_eq_lazy_delta(expr & t, expr & s) {
                 if (!progress && !has_expr_metavar(t) && !has_expr_metavar(s)) {
                     int c = compare(d_t->get_hints(), d_s->get_hints());
                     if (c < 0) {
-                        progress = true;
-                        t        = whnf_core(*unfold_definition(t));
+                        if (auto new_t = unfold_definition(t)) {
+                            t = whnf_core(*new_t);
+                            progress = true;
+                        }
                     } else if (c > 0) {
-                        progress = true;
-                        s        = whnf_core(*unfold_definition(s));
+                        if (auto new_s = unfold_definition(s)) {
+                            s = whnf_core(*new_s);
+                            progress = true;
+                        }
                     }
                 }
                 /* If we haven't reduced t nor s, then we reduce both IF the reduction is productive.
@@ -3241,6 +3411,7 @@ void initialize_type_context() {
     register_trace_class(name({"type_context", "univ_is_def_eq"}));
     register_trace_class(name({"type_context", "univ_is_def_eq_detail"}));
     register_trace_class(name({"type_context", "tmp_vars"}));
+    register_trace_class(name({"type_context", "eqn_lemmas"}));
     register_trace_class("type_context_cache");
     g_class_instance_max_depth     = new name{"class", "instance_max_depth"};
     g_instance                     = new name{"instance"};

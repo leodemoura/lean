@@ -19,6 +19,7 @@ Author: Leonardo de Moura
 #include "library/expr_pair_maps.h"
 
 namespace lean {
+class simp_lemma;
 enum class transparency_mode { All, Semireducible, Reducible, None };
 
 /* \brief Cached information for type_context. */
@@ -208,12 +209,17 @@ class type_context : public abstract_type_context {
     local_context      m_tmp_mvar_lctx;
     /* undo/trail stack for m_tmp_uassignment/m_tmp_eassignment */
     tmp_trail          m_tmp_trail;
+    unsigned           m_tmp_uvar_start_idx;
+    unsigned           m_tmp_mvar_start_idx;
     /* Stack of backtracking point (aka scope) */
     scopes             m_scopes;
 
     /* If m_approximate == true, then enable approximate higher-order unification
        even if we are not in tmp_mode */
     bool               m_approximate;
+    /* If m_refl_lemmas == true, then refl_lemmas are used to unfold functions
+       defined using the equational compiler. */
+    bool               m_refl_lemmas;
 
     /* Postponed universe constraints.
        We postpone universe constraints containing max/imax. Examples:
@@ -318,6 +324,7 @@ public:
     virtual bool relaxed_is_def_eq(expr const & e1, expr const & e2) override;
 
     optional<expr> is_stuck_projection(expr const & e);
+    optional<expr> is_refl_lemma_stuck(expr const & e);
     virtual optional<expr> is_stuck(expr const &) override;
 
     virtual expr push_local(name const & pp_name, expr const & type, binder_info const & bi = binder_info()) override;
@@ -385,6 +392,11 @@ public:
             flet<bool>(ctx.m_approximate, true) {}
     };
 
+    struct refl_lemmas_scope : public flet<bool> {
+        refl_lemmas_scope(type_context & ctx, bool enable):
+            flet<bool>(ctx.m_refl_lemmas, enable) {}
+    };
+
     /* --------------------------
        Temporary assignment mode.
        It is used when performing type class resolution and matching.
@@ -449,7 +461,11 @@ public:
 
 private:
     void init_core(transparency_mode m);
-    optional<expr> unfold_definition_core(expr const & e);
+    bool use_default_unfolding(name const & cname);
+    void get_refl_lemmas(name const & fn_name, buffer<simp_lemma> & result);
+    optional<expr> unfold_using_refl_lemma(expr const & e, simp_lemma const & refl_lemma);
+    optional<expr> unfold_using_refl_lemmas_core(expr const & e, buffer<simp_lemma> const & refl_lemmas);
+    optional<expr> unfold_using_refl_lemmas(expr const & e, buffer<simp_lemma> const & refl_lemmas);
     optional<expr> unfold_definition(expr const & e);
     optional<expr> try_unfold_definition(expr const & e);
     bool should_unfold_macro(expr const & e);

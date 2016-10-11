@@ -30,6 +30,12 @@ unsigned to_meta_idx(expr const & e);
 /** \brief Return true iff \c e contains idx metavariables or universe metavariables */
 bool has_idx_metavar(expr const & e);
 
+
+/** \brief Return a new expression where index of idx_metauniv variables is increased by udelta,
+    and idx_metavars by mdelta */
+expr lift_idx_metavars(expr const & e, unsigned udelta, unsigned mdelta);
+level lift_idx_metaunivs(level const & l, unsigned udelta);
+
 void initialize_idx_metavar();
 void finalize_idx_metavar();
 }

@@ -460,6 +460,7 @@ static expr prove_eqn_lemma_core(type_context & ctx, buffer<expr> const & Hs, ex
 }
 
 static expr prove_eqn_lemma(type_context & ctx, buffer<expr> const & Hs, expr const & lhs, expr const & rhs) {
+    type_context::refl_lemmas_scope scope(ctx, false);
     expr body = prove_eqn_lemma_core(ctx, Hs, lhs, rhs);
     return ctx.mk_lambda(Hs, body);
 }
