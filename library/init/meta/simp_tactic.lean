@@ -68,7 +68,7 @@ meta constant simp_lemmas.simplify_core : simp_lemmas → tactic unit → name �
    The resulting expression is definitionally equal to the input. -/
 meta constant simp_lemmas.dsimplify_core (max_steps : nat) (visit_instances : bool) : simp_lemmas → expr → tactic expr
 
-meta def default_max_steps := 10000000
+def default_max_steps := 10000000
 
 meta def simp_lemmas.dsimplify : simp_lemmas → expr → tactic expr :=
 simp_lemmas.dsimplify_core default_max_steps ff
@@ -151,6 +151,36 @@ do num_reverted : ℕ ← revert h,
    new_d : expr ← dunfold_core reducible default_max_steps cs d,
    change $ expr.pi n bi new_d b,
    intron num_reverted
+
+meta constant simplify_core
+  /- The user state type. -/
+  {A : Type}
+  /- Initial user data -/
+  (a : A)
+  (max_steps : nat)
+  /- If use_funext = tt, then function extensionality is used to go inside lambda expressions. -/
+  (use_funext : bool)
+  /- If lift_eq = tt, then function switches to equality whenever there is no congruence lemma
+     for going inside a subterm 'e'. -/
+  (lift_eq : bool)
+  /- Additional congruence lemmas. Remark: simplification/rewriting lemmas in simp_lemmas are
+     not considered. The pre/post visit functions should be used to apply simplifications. -/
+  (cgr_lemmas : simp_lemmas)
+  /- (pre a r p e) is invoked before visiting the children of subterm 'e',
+     'r' is the simplification relation being used, 'p' is the "parent" expression (if there is one).
+     if it succeeds the result is (new_a, new_e, new_pr, flag) where
+       - 'new_a' is the new value for the user data
+       - 'new_e' is a new expression s.t. 'e r new_e'
+       - 'new_pr' is a proof for 'e r new_e', If it is none, the proof is assumed to be by reflexivity
+       - 'flag'  if tt 'new_e' children should be visited, and 'post' invoked. -/
+  (pre : A → name → option expr → expr → tactic (A × expr × option expr × bool))
+  /- (post a e) is invoked after visiting the children of subterm 'e',
+     The output is similar to (pre a r p e), but the 'flag' indicates whether
+     the new expression should be revisited or not. -/
+  (post : A → name → option expr → expr → tactic (A × expr × option expr × bool))
+  /- simplification relation -/
+  (r : name) :
+  expr → tactic (A × expr × expr)
 
 meta def simplify (prove_fn : tactic unit) (extra_lemmas : list expr) (e : expr) : tactic (expr × expr) :=
 do lemmas       ← simp_lemmas.mk_default,
