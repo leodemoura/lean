@@ -439,11 +439,6 @@ int main(int argc, char ** argv) {
         if (ok && compile) {
             native_compile_binary(env, env.get(lean::name("main")));
         }
-        if (save_cache) {
-            exclusive_file_lock cache_lock(cache_name);
-            std::ofstream out(cache_name, std::ofstream::binary);
-            cache.save(out);
-        }
         if (export_native_objects && ok) {
             env = lean::set_native_module_path(env, lean::name(native_output));
         }
