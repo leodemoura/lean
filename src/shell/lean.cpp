@@ -433,9 +433,13 @@ int main(int argc, char ** argv) {
             }
         }
 
-        // Get the native options.
+        // Ensure tracing is turned on ...
         lean::scope_global_ios scope1(ios);
-        lean::scope_trace_env  scope2(ios.get_options());
+        auto opts = ios.get_options();
+        type_context tc(env, opts);
+        lean::scope_trace_env scope2(env, opts, tc);
+
+        // Get the native options.
         // scope_traces_as_messages traces_as_messages(get_stream_name(), pos());
         lean::native::scope_config scoped_native_config(ios.get_options());
 
