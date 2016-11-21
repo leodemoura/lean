@@ -105,12 +105,8 @@ vm_obj mk_native_closure(environment const & env, name const & n, std::initializ
 }
 
 vm_obj mk_native_closure(environment const & env, name const & n, unsigned sz, vm_obj const * data) {
-      auto idx = lean::get_vm_constant_idx(env, n);
-      if (idx) {
-          return lean::mk_vm_closure(*idx, sz, data);
-      } else {
-          throw std::runtime_error("unknown native function");
-      }
+    std::cout << "mk native clo" << std::endl;
+    return get_vm_state().get_constant(n);
 }
 
 vm_obj mk_vm_closure(unsigned fn_idx, unsigned sz, vm_obj const * data) {
@@ -877,6 +873,10 @@ static environment update(environment const & env, vm_decls const & ext) {
 
 static environment add_native(environment const & env, name const & n, unsigned arity, vm_cfunction fn) {
     auto ext = get_extension(env);
+    ext.m_name2idx.for_each([&] (name const & n, unsigned const & u) {
+        std::cout << "NAME: " << n << std::endl;
+        std::cout << "INDEX: " << u << std::endl;
+    });
     if (auto idx = ext.m_name2idx.find(n)) {
         lean_assert(ext.m_decls.find(*idx)->get_arity() == arity);
         ext.m_decls.insert(*idx, vm_decl(n, *idx, arity, fn));
