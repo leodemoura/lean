@@ -881,7 +881,8 @@ static environment add_native(environment const & env, name const & n, unsigned 
         lean_assert(ext.m_decls.find(*idx)->get_arity() == arity);
         ext.m_decls.insert(*idx, vm_decl(n, *idx, arity, fn));
     } else {
-        ext.add(vm_decl(n, ext.m_decls.size(), arity, fn));
+        ext.add(vm_decl(n, ext.m_next_decl_idx, arity, fn));
+        ext.m_next_decl_idx++;
     }
     return update(env, ext);
 }
