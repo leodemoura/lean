@@ -30,9 +30,14 @@ Author: Leonardo de Moura
 #include "library/unification_hint.h"
 #include "library/delayed_abstraction.h"
 #include "library/fun_info.h"
+#include "library/num.h"
 
 #ifndef LEAN_DEFAULT_CLASS_INSTANCE_MAX_DEPTH
 #define LEAN_DEFAULT_CLASS_INSTANCE_MAX_DEPTH 32
+#endif
+
+#ifndef LEAN_DEFAULT_DEFEQ_SMALL_NAT_THRESHOLD
+#define LEAN_DEFAULT_DEFEQ_SMALL_NAT_THRESHOLD 256
 #endif
 
 namespace lean {
@@ -2433,6 +2438,45 @@ expr type_context::try_to_unstuck_using_complete_instance(expr const & e) {
     return complete_instance(e);
 }
 
+
+static bool is_small_nat_arith_term_core(type_context & ctx, expr e, unsigned & threshold) {
+    if (threshold == 0)
+        return false;
+    if (is_app_of(e, get_nat_succ_name(), 1)) {
+        threshold--;
+        return is_small_nat_arith_term_core(ctx, app_arg(e), threshold);
+    } else if (auto arg = is_bit0(e)) {
+        threshold /= 2;
+        return is_small_nat_arith_term_core(ctx, *arg, threshold);
+    } else if (auto arg = is_bit1(e)) {
+        threshold--;
+        threshold /= 2;
+        return is_small_nat_arith_term_core(ctx, *arg, threshold);
+    } else if (is_app_of(e, get_add_name(), 4) || is_app_of(e, get_sub_name(), 4)) {
+        return
+            is_small_nat_arith_term_core(ctx, app_arg(app_fn(e)), threshold) &&
+            is_small_nat_arith_term_core(ctx, app_arg(e), threshold);
+    } else if (is_zero(e) || is_one(e) || is_local(e)) {
+        return true;
+    } else {
+        // tout() << "FAILED AT : " << e << "\n";
+        return false;
+    }
+}
+
+static bool is_small_nat_arith_term(type_context & ctx, expr const & e) {
+    unsigned threshold = LEAN_DEFAULT_DEFEQ_SMALL_NAT_THRESHOLD;
+    return is_small_nat_arith_term_core(ctx, e, threshold);
+}
+
+static bool is_small_nat_arith_constraint(type_context & ctx, expr const & lhs, expr const & rhs) {
+    if (has_expr_metavar(lhs) || has_expr_metavar(rhs))
+        return false;
+    // if (!ctx.is_def_eq(ctx.infer(lhs), mk_nat()))
+    // return false;
+    return is_small_nat_arith_term(ctx, lhs) && is_small_nat_arith_term(ctx, rhs);
+}
+
 bool type_context::on_is_def_eq_failure(expr const & e1, expr const & e2) {
     lean_trace(name({"type_context", "is_def_eq_detail"}),
                scope_trace_env scope(env(), *this);
@@ -2511,6 +2555,19 @@ bool type_context::is_def_eq_core_core(expr const & t, expr const & s) {
 bool type_context::is_def_eq_core(expr const & t, expr const & s) {
     unsigned postponed_sz = m_postponed.size();
     bool r = is_def_eq_core_core(t, s);
+
+    if (!r &&
+        m_transparency_mode == transparency_mode::Reducible) {
+        if (is_small_nat_arith_constraint(*this, t, s)) {
+            transparency_scope _(*this, transparency_mode::Semireducible);
+            bool r = is_def_eq_core(t, s);
+            // if (!r) {
+            //    tout() << ">>>> FAILURE\n" << t << " =?= " << s << "\n";
+            // }
+            return r;
+        }
+    }
+
     if (r && postponed_sz == m_postponed.size()) {
         cache_equiv(t, s);
     }
