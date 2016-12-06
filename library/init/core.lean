@@ -357,6 +357,8 @@ namespace nat
   | (num.pos p) := of_pos_num p
 end nat
 
+attribute [ground_reducible] add nat.add nat.add._main bit0 bit1 one zero
+
 instance : has_zero nat := ⟨nat.zero⟩
 
 instance : has_one nat := ⟨nat.succ (nat.zero)⟩

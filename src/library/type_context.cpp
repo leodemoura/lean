@@ -2433,6 +2433,21 @@ expr type_context::try_to_unstuck_using_complete_instance(expr const & e) {
     return complete_instance(e);
 }
 
+static name * g_ground_reducible = nullptr;
+
+/* See issue #1226 at github */
+static expr whnf_ground_reducible(type_context & ctx, expr const & e) {
+    type_context::transparency_scope _(ctx, transparency_mode::All);
+    return ctx.whnf_pred(e, [&](expr const & e) {
+            expr const & f = get_app_fn(e);
+            if (!is_constant(f)) return false;
+            if (is_reducible(ctx.env(), const_name(f)))
+                return true;
+            attribute const & attr = get_system_attribute(*g_ground_reducible);
+            return attr.is_instance(ctx.env(), const_name(f));
+        });
+}
+
 bool type_context::on_is_def_eq_failure(expr const & e1, expr const & e2) {
     lean_trace(name({"type_context", "is_def_eq_detail"}),
                scope_trace_env scope(env(), *this);
@@ -2454,6 +2469,17 @@ bool type_context::on_is_def_eq_failure(expr const & e1, expr const & e2) {
         }
     }
 
+    /* TODO(Leo): the following trick is a little bit hackish.
+       See issue #1226 at github.
+       We may also try to handle this kind of issue using unification hints, but we would need to improve
+       the unification hint mechanism first. */
+    if (!has_expr_metavar(e1) && !has_expr_metavar(e2) && m_transparency_mode == transparency_mode::Reducible) {
+        expr new_e1 = whnf_ground_reducible(*this, e1);
+        expr new_e2 = whnf_ground_reducible(*this, e2);
+        if (new_e1 != e1 || new_e2 != e2) {
+            return is_def_eq_core(new_e1, new_e2);
+        }
+    }
     return false;
 }
 
@@ -3244,10 +3270,16 @@ void initialize_type_context() {
     g_instance                     = new name{"instance"};
     register_unsigned_option(*g_class_instance_max_depth, LEAN_DEFAULT_CLASS_INSTANCE_MAX_DEPTH,
                              "(class) max allowed depth in class-instance resolution");
+    g_ground_reducible             = new name{"ground_reducible"};
+    register_system_attribute(basic_attribute(*g_ground_reducible, "when performing restricted definitional equality tests "
+                                              "(i.e., where only reducible constants are unfolded), a constant marked as [ground_reducible] "
+                                              "will be unfolded if the terms being tested do not have meta-variables, "
+                                              "this attribute is orthogonal to reducibility attributes (reducible, semireducible, irreducible)"));
 }
 
 void finalize_type_context() {
     delete g_class_instance_max_depth;
     delete g_instance;
+    delete g_ground_reducible;
 }
 }
