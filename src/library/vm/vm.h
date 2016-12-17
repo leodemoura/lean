@@ -460,7 +460,12 @@ public:
     void display(std::ostream & out) const;
 
     void serialize(serializer & s, std::function<name(unsigned)> const & idx2name) const;
+
+    unsigned hash() const;
+    friend bool operator==(vm_instr const & i1, vm_instr const & i2);
 };
+
+inline bool operator!=(vm_instr const & i1, vm_instr const & i2) { return !(i1 == i2); }
 
 vm_instr mk_push_instr(unsigned idx);
 vm_instr mk_drop_instr(unsigned n);

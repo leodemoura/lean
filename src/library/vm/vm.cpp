@@ -11,6 +11,7 @@ Author: Leonardo de Moura
 #include <unordered_map>
 #include <unordered_set>
 #include <iomanip>
+#include "util/hash.h"
 #include "util/flet.h"
 #include "util/interrupt.h"
 #include "util/sstream.h"
@@ -723,6 +724,101 @@ void vm_instr::serialize(serializer & s, std::function<name(unsigned)> const & i
     }
 }
 
+bool operator==(vm_instr const & i1, vm_instr const & i2) {
+    if (i1.m_op != i2.m_op) return false;
+    switch (i1.m_op) {
+    case opcode::InvokeGlobal: case opcode::InvokeBuiltin: case opcode::InvokeCFun:
+        return i1.m_fn_idx == i2.m_fn_idx;
+    case opcode::Closure:
+        return
+            i1.m_fn_idx == i2.m_fn_idx &&
+            i1.m_nargs  == i2.m_nargs;
+    case opcode::Push: case opcode::Proj:
+        return i1.m_idx == i2.m_idx;
+    case opcode::Drop:
+        return i1.m_num == i2.m_num;
+    case opcode::Goto:
+        return i1.m_pc[0] == i2.m_pc[0];
+    case opcode::Cases2: case opcode::NatCases:
+        return
+            i1.m_pc[0] == i2.m_pc[0] &&
+            i1.m_pc[1] == i2.m_pc[1];
+    case opcode::CasesN:
+    case opcode::BuiltinCases:
+        for (unsigned j = 0; j < i1.m_npcs[0] + 1; j++)
+            if (i1.m_npcs[j] != i2.m_npcs[j]) return false;
+        return i1.m_cases_idx == i2.m_cases_idx;
+    case opcode::SConstructor:
+        return i1.m_cidx == i2.m_cidx;
+    case opcode::Constructor:
+        return
+            i1.m_cidx    == i2.m_cidx &&
+            i1.m_nfields == i2.m_nfields;
+    case opcode::Num:
+        return *i1.m_mpz == *i2.m_mpz;
+    case opcode::Pexpr:
+        return *i1.m_expr == *i2.m_expr;
+    case opcode::LocalInfo:
+        return
+            i1.m_local_idx == i2.m_local_idx &&
+            *i1.m_local_info == *i2.m_local_info;
+        break;
+    case opcode::Ret:         case opcode::Destruct:
+    case opcode::Unreachable: case opcode::Apply:
+        return true;
+    }
+    lean_unreachable();
+}
+
+unsigned vm_instr::hash() const {
+    unsigned r = 0;
+    switch (m_op) {
+    case opcode::InvokeGlobal: case opcode::InvokeBuiltin: case opcode::InvokeCFun:
+        r = m_fn_idx;
+        break;
+    case opcode::Closure:
+        r = ::lean::hash(m_fn_idx, m_nargs);
+        break;
+    case opcode::Push: case opcode::Proj:
+        r = m_idx;
+        break;
+    case opcode::Drop:
+        r = m_num;
+        break;
+    case opcode::Goto:
+        r = m_pc[0];
+        break;
+    case opcode::Cases2: case opcode::NatCases:
+        r = ::lean::hash(m_pc[0], m_pc[1]);
+        break;
+    case opcode::CasesN:
+    case opcode::BuiltinCases:
+        r = m_cases_idx;
+        for (unsigned j = 0; j < m_npcs[0] + 1; j++)
+            r = ::lean::hash(r, m_npcs[j]);
+        break;
+    case opcode::SConstructor:
+        r = m_cidx;
+        break;
+    case opcode::Constructor:
+        r = ::lean::hash(m_cidx, m_nfields);
+        break;
+    case opcode::Num:
+        r = m_mpz->hash();
+        break;
+    case opcode::Pexpr:
+        r = m_expr->hash();
+        break;
+    case opcode::LocalInfo:
+        r = m_local_idx;
+        break;
+    case opcode::Ret:         case opcode::Destruct:
+    case opcode::Unreachable: case opcode::Apply:
+        break;
+    }
+    return ::lean::hash(r, static_cast<unsigned>(m_op));
+}
+
 static unsigned read_fn_idx(deserializer & d, name_map<unsigned> const & name2idx) {
     name n;
     d >> n;
@@ -803,6 +899,46 @@ static vm_instr read_vm_instr(deserializer & d, name_map<unsigned> const & name2
     lean_unreachable();
 }
 
+class vm_code_cache {
+    typedef std::vector<vm_instr> code;
+    struct hash_proc {
+        unsigned operator()(code * v) const {
+            return ::lean::hash(v->size(), [&](unsigned i) { return (*v)[i].hash(); });
+        }
+    };
+
+    struct eq_proc {
+        bool operator()(code * v1, code * v2) const {
+            return *v1 == *v2;
+        }
+    };
+
+    std::unordered_set<code *, hash_proc, eq_proc> m_cache;
+public:
+    ~vm_code_cache() {
+        for (code * c : m_cache) {
+            delete c;
+        }
+    }
+
+    code * cache(code * c) {
+        auto it = m_cache.find(c);
+        if (it != m_cache.end()) {
+            delete c;
+            return *it;
+        } else {
+            m_cache.insert(c);
+            return c;
+        }
+    }
+};
+
+MK_THREAD_LOCAL_GET_DEF(vm_code_cache, get_code_cache);
+
+static std::vector<vm_instr> * cache(std::vector<vm_instr> * c) {
+    return get_code_cache().cache(c);
+}
+
 vm_decl_cell::vm_decl_cell(name const & n, unsigned idx, unsigned arity, vm_function fn):
     m_rc(0), m_kind(vm_decl_kind::Builtin), m_name(n), m_idx(idx), m_arity(arity), m_fn(fn) {}
 
@@ -820,14 +956,11 @@ vm_decl_cell::vm_decl_cell(name const & n, unsigned idx, expr const & e, unsigne
         m_arity++;
         it = binding_body(it);
     }
-    m_code = new vm_instr[code_sz];
-    for (unsigned i = 0; i < code_sz; i++)
-        m_code[i] = code[i];
+    std::vector<vm_instr> * v = new std::vector<vm_instr>(code, code+code_sz);
+    m_code = cache(v)->data();
 }
 
 vm_decl_cell::~vm_decl_cell() {
-    if (m_kind == vm_decl_kind::Bytecode)
-        delete[] m_code;
 }
 
 void vm_decl_cell::dealloc() {
