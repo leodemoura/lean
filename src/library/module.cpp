@@ -276,17 +276,33 @@ struct decl_modification : public modification {
     LEAN_MODIFICATION("decl")
 
     declaration m_decl;
+    bool        m_from_olean;
 
     decl_modification() {}
-    decl_modification(declaration const & decl) : m_decl(decl) {}
+    decl_modification(declaration const & decl, bool from_olean = false):
+        m_decl(decl), m_from_olean(from_olean) {}
 
     void perform(environment & env) const override {
+        static mutex mx;
         auto decl = m_decl;
-        decl = unfold_untrusted_macros(env, decl);
+
+        {
+            unique_lock<mutex> lk(mx);
+            std::cout << "perform: " << decl.get_name() << "\n";
+        }
+
+        if (m_from_olean)
+            decl = unfold_untrusted_macros(env, decl);
         if (decl.get_name() == get_sorry_name() && has_sorry(env)) {
             // ignore double sorrys
             return;
         }
+
+        {
+            unique_lock<mutex> lk(mx);
+            std::cout << "done: " << decl.get_name() << "\n";
+        }
+
         // TODO(gabriel): this might be a bit more unsafe here than before
         env = import_helper::add_unchecked(env, decl);
     }
@@ -296,7 +312,7 @@ struct decl_modification : public modification {
     }
 
     static std::shared_ptr<modification const> deserialize(deserializer & d) {
-        return std::make_shared<decl_modification>(read_declaration(d));
+        return std::make_shared<decl_modification>(read_declaration(d), true);
     }
 
     void get_task_dependencies(std::vector<generic_task_result> & deps) const override {
