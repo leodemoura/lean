@@ -10,10 +10,25 @@ axiom dvd_mul (m n k : ℕ) : dvd m n → dvd m (n*k)
 
 axiom nat_mul_cancel_one (m n : ℕ) : m = m * n → n = 1
 
+set_option trace.compiler true
+
+example (i) (p q : i → i → Prop) (a b c d : i) :
+  (∀x y z, p x y ∧ p y z → p x z) →
+  (∀x y z, q x y ∧ q y z → q x z) →
+  (∀x y, q x y → q y x) →
+  (∀x y, p x y ∨ q x y) →
+  p a b ∨ q c d :=
+by super
+
+exit
+/-
 example {m n : ℕ} : prime (m * n) → m = 1 ∨ n = 1 :=
 by super with dvd_refl dvd_mul nat_mul_cancel_one
-
+-/
 example : nat.zero ≠ nat.succ nat.zero := by super
+
+
+exit
 example (x y : ℕ) : nat.succ x = nat.succ y → x = y := by super
 example (i) (a b c : i) : [a,b,c] = [b,c,a] -> a = b ∧ b = c := by super
 

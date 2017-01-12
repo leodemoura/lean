@@ -166,14 +166,17 @@ lift passive state_t.read
 meta def get_precedence : prover (list expr) :=
 do state ← state_t.read, return state^.prec
 
-private meta def get_term_order' : prover (unit × (expr → expr → bool)) := do
+private meta def get_term_order' : prover (expr → expr → bool) := do
 state ← state_t.read,
-return (mk_lpo (map name_of_funsym state^.prec))
+trace "mk_lpo",
+let fn := mk_lpo (map name_of_funsym state^.prec) in
+return fn
 
 meta def get_term_order : prover (expr → expr → bool) := do
 trace "get_term_order",
-lpo ← get_term_order',
-return lpo.2
+state ← state_t.read,
+trace "mk_lpo",
+return (mk_lpo (map name_of_funsym state^.prec))
 
 private meta def set_precedence (new_prec : list expr) : prover unit :=
 do state ← state_t.read, state_t.write { state with prec := new_prec }

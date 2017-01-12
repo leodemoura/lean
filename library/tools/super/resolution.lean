@@ -55,6 +55,8 @@ take given, do active ← get_active, sequence' $ do
   guard $ clause.literal.is_neg (other^.c^.get_lit other_i),
   [maybe_add_resolvent gt given other given_i other_i]
 
+
+
 @[super.inf]
 meta def resolution_inf : inf_decl := inf_decl.mk 40 $
 take given, do gt ← get_term_order, resolution_left_inf gt given >> resolution_right_inf gt given
