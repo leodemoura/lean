@@ -33,9 +33,22 @@ if prec_gt (get_app_fn s) (get_app_fn t) then majo lpo s (get_app_args t)
 else if get_app_fn s = get_app_fn t then lex_ma lpo s t (get_app_args s) (get_app_args t)
 else alpha lpo (get_app_args s) t
 
-meta def prec_gt_of_name_list (ns : list name) : expr → expr → bool :=
-let nis := rb_map.of_list (list.zip_with_index ns) in
-λs t, match (rb_map.find nis (name_of_funsym s), rb_map.find nis (name_of_funsym t)) with
+private meta def prec_gt_of_name_list' (nis : rb_map name ℕ) : unit × (expr → expr → bool) :=
+⟨⟨⟩, λs t, match (rb_map.find nis (name_of_funsym s), rb_map.find nis (name_of_funsym t)) with
 | (some si, some ti) := to_bool (si > ti)
 | _ := ff
-end
+end⟩
+
+private meta def to_indices (ns : list name) :=
+trace "to_indices" $ λx,
+rb_map.of_list ns^.zip_with_index
+
+meta def prec_gt_of_name_list (ns : list name) : unit × (expr → expr → bool) :=
+let nis := to_indices ns in
+prec_gt_of_name_list' nis
+
+private meta def mk_lpo' (gt : unit × (expr → expr → bool)) : unit × (expr → expr → bool) :=
+⟨⟨⟩, lpo gt.2⟩
+
+meta def mk_lpo (ns : list name) : unit × (expr → expr → bool) :=
+mk_lpo' (prec_gt_of_name_list ns)
