@@ -1559,7 +1559,7 @@ Now, we consider some workarounds/approximations.
 
      then we use first-order unification (if approximate() is true)
 */
-bool type_context::process_assignment(expr const & m, expr const & v) {
+bool type_context::process_assignment_core(expr const & m, expr const & v) {
     lean_trace(name({"type_context", "is_def_eq_detail"}),
                scope_trace_env scope(env(), *this);
                tout() << "process_assignment " << m << " := " << v << "\n";);
@@ -1804,6 +1804,32 @@ bool type_context::process_assignment(expr const & m, expr const & v) {
                scope_trace_env scope(env(), *this);
                tout() << "assign: " << mvar << " := " << new_v << "\n";);
     return true;
+}
+
+bool type_context::process_assignment(expr const & m, expr v) {
+    return process_assignment_core(m, v);
+    while (true) {
+        if (process_assignment_core(m, v)) {
+            return true;
+        } else if (is_delta(v)) {
+            /* If v can be delta reduced, we reduce it, and
+               try again.
+
+               This extra step is useful for constraints such as
+
+               ?m_1 t =?= f s
+
+               where first-order unification is used and
+               if (t =?= s) cannot be solved.
+
+               However, after we delta reduce (f s), the constraint
+               may be solvable.
+            */
+            v = whnf_core(*unfold_definition(v));
+        } else {
+            return false;
+        }
+    }
 }
 
 struct check_assignment_failed {};

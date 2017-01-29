@@ -8,7 +8,7 @@ namespace set
 universe variable u
 variable {α : Type u}
 
-lemma ext {a b : set α} (h : ∀ x, x ∈ a ↔ x ∈ b) : a = b :=
+lemma ext {a b : set α} (h : ∀ x : α, x ∈ a ↔ x ∈ b) : a = b :=
 funext (take x, propext (h x))
 
 lemma subset.refl (a : set α) : a ⊆ a := take x, assume H, H
@@ -32,7 +32,7 @@ assume h : x ∈ ∅, h
 lemma mem_empty_eq (x : α) : x ∈ (∅ : set α) = false :=
 rfl
 
-lemma eq_empty_of_forall_not_mem {s : set α} (h : ∀ x, x ∉ s) : s = ∅ :=
+lemma eq_empty_of_forall_not_mem {s : set α} (h : ∀ x : α, x ∉ s) : s = ∅ :=
 ext (take x, iff.intro
   (assume xs, absurd xs (h x))
   (assume xe, absurd xe (not_mem_empty _)))

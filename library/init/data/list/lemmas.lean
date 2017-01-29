@@ -43,16 +43,16 @@ rfl
 
 /- list membership -/
 @[simp]
-lemma mem_nil_iff (a : α) : a ∈ [] ↔ false :=
+lemma mem_nil_iff (a : α) : a ∈ ([] : list α) ↔ false :=
 iff.rfl
 
-@[simp] lemma not_mem_nil (a : α) : a ∉ [] :=
+@[simp] lemma not_mem_nil (a : α) : a ∉ ([] : list α) :=
 iff.mp $ mem_nil_iff a
 
 @[simp] lemma mem_cons_self (a : α) (l : list α) : a ∈ a :: l :=
 or.inl rfl
 
-lemma eq_nil_of_forall_not_mem : ∀ {l : list α}, (∀ a, a ∉ l) → l = nil
+lemma eq_nil_of_forall_not_mem : ∀ {l : list α}, (∀ a : α, a ∉ l) → l = nil
 | []        := assume h, rfl
 | (b :: l') := assume h, absurd (mem_cons_self b l') (h b)
 
