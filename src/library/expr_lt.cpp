@@ -74,7 +74,7 @@ bool is_lt_no_level_params(level const & a, level const & b) {
         return kind(a) < kind(b);
     }
     switch (kind(a)) {
-    case level_kind::Zero:
+    case level_kind::Zero: case level_kind::Prop:
         lean_unreachable(); // LCOV_EXCL_LINE
     case level_kind::Param:
         return false;
@@ -89,13 +89,6 @@ bool is_lt_no_level_params(level const & a, level const & b) {
             return false;
         else
             return is_lt_no_level_params(max_rhs(a), max_rhs(b));
-    case level_kind::IMax:
-        if (is_lt_no_level_params(imax_lhs(a), imax_lhs(b)))
-            return true;
-        else if (is_lt_no_level_params(imax_lhs(b), imax_lhs(a)))
-            return false;
-        else
-            return is_lt_no_level_params(imax_rhs(a), imax_rhs(b));
     case level_kind::Succ:
         return is_lt_no_level_params(succ_of(a), succ_of(b));
     }

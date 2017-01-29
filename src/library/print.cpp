@@ -203,7 +203,7 @@ struct print_expr_fn {
             bool first = true;
             for (auto l : ls) {
                 if (first) first = false; else out() << " ";
-                if (is_max(l) || is_imax(l))
+                if (is_max(l))
                     out() << "(" << l << ")";
                 else
                     out() << l;

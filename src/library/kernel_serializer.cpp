@@ -24,12 +24,11 @@ public:
                 auto k = kind(l);
                 s << static_cast<char>(k);
                 switch (k) {
-                case level_kind::Zero:     break;
+                case level_kind::Zero: case level_kind::Prop:  break;
                 case level_kind::Param:    s << param_id(l);   break;
                 case level_kind::Global:   s << global_id(l);  break;
                 case level_kind::Meta:     s << meta_id(l);    break;
                 case level_kind::Max:      write(max_lhs(l));  write(max_rhs(l)); break;
-                case level_kind::IMax:     write(imax_lhs(l)); write(imax_rhs(l)); break;
                 case level_kind::Succ:     write(succ_of(l));  break;
                 }
             });
@@ -46,6 +45,8 @@ public:
                 switch (k) {
                 case level_kind::Zero:
                     return mk_level_zero();
+                case level_kind::Prop:
+                    return mk_level_prop();
                 case level_kind::Param:
                     return mk_param_univ(read_name(d));
                 case level_kind::Global:
@@ -55,10 +56,6 @@ public:
                 case level_kind::Max: {
                     level lhs = read();
                     return mk_max(lhs, read());
-                }
-                case level_kind::IMax: {
-                    level lhs = read();
-                    return mk_imax(lhs, read());
                 }
                 case level_kind::Succ:
                     return mk_succ(read());

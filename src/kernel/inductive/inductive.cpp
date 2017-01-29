@@ -231,10 +231,7 @@ struct add_inductive_fn {
     typedef std::unique_ptr<type_checker> type_checker_ptr;
     environment          m_env;
     inductive_decl       m_decl;
-    // when kernel sets Type.{0} as impredicative, then
-    // we track whether the resultant universe cannot be zero for any
-    // universe level instantiation
-    bool                 m_is_not_zero;
+    bool                 m_is_not_prop;
     list<level>          m_levels;       // m_decl.m_level_params ==> m_levels
     type_checker_ptr     m_tc;
 
@@ -262,7 +259,7 @@ struct add_inductive_fn {
                      bool is_trusted):
         m_env(env), m_decl(decl),
         m_tc(new type_checker(m_env, true, false)) {
-        m_is_not_zero = false;
+        m_is_not_prop = false;
         m_levels      = param_names_to_levels(decl.m_level_params);
         m_is_trusted  = is_trusted;
     }
@@ -306,13 +303,9 @@ struct add_inductive_fn {
         if (i != m_decl.m_num_params)
             throw kernel_exception(m_env, "number of parameters mismatch in inductive datatype declaration");
         t = tc().ensure_sort(t);
-        // We track whether the resultant universe
-        // is never zero (under any parameter assignment).
-        // TODO(Leo): when the resultant universe may be 0 and not zero depending on parameter assignment,
-        // we may generate two recursors: one when it is 0, and another one when it is not.
-        m_is_not_zero = is_not_zero(sort_level(t));
-        m_it_level = sort_level(t);
-        m_it_const = mk_constant(m_decl.m_name, m_levels);
+        m_is_not_prop = !is_prop(sort_level(t));
+        m_it_level    = sort_level(t);
+        m_it_const    = mk_constant(m_decl.m_name, m_levels);
     }
 
     /** \brief Add all datatype declarations to environment. */
@@ -444,8 +437,8 @@ struct add_inductive_fn {
 
     /** \brief Return true if type former C in the recursor can only map to Type.{0} */
     bool elim_only_at_universe_zero() {
-        if (m_is_not_zero) {
-            // If Type.{0} is not impredicative or the resultant inductive datatype is not in Type.{0},
+        if (m_is_not_prop) {
+            // If the resultant inductive datatype is not in Prop,
             // then the recursor may return Type.{l} where l is a universe level parameter.
             return false;
         }

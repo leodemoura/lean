@@ -90,21 +90,14 @@ optional<expr> unfold_app(environment const & env, expr const & e) {
 
 optional<level> dec_level(level const & l) {
     switch (kind(l)) {
-    case level_kind::Zero: case level_kind::Param: case level_kind::Global: case level_kind::Meta:
+    case level_kind::Zero:  case level_kind::Prop:
+    case level_kind::Param: case level_kind::Global: case level_kind::Meta:
         return none_level();
     case level_kind::Succ:
         return some_level(succ_of(l));
     case level_kind::Max:
         if (auto lhs = dec_level(max_lhs(l))) {
         if (auto rhs = dec_level(max_rhs(l))) {
-            return some_level(mk_max(*lhs, *rhs));
-        }}
-        return none_level();
-    case level_kind::IMax:
-        // Remark: the following mk_max is not a typo. The following
-        // assertion justifies it.
-        if (auto lhs = dec_level(imax_lhs(l))) {
-        if (auto rhs = dec_level(imax_rhs(l))) {
             return some_level(mk_max(*lhs, *rhs));
         }}
         return none_level();

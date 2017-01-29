@@ -532,9 +532,9 @@ expr mk_arrow(expr const & t, expr const & e, tag g) {
 }
 
 static expr * g_Prop  = nullptr;
-static expr * g_Type1 = nullptr;
+static expr * g_Type0 = nullptr;
 expr mk_Prop() { return *g_Prop; }
-expr mk_Type() { return *g_Type1; }
+expr mk_Type() { return *g_Type0; }
 
 unsigned get_weight(expr const & e) {
     switch (e.kind()) {
@@ -738,13 +738,13 @@ std::ostream & operator<<(std::ostream & out, expr_kind const & k) {
 void initialize_expr() {
     g_dummy        = new expr(mk_constant("__expr_for_default_constructor__"));
     g_default_name = new name("a");
-    g_Type1        = new expr(mk_sort(mk_level_one()));
-    g_Prop         = new expr(mk_sort(mk_level_zero()));
+    g_Type0        = new expr(mk_sort(mk_level_zero()));
+    g_Prop         = new expr(mk_sort(mk_level_prop()));
 }
 
 void finalize_expr() {
     delete g_Prop;
-    delete g_Type1;
+    delete g_Type0;
     delete g_dummy;
     delete g_default_name;
 }

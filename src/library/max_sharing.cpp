@@ -28,8 +28,8 @@ struct max_sharing_fn::imp {
             return *r;
         level res;
         switch (l.kind()) {
-        case level_kind::Zero:   case level_kind::Param:
-        case level_kind::Global: case level_kind::Meta:
+        case level_kind::Zero:  case level_kind::Prop:
+        case level_kind::Param: case level_kind::Global: case level_kind::Meta:
             res = l;
             break;
         case level_kind::Succ:
@@ -37,9 +37,6 @@ struct max_sharing_fn::imp {
             break;
         case level_kind::Max:
             res = update_max(l, apply(max_lhs(l)), apply(max_rhs(l)));
-            break;
-        case level_kind::IMax:
-            res = update_max(l, apply(imax_lhs(l)), apply(imax_rhs(l)));
             break;
         }
         m_lvl_cache.insert(res);

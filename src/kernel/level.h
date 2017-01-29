@@ -20,14 +20,11 @@ struct level_cell;
 /**
    \brief Universe level kinds.
 
-   - Zero         : It is also Prop level if env.impredicative() is true
+   - Prop         : universe level for propositions
+
+   - Zero         : universe zero
    - Succ(l)      : successor level
    - Max(l1, l2)  : maximum of two levels
-   - IMax(l1, l2) : IMax(x, zero)    = zero             for all x
-                    IMax(x, succ(y)) = Max(x, succ(y))  for all x, y
-
-                    We use IMax to handle Pi-types, and Max for Sigma-types.
-                    Their definitions "mirror" the typing rules for Pi and Sigma.
 
    - Param(n)     : A parameter. In Lean, we have universe polymorphic definitions.
    - Global(n)    : A global level.
@@ -35,7 +32,7 @@ struct level_cell;
                     The elaborator is responsible for replacing Meta with level expressions
                     that do not contain Meta.
 */
-enum class level_kind { Zero, Succ, Max, IMax, Param, Global, Meta };
+enum class level_kind { Prop, Zero, Succ, Max, Param, Global, Meta };
 
 /**
    \brief Universe level.
@@ -84,10 +81,10 @@ level cache(level const & l);
 bool is_cached(level const & l);
 void flush_level_cache();
 
+level const & mk_level_prop();
 level const & mk_level_zero();
 level const & mk_level_one();
 level mk_max(level const & l1, level const & l2);
-level mk_imax(level const & l1, level const & l2);
 level mk_succ(level const & l);
 level mk_param_univ(name const & n);
 level mk_global_univ(name const & n);
@@ -98,21 +95,19 @@ pair<level, unsigned> to_offset(level l);
 
 inline unsigned hash(level const & l) { return l.hash(); }
 inline level_kind kind(level const & l) { return l.kind(); }
+inline bool is_prop(level const & l)   { return kind(l) == level_kind::Prop; }
 inline bool is_zero(level const & l)   { return kind(l) == level_kind::Zero; }
 inline bool is_param(level const & l)  { return kind(l) == level_kind::Param; }
 inline bool is_global(level const & l) { return kind(l) == level_kind::Global; }
 inline bool is_meta(level const & l)   { return kind(l) == level_kind::Meta; }
 inline bool is_succ(level const & l)   { return kind(l) == level_kind::Succ; }
 inline bool is_max(level const & l)    { return kind(l) == level_kind::Max; }
-inline bool is_imax(level const & l)   { return kind(l) == level_kind::IMax; }
 bool is_one(level const & l);
 
 unsigned get_depth(level const & l);
 
 level const & max_lhs(level const & l);
 level const & max_rhs(level const & l);
-level const & imax_lhs(level const & l);
-level const & imax_rhs(level const & l);
 level const & succ_of(level const & l);
 name const & param_id(level const & l);
 name const & global_id(level const & l);
@@ -147,7 +142,7 @@ level update_succ(level const & l, level const & new_arg);
    \brief Return a new level expression based on <tt>l == max(lhs, rhs)</tt>, where \c lhs is replaced with
    \c new_lhs and \c rhs is replaced with \c new_rhs.
 
-   \pre is_max(l) || is_imax(l)
+   \pre is_max(l)
 */
 level update_max(level const & l, level const & new_lhs, level const & new_rhs);
 
@@ -220,12 +215,6 @@ level instantiate(level const & l, level_param_names const & ps, levels const & 
 
 /** \brief Printer for debugging purposes */
 std::ostream & operator<<(std::ostream & out, level const & l);
-
-/**
-   \brief If the result is true, then forall assignments \c A that assigns all parameters, globals and metavariables occuring
-   in \c l, l[A] != zero.
-*/
-bool is_not_zero(level const & l);
 
 /** \brief Pretty print the given level expression, unicode characters are used if \c unicode is \c true. */
 format pp(level l, bool unicode, unsigned indent);

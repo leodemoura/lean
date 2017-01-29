@@ -147,10 +147,12 @@ expr type_checker::infer_pi(expr const & _e, bool infer_only) {
     e = instantiate_rev(e, ls.size(), ls.data());
     expr s  = ensure_sort_core(infer_type_core(e, infer_only), e);
     level r = sort_level(s);
+    if (is_prop(r))
+        return mk_Prop();
     unsigned i = ls.size();
     while (i > 0) {
         --i;
-        r = mk_imax(us[i], r);
+        r = mk_max(us[i], r);
     }
     return mk_sort(r);
 }
