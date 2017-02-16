@@ -419,6 +419,7 @@ struct parse_tactic_fn {
     }
 
     expr parse_elem_core(bool save_info) {
+        save_info = false;
         try {
             m_p.check_break_before();
             if (m_p.curr_is_identifier())
@@ -451,6 +452,7 @@ struct parse_tactic_fn {
     }
 
     expr parse_elem(bool save_info) {
+        save_info = false;
         if (m_p.curr_is_token(get_begin_tk()) ||
             m_p.curr_is_token(get_lcurly_tk())) {
             auto pos = m_p.pos();
@@ -601,14 +603,14 @@ struct parse_begin_end_block_fn {
         }
         m_tac_class = new_tac_class;
         buffer<expr> to_concat;
-        to_concat.push_back(mk_tactic_save_info(m_p, start_pos, m_tac_class));
+        // to_concat.push_back(mk_tactic_save_info(m_p, start_pos, m_tac_class));
         try {
             while (!m_p.curr_is_token(end_token)) {
                 pos_info pos = m_p.pos();
                 try {
                     to_concat.push_back(parse_tactic());
                     if (!m_p.curr_is_token(end_token)) {
-                        to_concat.push_back(mk_save_info());
+                        // to_concat.push_back(mk_save_info());
                         m_p.check_token_next(get_comma_tk(), "invalid 'begin-end' expression, ',' expected");
                     }
                 } catch (break_at_pos_exception & ex) {
@@ -623,7 +625,7 @@ struct parse_begin_end_block_fn {
         }
         auto end_pos = m_p.pos();
         expr r = concat(to_concat, start_pos);
-        r = concat(r, mk_tactic_save_info(m_p, end_pos, m_tac_class), end_pos);
+        // r = concat(r, mk_tactic_save_info(m_p, end_pos, m_tac_class), end_pos);
         try {
             m_p.next();
         } catch (break_at_pos_exception & ex) {

@@ -1200,6 +1200,7 @@ expr elaborator::mk_auto_param(expr const & name_lit, expr const & expected_type
 
 
 optional<expr> elaborator::process_optional_and_auto_params(expr type, expr const & ref, buffer<expr> & eta_args, buffer<expr> & new_args) {
+    return none_expr();
     unsigned sz1 = eta_args.size();
     unsigned sz2 = new_args.size();
     optional<expr> result_type;
@@ -1469,13 +1470,23 @@ expr elaborator::visit_base_app_simple(expr const & _fn, arg_mask amask, buffer<
 
 expr elaborator::visit_base_app_core(expr const & fn, arg_mask amask, buffer<expr> const & args,
                                      bool args_already_visited, optional<expr> const & expected_type, expr const & ref) {
+    static name g_product({"gapt_export", "product"});
+    static name g_quotient({"gapt_export", "quotient"});
+    static name g_difference({"gapt_export", "difference"});
+
     /** Check if this application is a candidate for propagating the expected type to arguments */
-    if (args_already_visited || /* if the arguments have already been visited, then there is no point. */
+    if (true || args_already_visited || /* if the arguments have already been visited, then there is no point. */
         amask != arg_mask::Default || /* we do not propagate expected type info when @ and @@ are used */
         !is_with_expected_candidate(fn) ||
-        !expected_type) {
+        !expected_type ||
+        is_constant(fn, g_product) ||
+        is_constant(fn, g_difference) ||
+        is_constant(fn, g_quotient) || args.size() == 0
+        ) {
         return visit_base_app_simple(fn, amask, args, args_already_visited, expected_type, ref);
     }
+
+    // tout() << fn << " " << ((unsigned)fn.kind()) << " " << is_constant(fn, g_product) << " " << *expected_type << "\n";
 
     snapshot C(*this);
     first_pass_info info;
