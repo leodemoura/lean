@@ -13,6 +13,7 @@ Author: Leonardo de Moura
 #include "library/equations_compiler/compiler.h"
 #include "library/equations_compiler/util.h"
 #include "library/equations_compiler/pack_domain.h"
+#include "library/equations_compiler/primitive_rec.h"
 #include "library/equations_compiler/structural_rec.h"
 #include "library/equations_compiler/unbounded_rec.h"
 #include "library/equations_compiler/elim_match.h"
@@ -42,6 +43,8 @@ static expr compile_equations_core(environment & env, options const & opts,
     if (header.m_num_fns == 1) {
         if (!is_recursive_eqns(ctx, eqns)) {
             return mk_equations_result(mk_nonrec(env, opts, mctx, lctx, eqns));
+        } else if (optional<expr> r = try_primitive_rec(env, opts, mctx, lctx, eqns)) {
+            return mk_equations_result(*r);
         } else if (optional<expr> r = try_structural_rec(env, opts, mctx, lctx, eqns)) {
             return mk_equations_result(*r);
         }
