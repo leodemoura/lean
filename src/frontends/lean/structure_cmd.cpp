@@ -46,6 +46,7 @@ Author: Leonardo de Moura
 #include "library/constructions/cases_on.h"
 #include "library/constructions/projection.h"
 #include "library/constructions/no_confusion.h"
+#include "library/constructions/injective.h"
 #include "library/inductive_compiler/add_decl.h"
 #include "library/tactic/elaborator_exception.h"
 #include "frontends/lean/parser.h"
@@ -1063,7 +1064,7 @@ struct structure_cmd_fn {
         }
     }
 
-    void declare_no_confustion() {
+    void declare_no_confusion() {
         if (!has_eq_decls(m_env))
             return;
         if (!has_heq_decls(m_env))
@@ -1071,6 +1072,13 @@ struct structure_cmd_fn {
         m_env = mk_no_confusion(m_env, m_name);
         name no_confusion_name(m_name, "no_confusion");
         add_alias(no_confusion_name);
+
+        if (!has_and_decls(m_env))
+            return;
+
+        m_env = mk_injective_lemmas(m_env, m_name);
+        add_alias(mk_injective_name(m_name));
+        add_alias(mk_injective_arrow_name(m_name));
     }
 
     void add_doc_string() {
@@ -1114,7 +1122,7 @@ struct structure_cmd_fn {
         declare_coercions();
         add_doc_string();
         if (!m_inductive_predicate) {
-            declare_no_confustion();
+            declare_no_confusion();
         }
         return m_env;
     }
