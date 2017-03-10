@@ -854,7 +854,7 @@ class add_nested_inductive_decl_fn {
         prove_pi_pack_unpack(pi_pack, pi_unpack, ldeps, nested_pack_fn, nested_unpack_fn, arg_ty);
         prove_pi_unpack_pack(pi_pack, pi_unpack, ldeps, nested_pack_fn, nested_unpack_fn, arg_ty);
         prove_pi_pack_sizeof(pi_pack, ldeps, nested_pack_fn, arg_ty);
-        prove_pi_pack_injective(pi_pack, ldeps, nested_pack_fn, arg_ty, m_nested_decl.get_num_params() + ldeps.size() + 1);
+        prove_pi_pack_injective(m_nested_decl.get_num_params() + ldeps.size() + 1);
 
         return optional<pair<expr, unsigned> >(pi_pack, m_nested_decl.get_num_params() + ldeps.size() + 1);
     }
@@ -1081,7 +1081,7 @@ class add_nested_inductive_decl_fn {
         prove_nested_pack_unpack(start, end, c_nested_pack, c_nested_unpack, indices, nest_idx);
         prove_nested_unpack_pack(start, end, c_nested_pack, c_nested_unpack, indices, nest_idx);
         prove_nested_pack_sizeof(start, end, c_nested_pack, indices, nest_idx);
-        prove_nested_pack_injective(start, end, c_nested_pack, indices, nest_idx);
+        prove_nested_pack_injective(nest_idx);
 
         return optional<expr_pair>(c_nested_pack, c_nested_unpack);
     }
@@ -1263,7 +1263,7 @@ class add_nested_inductive_decl_fn {
         prove_primitive_pack_unpack(indices);
         prove_primitive_unpack_pack(indices);
         prove_primitive_pack_sizeof(indices);
-        prove_primitive_pack_injective(indices);
+        prove_primitive_pack_injective();
     }
 
     /////////////////////////////
@@ -1512,7 +1512,7 @@ class add_nested_inductive_decl_fn {
         m_lemmas = add(tctx_synth, m_lemmas, n, LEAN_DEFAULT_PRIORITY);
     }
 
-    void prove_primitive_pack_injective(buffer<expr> const & index_locals) {
+    void prove_primitive_pack_injective() {
         if (!m_prove_inj) return;
         name pack_name = mk_primitive_name(fn_type::PACK);
         expr goal = mk_pack_injective_type(pack_name);
@@ -1566,7 +1566,7 @@ class add_nested_inductive_decl_fn {
         m_lemmas = add(tctx_synth, m_lemmas, n, LEAN_DEFAULT_PRIORITY);
     }
 
-    void prove_nested_pack_injective(expr const & start, expr const & /* end */, expr const & nested_pack, buffer<expr> const & index_locals, unsigned nest_idx) {
+    void prove_nested_pack_injective(unsigned nest_idx) {
         if (!m_prove_inj) return;
         name pack_name = mk_nested_name(fn_type::PACK, nest_idx);
         expr goal = mk_pack_injective_type(pack_name);
@@ -1663,7 +1663,7 @@ class add_nested_inductive_decl_fn {
         m_tctx.set_env(m_env);
     }
 
-    void prove_pi_pack_injective(expr const & pi_pack, buffer<expr> const & ldeps, expr const & nested_pack_fn, expr const & arg_ty, unsigned arity) {
+    void prove_pi_pack_injective(unsigned arity) {
         if (!m_prove_inj) return;
         name pack_name = mk_pi_name(fn_type::PACK);
         expr goal = mk_pack_injective_type(pack_name, optional<unsigned>(arity));
