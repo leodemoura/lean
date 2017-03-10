@@ -10,9 +10,9 @@ namespace tactic
 open nat tactic environment expr list
 
 private meta def at_end₂ (e₁ e₂ : expr) : ℕ → tactic (list (option expr))
-| 2 := return [some e₁, some e₂]
+| 2     := return [some e₁, some e₂]
 | (n+3) := at_end₂ (n+2) >>= (λ xs, return (none :: xs))
-| _ := fail "at_end expected arity > 1"
+| _     := fail "at_end expected arity > 1"
 
 private meta def mk_intro_name : name → list name → name
 | n₁ (n₂ :: ns) := n₂

@@ -79,11 +79,6 @@ private meta def intros_and_subst : expr → tactic unit
 
 | e           := do skip
 
-private meta def ilast₃ {α : Type*} [inhabited α] : list α → tactic (α × α × α)
-| [a, b, c]    := return (a, b, c)
-| (a::b::c::l) := ilast₃ (b::c::l)
-| _            := fail "ilast₃ expecting list of at least 3 args"
-
 private meta def destruct_conjuncts : name → tactic unit
 | n := do
   H ← get_local n,
