@@ -523,6 +523,8 @@ public:
     optional<expr> get_tmp_mvar_assignment(unsigned idx) const;
     optional<level> get_tmp_assignment(level const & l) const;
     optional<expr> get_tmp_assignment(expr const & e) const;
+    void assign_tmp(unsigned idx, level const & l);
+    void assign_tmp(unsigned idx, expr const & v);
     level mk_tmp_univ_mvar();
     expr mk_tmp_mvar(expr const & type);
 

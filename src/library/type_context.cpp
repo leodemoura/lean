@@ -1204,28 +1204,34 @@ optional<expr> type_context::get_tmp_assignment(expr const & e) const {
     return get_tmp_mvar_assignment(to_meta_idx(e));
 }
 
-void type_context::assign_tmp(level const & u, level const & l) {
+void type_context::assign_tmp(unsigned idx, level const & l) {
     lean_assert(in_tmp_mode());
-    lean_assert(is_idx_metauniv(u));
-    lean_assert(to_meta_idx(u) < m_tmp_data->m_uassignment.size());
-    unsigned idx = to_meta_idx(u);
+    lean_assert(idx < m_tmp_data->m_uassignment.size());
     if (!m_scopes.empty() && !m_tmp_data->m_uassignment[idx]) {
         m_tmp_data->m_trail.emplace_back(tmp_trail_kind::Level, idx);
     }
     m_tmp_data->m_uassignment[idx] = l;
 }
 
-void type_context::assign_tmp(expr const & m, expr const & v) {
+void type_context::assign_tmp(level const & u, level const & l) {
+    lean_assert(is_idx_metauniv(u));
+    assign_tmp(to_meta_idx(u), l);
+}
+
+void type_context::assign_tmp(unsigned idx, expr const & v) {
     lean_assert(in_tmp_mode());
-    lean_assert(is_idx_metavar(m));
-    lean_assert(to_meta_idx(m) < m_tmp_data->m_eassignment.size());
-    unsigned idx = to_meta_idx(m);
+    lean_assert(idx < m_tmp_data->m_eassignment.size());
     lean_trace(name({"type_context", "tmp_vars"}),
                tout() << "assign ?x_" << idx << " := " << v << "\n";);
     if (!m_scopes.empty() && !m_tmp_data->m_eassignment[idx]) {
         m_tmp_data->m_trail.emplace_back(tmp_trail_kind::Expr, idx);
     }
-    m_tmp_data->m_eassignment[to_meta_idx(m)] = v;
+    m_tmp_data->m_eassignment[idx] = v;
+}
+
+void type_context::assign_tmp(expr const & m, expr const & v) {
+    lean_assert(is_idx_metavar(m));
+    assign_tmp(to_meta_idx(m), v);
 }
 
 level type_context::mk_tmp_univ_mvar() {
