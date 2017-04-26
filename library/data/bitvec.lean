@@ -40,8 +40,10 @@ section shift
 
   local attribute [ematch] nat.add_sub_assoc sub_le le_of_not_ge sub_eq_zero_of_le
   def fill_shr (x : bitvec n) (i : ℕ) (fill : bool) : bitvec n :=
-  bitvec.cong (by async { begin [smt] by_cases (i ≤ n), eblast end }) $
+  bitvec.cong (begin [smt] by_cases (i ≤ n), eblast, trace_state end) $
     repeat fill (min n i) ++ₜ taken (n-i) x
+
+#exit
 
   -- unsigned shift right
   def ushr (x : bitvec n) (i : ℕ) : bitvec n :=
