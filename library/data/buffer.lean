@@ -65,11 +65,11 @@ b.append_list s.reverse
 
 def append_array {α : Type u} {n : nat} (nz : n > 0) : buffer α → array α n → ∀ i : nat, i < n → buffer α
 | ⟨m, b⟩ a 0     _ :=
-  let i : fin n := ⟨n - 1, array.lt_aux_2 nz⟩ in
+  let i : fin n := ⟨n - 1, fn_array.lt_aux_2 nz⟩ in
   ⟨m+1, b.push_back (a.read i)⟩
 | ⟨m, b⟩ a (j+1) h :=
-  let i : fin n := ⟨n - 2 - j, array.lt_aux_3 h⟩ in
-  append_array ⟨m+1, b.push_back (a.read i)⟩ a j (array.lt_aux_1 h)
+  let i : fin n := ⟨n - 2 - j, fn_array.lt_aux_3 h⟩ in
+  append_array ⟨m+1, b.push_back (a.read i)⟩ a j (fn_array.lt_aux_1 h)
 
 protected def append {α : Type u} : buffer α → buffer α → buffer α
 | b ⟨0, a⟩   := b
