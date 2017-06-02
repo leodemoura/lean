@@ -77,6 +77,7 @@ reserve infix ` ∣ `:50
 reserve infixl ` ++ `:65
 reserve infixr ` :: `:67
 reserve infixl `; `:1
+reserve infixl `;; `:1
 
 universes u v w
 
@@ -303,6 +304,11 @@ class has_sep (α : inout Type u) (γ : Type v) :=
 (sep : (α → Prop) → γ → γ)
 /- Type class for set-like membership -/
 class has_mem (α : inout Type u) (γ : Type v) := (mem : α → γ → Prop)
+/- Heterogeneous andthen type class -/
+class has_handthen (α : Type u) (β : Type v) (σ : inout Type w) := (handthen : α → β → σ)
+
+def handthen {α : Type u} {β : Type v} {σ : Type w} [has_handthen α β σ] : α → β → σ :=
+has_handthen.handthen σ
 
 infix ∈        := has_mem.mem
 notation a ∉ s := ¬ has_mem.mem a s
@@ -324,6 +330,7 @@ infix ∩        := has_inter.inter
 infix ⊆        := has_subset.subset
 infix ⊂        := has_ssubset.ssubset
 infix \        := has_sdiff.sdiff
+infix ;;       := handthen
 
 export has_append (append)
 
