@@ -6,7 +6,7 @@ Authors: Leonardo de Moura
 prelude
 import init.meta.tactic init.meta.rewrite_tactic init.meta.simp_tactic
 import init.meta.smt.congruence_closure init.category.combinators
-import init.meta.interactive_base
+import init.meta.interactive_base init.meta.generalize_proofs
 
 open lean
 open lean.parser
@@ -399,7 +399,11 @@ meta def generalize2 (p : parse qexpr) (x : parse ident) (h : parse ident) : tac
 do tgt ← target,
    e ← to_expr p,
    let e' := tgt.replace $ λa n, if a = e then some (var n.succ) else none,
-   to_expr ``(Π x, %%e = x → %%e') >>= assert h,
+   tgt' ← (do
+     tgt' ← to_expr ``(Π x, %%e = x → %%e'),
+     type_check tgt',
+     return tgt') <|> to_expr ``(Π x, %%e = x → %%tgt),
+   assert h tgt',
    swap,
    t ← get_local h,
    exact ``(%%t %%p rfl),
@@ -415,6 +419,9 @@ do x ← mk_fresh_name,
    generalize2 p x h,
    t ← get_local x,
    induction (to_pexpr t) rec_name hs ([] : list name)
+
+meta def generalize_proofs : parse ident_* → tactic unit :=
+tactic.generalize_proofs
 
 meta def trivial : tactic unit :=
 tactic.triv <|> tactic.reflexivity <|> tactic.contradiction <|> fail "trivial tactic failed"
