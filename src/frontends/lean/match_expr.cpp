@@ -22,7 +22,7 @@ bool is_match_binder_name(name const & n) { return n == *g_match_name; }
 expr parse_match(parser & p, unsigned, expr const *, pos_info const & pos) {
     parser::local_scope scope1(p);
     match_definition_scope scope2;
-    equations_header header = mk_equations_header(scope2.get_name());
+    equations_header header = mk_equations_header(scope2.get_name(), scope2.get_private_name());
     buffer<expr> eqns;
     buffer<expr> ts;
     try {
