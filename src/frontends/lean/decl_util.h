@@ -29,7 +29,9 @@ struct decl_modifiers {
 
 /** \brief In Lean, declarations may contain nested definitions.
     This object is used to propagate relevant flags to
-    nested definitions. */
+    nested definitions.
+
+    It is used to set/restore the thread local information. */
 class declaration_info_scope {
     declaration_info_scope(name const & ns, def_cmd_kind kind, decl_modifiers const & modifiers);
 public:
@@ -41,24 +43,48 @@ public:
 /** \brief Similar to declaration_info_scope, but it is used to update
     naming prefix for nested definitions. */
 class declaration_name_scope {
+    /* Remark: m_name == m_private_name && m_old_prefix == m_old_private_prefix for non private declarations */
     name     m_name;
-    name     m_old_prefix;
+    name     m_private_name;
+    name     m_old_prefix; /* save current user facing prefix */
+    name     m_old_private_prefix; /* save current prefix */
     unsigned m_old_next_match_idx;
+    /* Remark: the operation prefix + name in the following constructors and methods tries to avoid propagating
+       the string `_main` into names. That is, `foo._main` + `bla` is `foo.bla`. */
 public:
+    /* Save the current prefix and match_idx, and set m_name to current prefix + n. */
     declaration_name_scope(name const & n);
+    /* Save the current prefix and match_idx, and reset get_definition_info().m_next_match_idx. */
     declaration_name_scope();
-    ~declaration_name_scope();
+    /* Set m_name to current prefix + n. This method is used when the constructor declaration_name_scope
+       has been used. */
     void set_name(name const & n);
+    /* Restore prefix and match_idx. */
+    ~declaration_name_scope();
     name const & get_name() const { return m_name; }
+    name const & get_private_name() const { return m_private_name; }
+};
+
+/** \brief Auxiliary scope for setting m_private_prefix.
+    It is used with declaration_name_scope. */
+class private_name_scope {
+    name     m_old_private_prefix; /* save current prefix */
+public:
+    /* Remark: If is_private == false, then this auxiliary scope is a no-op. */
+    private_name_scope(bool is_private, environment & env);
+    ~private_name_scope();
 };
 
 /** \brief Auxiliary scope to compute the name for a nested match expression.
     In Lean, we create auxiliary declarations for match expressions. */
 class match_definition_scope {
+    /* Remark: m_name == m_private_name for non private declarations. */
     name m_name;
+    name m_private_name;
 public:
     match_definition_scope();
     name const & get_name() const { return m_name; }
+    name const & get_private_name() const { return m_private_name; }
 };
 
 /** \brief Return true if the current scope used match-expressions */
@@ -128,8 +154,8 @@ environment add_alias(environment const & env, bool is_protected, name const & c
 
 /** \brief Create an equations header for the given function names.
     It uses the information set using declaration_info_scope */
-equations_header mk_equations_header(list<name> const & fn_names);
-equations_header mk_equations_header(name const & fn_name);
+equations_header mk_equations_header(list<name> const & fn_names, list<name> const & fn_prv_names);
+equations_header mk_equations_header(name const & fn_name, name const & fn_prv_name);
 
 expr replace_locals_preserving_pos_info(expr const & e, buffer<expr> const & from, buffer<expr> const & to);
 expr replace_local_preserving_pos_info(expr const & e, expr const & from, expr const & to);
