@@ -376,7 +376,7 @@ MK_THREAD_LOCAL_GET_DEF(definition_info, get_definition_info);
 declaration_info_scope::declaration_info_scope(name const & ns, decl_cmd_kind kind, decl_modifiers const & modifiers) {
     definition_info & info = get_definition_info();
     lean_assert(info.m_prefix.is_anonymous());
-    info.m_prefix           = ns;
+    info.m_prefix           = name(); // prefix is used to create local name
     /* Remark: if info.m_actual_prefix is not `anonymous`, then it has already been set using private_name_scope */
     if (info.m_actual_prefix.is_anonymous()) {
         info.m_actual_prefix = ns;

@@ -17,9 +17,7 @@ example (a b : nat) (p : b = 0) (h : a = foo b) : a = 1 :=
 begin
   simp [foo] at h,
   simp [p] at h,
-  -- TODO(Leo):
-  -- simp [foo._match_1] does not work. We are not creating the alias to the private name.
-  simp [bla.foo._match_1] at h,
+  simp [foo._match_1] at h,
   guard_hyp h := a = 1,
   exact h
 end
