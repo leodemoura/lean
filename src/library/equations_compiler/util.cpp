@@ -12,6 +12,7 @@ Author: Leonardo de Moura
 #include "kernel/scope_pos_info_provider.h"
 #include "kernel/free_vars.h"
 #include "library/util.h"
+#include "library/aliases.h"
 #include "library/trace.h"
 #include "library/app_builder.h"
 #include "library/private.h"
@@ -280,6 +281,7 @@ pair<environment, expr> mk_aux_definition(environment const & env, options const
     name new_c          = prv_c;
     if (header.m_is_private) {
         new_env = register_private_name(env, c, prv_c);
+        new_env = add_expr_alias(env, c, prv_c);
     }
     expr r;
     try {
