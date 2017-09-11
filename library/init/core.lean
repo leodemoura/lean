@@ -384,7 +384,7 @@ def std.priority.default : nat := 1000
 def std.priority.max     : nat := 0xFFFFFFFF
 
 namespace nat
-  protected def prio : nat := std.priority.default + 100
+  protected def prio := std.priority.default + 100
 end nat
 
 /-

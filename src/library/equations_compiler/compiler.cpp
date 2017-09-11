@@ -37,12 +37,6 @@ static eqn_compiler_result compile_equations_core(environment & env, options con
     trace_compiler(tout() << "nested recursion:   " << has_nested_rec(eqns) << "\n";);
     trace_compiler(tout() << "using_well_founded: " << is_wf_equations(eqns) << "\n";);
     equations_header const & header = get_equations_header(eqns);
-/*
-    for (auto n : header.m_fn_names)
-        tout() << "   >> " << n << "\n";
-    for (auto n : header.m_fn_private_names)
-        tout() << "prv>> " << n << "\n";
-*/
     lean_assert(header.m_is_meta || !has_nested_rec(eqns));
 
     if (header.m_is_meta) {
