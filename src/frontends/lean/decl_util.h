@@ -13,7 +13,7 @@ namespace lean {
 class parser;
 class elaborator;
 
-enum def_cmd_kind { Theorem, Definition, Example, Instance };
+enum class decl_cmd_kind { Theorem, Definition, Example, Instance, Var };
 
 struct decl_modifiers {
     bool m_is_private{false};
@@ -33,9 +33,9 @@ struct decl_modifiers {
 
     It is used to set/restore the thread local information. */
 class declaration_info_scope {
-    declaration_info_scope(name const & ns, def_cmd_kind kind, decl_modifiers const & modifiers);
+    declaration_info_scope(name const & ns, decl_cmd_kind kind, decl_modifiers const & modifiers);
 public:
-    declaration_info_scope(parser const & p, def_cmd_kind kind, decl_modifiers const & modifiers);
+    declaration_info_scope(parser const & p, decl_cmd_kind kind, decl_modifiers const & modifiers);
     ~declaration_info_scope();
     bool gen_aux_lemmas() const;
 };
@@ -69,6 +69,7 @@ public:
     It is used with declaration_name_scope. */
 class private_name_scope {
     name     m_old_private_prefix; /* save current prefix */
+    bool     m_old_is_private;
 public:
     /* Remark: If is_private == false, then this auxiliary scope is a no-op. */
     private_name_scope(bool is_private, environment & env);

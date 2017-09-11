@@ -373,7 +373,7 @@ struct definition_info {
 
 MK_THREAD_LOCAL_GET_DEF(definition_info, get_definition_info);
 
-declaration_info_scope::declaration_info_scope(name const & ns, def_cmd_kind kind, decl_modifiers const & modifiers) {
+declaration_info_scope::declaration_info_scope(name const & ns, decl_cmd_kind kind, decl_modifiers const & modifiers) {
     definition_info & info = get_definition_info();
     lean_assert(info.m_prefix.is_anonymous());
     info.m_prefix           = ns;
@@ -384,12 +384,12 @@ declaration_info_scope::declaration_info_scope(name const & ns, def_cmd_kind kin
     info.m_is_private       = modifiers.m_is_private;
     info.m_is_meta          = modifiers.m_is_meta;
     info.m_is_noncomputable = modifiers.m_is_noncomputable;
-    info.m_is_lemma         = kind == Theorem;
-    info.m_aux_lemmas       = kind != Theorem && !modifiers.m_is_meta;
+    info.m_is_lemma         = kind == decl_cmd_kind::Theorem;
+    info.m_aux_lemmas       = kind != decl_cmd_kind::Theorem && !modifiers.m_is_meta;
     info.m_next_match_idx = 1;
 }
 
-declaration_info_scope::declaration_info_scope(parser const & p, def_cmd_kind kind, decl_modifiers const & modifiers):
+declaration_info_scope::declaration_info_scope(parser const & p, decl_cmd_kind kind, decl_modifiers const & modifiers):
     declaration_info_scope(get_namespace(p.env()), kind, modifiers) {}
 
 declaration_info_scope::~declaration_info_scope() {
@@ -471,9 +471,11 @@ declaration_name_scope::~declaration_name_scope() {
 private_name_scope::private_name_scope(bool is_private, environment & env) {
     definition_info & info = get_definition_info();
     m_old_private_prefix   = info.m_prefix;
+    m_old_is_private       = info.m_is_private;
     if (is_private) {
         name prv_prefix;
         std::tie(env, prv_prefix) = mk_private_prefix(env);
+        info.m_is_private     = true;
         info.m_private_prefix = prv_prefix;
     }
 }
@@ -481,6 +483,7 @@ private_name_scope::private_name_scope(bool is_private, environment & env) {
 private_name_scope::~private_name_scope() {
     definition_info & info = get_definition_info();
     info.m_private_prefix = m_old_private_prefix;
+    info.m_is_private     = m_old_is_private;
 }
 
 match_definition_scope::match_definition_scope() {

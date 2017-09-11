@@ -232,7 +232,7 @@ static environment compile_decl(parser & p, environment const & env,
 }
 
 static pair<environment, name>
-declare_definition(parser & p, environment const & env, def_cmd_kind kind, buffer<name> const & lp_names,
+declare_definition(parser & p, environment const & env, decl_cmd_kind kind, buffer<name> const & lp_names,
                    name const & c_name, name const & prv_name, expr type, optional<expr> val, task<expr> const & proof, cmd_meta const & meta,
                    pos_info const & pos) {
     name c_real_name;
@@ -256,7 +256,7 @@ declare_definition(parser & p, environment const & env, def_cmd_kind kind, buffe
     bool use_conv_opt = true;
     bool is_trusted   = !meta.m_modifiers.m_is_meta;
     auto def          =
-        !val ? mk_theorem(c_real_name, to_list(lp_names), type, proof) : (kind == Theorem ?
+        !val ? mk_theorem(c_real_name, to_list(lp_names), type, proof) : (kind == decl_cmd_kind::Theorem ?
         mk_theorem(c_real_name, to_list(lp_names), type, *val) :
         mk_definition(new_env, c_real_name, to_list(lp_names), type, *val, use_conv_opt, is_trusted));
     auto cdef         = check(p, new_env, c_name, def, pos);
@@ -459,7 +459,7 @@ static environment copy_equation_lemmas(environment const & env, name const & d_
     return copy_equation_lemmas(env, d_names);
 }
 
-static environment mutual_definition_cmd_core(parser & p, def_cmd_kind kind, cmd_meta const & meta) {
+static environment mutual_definition_cmd_core(parser & p, decl_cmd_kind kind, cmd_meta const & meta) {
     buffer<name> lp_names;
     buffer<expr> fns, params;
     declaration_info_scope scope(p, kind, meta.m_modifiers);
@@ -586,15 +586,15 @@ static expr_pair elaborate_theorem(elaborator & elab, expr const & fn, expr val)
     return elab.elaborate_with_type(val, mk_as_is(fn_type));
 }
 
-static expr_pair elaborate_definition_core(elaborator & elab, def_cmd_kind kind, expr const & fn, expr const & val) {
-    if (kind == Theorem) {
+static expr_pair elaborate_definition_core(elaborator & elab, decl_cmd_kind kind, expr const & fn, expr const & val) {
+    if (kind == decl_cmd_kind::Theorem) {
         return elaborate_theorem(elab, fn, val);
     } else {
         return elab.elaborate_with_type(val, mlocal_type(fn));
     }
 }
 
-static expr_pair elaborate_definition(parser & p, elaborator & elab, def_cmd_kind kind, expr const & fn, expr const & val, pos_info const & pos) {
+static expr_pair elaborate_definition(parser & p, elaborator & elab, decl_cmd_kind kind, expr const & fn, expr const & val, pos_info const & pos) {
     if (p.profiling()) {
         xtimeit timer(get_profiling_threshold(p.get_options()), [&](second_duration duration) {
                 auto msg = p.mk_message(pos, INFORMATION);
@@ -772,7 +772,7 @@ static bool is_rfl_preexpr(expr const & e) {
     return is_constant(e, get_rfl_name());
 }
 
-environment single_definition_cmd_core(parser & p, def_cmd_kind kind, cmd_meta meta) {
+environment single_definition_cmd_core(parser & p, decl_cmd_kind kind, cmd_meta meta) {
     buffer<name> lp_names;
     buffer<expr> params;
     expr fn, val;
@@ -781,8 +781,8 @@ environment single_definition_cmd_core(parser & p, def_cmd_kind kind, cmd_meta m
     declaration_info_scope scope(p, kind, meta.m_modifiers);
     environment env   = p.env();
     private_name_scope prv_scope(meta.m_modifiers.m_is_private, env);
-    bool is_example   = (kind == def_cmd_kind::Example);
-    bool is_instance  = (kind == def_cmd_kind::Instance);
+    bool is_example   = (kind == decl_cmd_kind::Example);
+    bool is_instance  = (kind == decl_cmd_kind::Instance);
     bool aux_lemmas   = scope.gen_aux_lemmas();
     bool is_rfl       = false;
     if (is_instance)
@@ -812,7 +812,7 @@ environment single_definition_cmd_core(parser & p, def_cmd_kind kind, cmd_meta m
         bool eqns = false;
         name c_name = mlocal_name(fn);
         pair<environment, name> env_n;
-        if (kind == Theorem) {
+        if (kind == decl_cmd_kind::Theorem) {
             is_rfl = is_rfl_preexpr(val);
             type = elab.elaborate_type(mlocal_type(fn));
             elab.ensure_no_unassigned_metavars(type);
@@ -834,7 +834,7 @@ environment single_definition_cmd_core(parser & p, def_cmd_kind kind, cmd_meta m
                                        mctx, lctx, pos_provider, use_info_manager, file_name);
             }), log_tree::ElaborationLevel);
             env_n = declare_definition(p, elab.env(), kind, lp_names, c_name, prv_name, type, opt_val, proof, meta, header_pos);
-        } else if (kind == Example) {
+        } else if (kind == decl_cmd_kind::Example) {
             auto env = p.env();
             auto opts = p.get_options();
             auto lp_name_list = to_list(lp_names);
@@ -874,7 +874,7 @@ environment single_definition_cmd_core(parser & p, def_cmd_kind kind, cmd_meta m
         if (eqns && aux_lemmas) {
             new_env = copy_equation_lemmas(new_env, c_real_name);
         }
-        if (!eqns && !meta.m_modifiers.m_is_meta && (kind == Definition || kind == Instance)) {
+        if (!eqns && !meta.m_modifiers.m_is_meta && (kind == decl_cmd_kind::Definition || kind == decl_cmd_kind::Instance)) {
             unsigned arity = new_params.size();
             new_env = mk_simple_equation_lemma_for(new_env, p.get_options(), meta.m_modifiers.m_is_private, c_name, c_real_name, arity);
         }
@@ -896,7 +896,7 @@ environment single_definition_cmd_core(parser & p, def_cmd_kind kind, cmd_meta m
     }
 }
 
-environment definition_cmd_core(parser & p, def_cmd_kind kind, cmd_meta const & meta) {
+environment definition_cmd_core(parser & p, decl_cmd_kind kind, cmd_meta const & meta) {
     if (meta.m_modifiers.m_is_mutual)
         return mutual_definition_cmd_core(p, kind, meta);
     else
