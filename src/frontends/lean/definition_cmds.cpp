@@ -124,15 +124,15 @@ static expr parse_mutual_definition(parser & p, buffer<name> & lp_names, buffer<
     parse_mutual_header(p, lp_names, pre_fns, params);
     buffer<expr> eqns;
     buffer<name> full_names;
-    buffer<name> full_prv_names;
+    buffer<name> full_actual_names;
     for (expr const & pre_fn : pre_fns) {
         // TODO(leo, dhs): make use of attributes
         expr fn_type = parse_inner_header(p, mlocal_pp_name(pre_fn)).first;
         declaration_name_scope scope2(mlocal_pp_name(pre_fn));
         declaration_name_scope scope3("_main");
         full_names.push_back(scope3.get_name());
-        full_prv_names.push_back(scope3.get_private_name());
-        prv_names.push_back(scope2.get_private_name());
+        full_actual_names.push_back(scope3.get_actual_name());
+        prv_names.push_back(scope2.get_actual_name());
         if (p.curr_is_token(get_period_tk())) {
             auto period_pos = p.pos();
             p.next();
@@ -152,7 +152,7 @@ static expr parse_mutual_definition(parser & p, buffer<name> & lp_names, buffer<
     for (expr & eq : eqns) {
         eq = replace_locals_preserving_pos_info(eq, pre_fns, fns);
     }
-    expr r = mk_equations(p, fns, full_names, full_prv_names, eqns, wf_tacs, header_pos);
+    expr r = mk_equations(p, fns, full_names, full_actual_names, eqns, wf_tacs, header_pos);
     collect_implicit_locals(p, lp_names, params, r);
     return r;
 }
@@ -529,7 +529,6 @@ static std::tuple<expr, expr, name> parse_definition(parser & p, buffer<name> & 
     auto header_pos = p.pos();
     declaration_name_scope scope2;
     expr fn = parse_single_header(p, scope2, lp_names, params, is_example, is_instance);
-    name prv_name = scope2.get_private_name();
     expr val;
     if (p.curr_is_token(get_assign_tk())) {
         p.next();
@@ -542,7 +541,7 @@ static std::tuple<expr, expr, name> parse_definition(parser & p, buffer<name> & 
             expr eqn = copy_tag(val, mk_equation(fn, val));
             buffer<expr> eqns;
             eqns.push_back(eqn);
-            val = mk_equations(p, fn, scope2.get_name(), scope2.get_private_name(), eqns, {}, header_pos);
+            val = mk_equations(p, fn, scope2.get_name(), scope2.get_actual_name(), eqns, {}, header_pos);
         } else {
             val = p.parse_expr();
         }
@@ -562,12 +561,12 @@ static std::tuple<expr, expr, name> parse_definition(parser & p, buffer<name> & 
             check_valid_end_of_equations(p);
         }
         optional<expr> wf_tacs = parse_using_well_founded(p);
-        val = mk_equations(p, fn, scope2.get_name(), scope2.get_private_name(), eqns, wf_tacs, header_pos);
+        val = mk_equations(p, fn, scope2.get_name(), scope2.get_actual_name(), eqns, wf_tacs, header_pos);
     } else {
         val = p.parser_error_or_expr({"invalid definition, '|' or ':=' expected", p.pos()});
     }
     collect_implicit_locals(p, lp_names, params, {mlocal_type(fn), val});
-    return std::make_tuple(fn, val, scope2.get_private_name());
+    return std::make_tuple(fn, val, scope2.get_actual_name());
 }
 
 static void replace_params(buffer<expr> const & params, buffer<expr> const & new_params, expr & fn, expr & val) {

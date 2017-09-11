@@ -709,7 +709,7 @@ struct structural_rec_fn {
             expr r;
             std::tie(m_env, r) = mk_aux_definition(m_env, m_opts, m_mctx, m_lctx, m_header,
                                                    head(m_header.m_fn_names),
-                                                   head(m_header.m_fn_private_names),
+                                                   head(m_header.m_fn_actual_names),
                                                    m_fn_type, new_fn);
             return r;
         }
@@ -952,9 +952,9 @@ struct structural_rec_fn {
                 if (local != F)
                     new_locals.push_back(local);
             }
-            name const & fn_name     = head(m_header.m_fn_names);
-            name const & fn_prv_name = head(m_header.m_fn_private_names);
-            m_env = mk_equation_lemma(m_env, m_opts, m_mctx, ctx.lctx(), fn_name, fn_prv_name,
+            name const & fn_name        = head(m_header.m_fn_names);
+            name const & fn_actual_name = head(m_header.m_fn_actual_names);
+            m_env = mk_equation_lemma(m_env, m_opts, m_mctx, ctx.lctx(), fn_name, fn_actual_name,
                                       eqn_idx, m_header.m_is_private, new_locals, new_lhs, new_rhs);
             eqn_idx++;
         }

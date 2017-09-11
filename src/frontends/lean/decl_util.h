@@ -43,11 +43,10 @@ public:
 /** \brief Similar to declaration_info_scope, but it is used to update
     naming prefix for nested definitions. */
 class declaration_name_scope {
-    /* Remark: m_name == m_private_name && m_old_prefix == m_old_private_prefix for non private declarations */
     name     m_name;
-    name     m_private_name;
+    name     m_actual_name;
     name     m_old_prefix; /* save current user facing prefix */
-    name     m_old_private_prefix; /* save current prefix */
+    name     m_old_actual_prefix; /* save current prefix */
     unsigned m_old_next_match_idx;
     /* Remark: the operation prefix + name in the following constructors and methods tries to avoid propagating
        the string `_main` into names. That is, `foo._main` + `bla` is `foo.bla`. */
@@ -62,13 +61,13 @@ public:
     /* Restore prefix and match_idx. */
     ~declaration_name_scope();
     name const & get_name() const { return m_name; }
-    name const & get_private_name() const { return m_private_name; }
+    name const & get_actual_name() const { return m_actual_name; }
 };
 
-/** \brief Auxiliary scope for setting m_private_prefix.
+/** \brief Auxiliary scope for setting m_actual_prefix.
     It is used with declaration_name_scope. */
 class private_name_scope {
-    name     m_old_private_prefix; /* save current prefix */
+    name     m_old_actual_prefix; /* save current prefix */
     bool     m_old_is_private;
 public:
     /* Remark: If is_private == false, then this auxiliary scope is a no-op. */
@@ -79,13 +78,12 @@ public:
 /** \brief Auxiliary scope to compute the name for a nested match expression.
     In Lean, we create auxiliary declarations for match expressions. */
 class match_definition_scope {
-    /* Remark: m_name == m_private_name for non private declarations. */
     name m_name;
-    name m_private_name;
+    name m_actual_name;
 public:
     match_definition_scope(environment const & env);
     name const & get_name() const { return m_name; }
-    name const & get_private_name() const { return m_private_name; }
+    name const & get_actual_name() const { return m_actual_name; }
 };
 
 /** \brief Return true if the current scope used match-expressions */
@@ -155,8 +153,8 @@ environment add_alias(environment const & env, bool is_protected, name const & c
 
 /** \brief Create an equations header for the given function names.
     It uses the information set using declaration_info_scope */
-equations_header mk_equations_header(list<name> const & fn_names, list<name> const & fn_prv_names);
-equations_header mk_equations_header(name const & fn_name, name const & fn_prv_name);
+equations_header mk_equations_header(list<name> const & fn_names, list<name> const & fn_actual_names);
+equations_header mk_equations_header(name const & fn_name, name const & fn_actual_name);
 
 expr replace_locals_preserving_pos_info(expr const & e, buffer<expr> const & from, buffer<expr> const & to);
 expr replace_local_preserving_pos_info(expr const & e, expr const & from, expr const & to);

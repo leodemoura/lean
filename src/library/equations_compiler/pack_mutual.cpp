@@ -153,23 +153,23 @@ struct pack_mutual_fn {
         level        codomains_lvl;
         equations_header header = get_equations_header(e);
         name         new_fn_name("_mutual");
-        name         new_fn_prv_name;
+        name         new_fn_actual_name;
         if (header.m_is_private) {
-            new_fn_prv_name = name(*get_private_prefix(m_ctx.env(), head(header.m_fn_private_names)), "_mutual");
+            new_fn_actual_name = name(*get_private_prefix(m_ctx.env(), head(header.m_fn_actual_names)), "_mutual");
         } else {
-            new_fn_prv_name = "_mutual";
+            new_fn_actual_name = "_mutual";
         }
         for (unsigned fidx = 0; fidx < ues.get_num_fns(); fidx++) {
             expr const & fn = ues.get_fn(fidx);
-            new_fn_name     = new_fn_name + mlocal_pp_name(fn);
-            new_fn_prv_name = new_fn_prv_name + mlocal_pp_name(fn);
+            new_fn_name        = new_fn_name + mlocal_pp_name(fn);
+            new_fn_actual_name = new_fn_actual_name + mlocal_pp_name(fn);
             lean_assert(ues.get_arity_of(fidx) == 1);
-            expr fn_type    = m_ctx.relaxed_whnf(m_ctx.infer(fn));
+            expr fn_type       = m_ctx.relaxed_whnf(m_ctx.infer(fn));
             lean_assert(is_pi(fn_type));
             domains.push_back(binding_domain(fn_type));
-            expr y          = locals.push_local("_s", binding_domain(fn_type));
-            expr c          = instantiate(binding_body(fn_type), y);
-            level c_lvl     = get_level(m_ctx, c);
+            expr y             = locals.push_local("_s", binding_domain(fn_type));
+            expr c             = instantiate(binding_body(fn_type), y);
+            level c_lvl        = get_level(m_ctx, c);
             if (fidx == 0) {
                 codomains_lvl = c_lvl;
             } else if (!m_ctx.is_def_eq(mk_sort(c_lvl), mk_sort(codomains_lvl))) {
@@ -188,7 +188,7 @@ struct pack_mutual_fn {
 
         equations_header new_header = get_equations_header(e);
         new_header.m_fn_names         = to_list(new_fn_name);
-        new_header.m_fn_private_names = to_list(new_fn_prv_name);
+        new_header.m_fn_actual_names  = to_list(new_fn_actual_name);
         new_header.m_num_fns          = 1;
 
         replace_fns replacer(m_ctx, ues, new_fn);

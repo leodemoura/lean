@@ -277,7 +277,7 @@ struct wf_rec_fn {
         expr fn_type = ctx.infer(fn);
         expr r;
         std::tie(m_env, r) = mk_aux_definition(m_env, m_opts, m_mctx, m_lctx, header,
-                                               head(header.m_fn_names), head(header.m_fn_private_names),
+                                               head(header.m_fn_names), head(header.m_fn_actual_names),
                                                fn_type, fn);
         return r;
     }
@@ -429,7 +429,7 @@ struct wf_rec_fn {
                                list<list<expr>> const & counter_example_args) {
         equations_header const & header = get_equations_header(eqns_before_pack);
         list<name> fn_names     = header.m_fn_names;
-        list<name> fn_prv_names = header.m_fn_private_names;
+        list<name> fn_actual_names = header.m_fn_actual_names;
         type_context ctx = mk_type_context();
         buffer<expr> result_fns;
         expr packed_fn_type = ctx.relaxed_whnf(ctx.infer(packed_fn));
@@ -447,16 +447,17 @@ struct wf_rec_fn {
                 expr arg = args.push_local_from_binding(it);
                 it = instantiate(binding_body(it), arg);
             }
-            expr sigma_mk    = mk_sigma(ctx, 0, args.as_buffer()).first;
-            expr packed_arg  = mk_mutual_arg(ctx, sigma_mk, fidx, num_fns, packed_domain);
-            expr fn_val      = args.mk_lambda(mk_app(packed_fn, packed_arg));
-            name fn_name     = head(fn_names);
-            name fn_prv_name = head(fn_prv_names);
-            fn_names         = tail(fn_names);
-            fn_prv_names     = tail(fn_prv_names);
+            expr sigma_mk       = mk_sigma(ctx, 0, args.as_buffer()).first;
+            expr packed_arg     = mk_mutual_arg(ctx, sigma_mk, fidx, num_fns, packed_domain);
+            expr fn_val         = args.mk_lambda(mk_app(packed_fn, packed_arg));
+            name fn_name        = head(fn_names);
+            name fn_actual_name = head(fn_actual_names);
+            fn_names            = tail(fn_names);
+            fn_actual_names     = tail(fn_actual_names);
             trace_debug_wf(tout() << fn_name << " := " << fn_val << "\n";);
             expr r;
-            std::tie(m_env, r) = mk_aux_definition(m_env, m_opts, m_mctx, m_lctx, header, fn_name, fn_prv_name, fn_type, fn_val);
+            std::tie(m_env, r) = mk_aux_definition(m_env, m_opts, m_mctx, m_lctx, header, fn_name, fn_actual_name,
+                                                   fn_type, fn_val);
             result_fns.push_back(r);
         }
         ctx.set_env(m_env);
@@ -536,7 +537,7 @@ struct wf_rec_fn {
         } else {
             equations_header new_header   = header;
             new_header.m_fn_names         = to_list(name(head(header.m_fn_names), "_pack"));
-            new_header.m_fn_private_names = to_list(name(head(header.m_fn_private_names), "_pack"));
+            new_header.m_fn_actual_names  = to_list(name(head(header.m_fn_actual_names), "_pack"));
             eqns                          = update_equations(eqns, new_header);
         }
 

@@ -84,17 +84,15 @@ local_context erase_inaccessible_annotations(local_context const & lctx);
 
 /* Create an auxiliary definition.
 
-   Remark: if !header.m_is_private, then n == prv_n.
-   Otherwise, `prv_n` is the name used to declare the definition, and `n` is the user-facing version.
+   Remark: `n` is the local name, and `actual_n` the kernel unique name.
+   `n` and `actual_n` are different for scoped/private declarations.
 */
 pair<environment, expr> mk_aux_definition(environment const & env, options const & opts, metavar_context const & mctx, local_context const & lctx,
-                                          equations_header const & header, name const & n, name const & prv_n, expr const & type, expr const & value);
+                                          equations_header const & header, name const & n, name const & actual_n, expr const & type, expr const & value);
 
-/* Create an equation lemma #eqn_idx for f_name/f_prv_name.
-
-   Remark: if !is_private, then f_name == f_prv_name. */
+/* Create an equation lemma #eqn_idx for f_name/f_actual_name. */
 environment mk_equation_lemma(environment const & env, options const & opts, metavar_context const & mctx, local_context const & lctx,
-                              name const & f_name, name const & f_prv_name, unsigned eqn_idx, bool is_private,
+                              name const & f_name, name const & f_actual_name, unsigned eqn_idx, bool is_private,
                               buffer<expr> const & Hs, expr const & lhs, expr const & rhs);
 
 /* Create an equational lemma for definition c based on its value.
@@ -107,9 +105,11 @@ environment mk_equation_lemma(environment const & env, options const & opts, met
 
    This function is used to make sure we have equations for all definitions.
 
-   Remark: if !is_private, then c == c_prv.
+
+   Remark: `c` is the local name, and `c_actual` the kernel unique name.
+   `c` and `c_actual` are different for scoped/private declarations.
 */
-environment mk_simple_equation_lemma_for(environment const & env, options const & opts, bool is_private, name const & c, name const & c_prv, unsigned arity);
+environment mk_simple_equation_lemma_for(environment const & env, options const & opts, bool is_private, name const & c, name const & c_actual, unsigned arity);
 
 name mk_equation_name(name const & f_name, unsigned eqn_idx);
 
