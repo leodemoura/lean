@@ -83,7 +83,7 @@ class match_definition_scope {
     name m_name;
     name m_private_name;
 public:
-    match_definition_scope();
+    match_definition_scope(environment const & env);
     name const & get_name() const { return m_name; }
     name const & get_private_name() const { return m_private_name; }
 };

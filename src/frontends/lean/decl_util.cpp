@@ -486,10 +486,22 @@ private_name_scope::~private_name_scope() {
     info.m_is_private     = m_old_is_private;
 }
 
-match_definition_scope::match_definition_scope() {
+match_definition_scope::match_definition_scope(environment const & env) {
     definition_info & info = get_definition_info();
-    m_name         = mk_decl_name(info.m_prefix, name("_match").append_after(info.m_next_match_idx));
-    m_private_name = mk_decl_name(info.m_private_prefix, name("_match").append_after(info.m_next_match_idx));
-    info.m_next_match_idx++;
+    while (true) {
+        m_name         = mk_decl_name(info.m_prefix, name("_match").append_after(info.m_next_match_idx));
+        m_private_name = mk_decl_name(info.m_private_prefix, name("_match").append_after(info.m_next_match_idx));
+        info.m_next_match_idx++;
+        if (empty(get_expr_aliases(env, m_name))) {
+            /* Make sure we don't introduce aliases.
+               This is important when match-expressions are used in several parameters in a section.
+               Example:
+
+                  parameter P : match ... end
+                  parameter Q : match ... end
+            */
+            break;
+        }
+    }
 }
 }
