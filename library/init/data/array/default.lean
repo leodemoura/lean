@@ -5,3 +5,4 @@ Authors: Gabriel Ebner
 -/
 prelude
 import init.data.array.basic init.data.array.slice
+import init.data.array.lemmas init.data.array.instances

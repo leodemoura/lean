@@ -148,4 +148,18 @@ lemma sub_lt : ∀ {a b : ℕ}, 0 < a → 0 < b → a - b < a
 protected lemma lt_of_lt_of_le {n m k : ℕ} : n < m → m ≤ k → n < k :=
 nat.le_trans
 
+protected lemma lt_of_le_of_ne {m n : ℕ} (h1 : m ≤ n) : m ≠ n → m < n :=
+or.resolve_right (or.swap (nat.eq_or_lt_of_le h1))
+
+lemma le_of_lt_succ {m n : nat} : m < succ n → m ≤ n :=
+le_of_succ_le_succ
+
+def lt.step {n m : ℕ} : n < m → n < succ m := less_than_or_equal.step
+
+lemma le_of_succ_le {n m : ℕ} (h : succ n ≤ m) : n ≤ m :=
+nat.le_trans (le_succ n) h
+
+protected lemma le_of_lt {n m : ℕ} (h : n < m) : n ≤ m :=
+le_of_succ_le h
+
 end nat

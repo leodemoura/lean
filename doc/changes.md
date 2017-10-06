@@ -9,6 +9,8 @@ master branch (aka work in progress branch)
 
 *API name changes*
 
+* `nat.lt_of_le_and_ne` => `nat.lt_of_le_of_ne`
+
 v3.3.0 (14 September 2017)
 -------------
 
