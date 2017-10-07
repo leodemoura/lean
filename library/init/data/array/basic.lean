@@ -7,6 +7,7 @@ prelude
 import init.data.fin.basic
 import init.data.nat.basic
 import init.data.list.basic
+import init.funext
 universes u w
 
 structure array (α : Type u) (n : nat) :=
@@ -16,7 +17,7 @@ def mk_array {α} (n) (v : α) : array α n :=
 {data := λ _, v}
 
 namespace array
-variables {α : Type u} {β : Type w} {n : nat}
+variables {α : Type u} {β : Type w} {n m : nat}
 
 def nil {α} : array α 0 :=
 {data := λ ⟨x, h⟩, absurd h (nat.not_lt_zero x)}
@@ -94,4 +95,19 @@ protected def mem (v : α) (a : array α n) : Prop := ∃i, read a i = v
 instance : has_mem α (array α n) := ⟨array.mem⟩
 
 theorem read_mem (a : array α n) (i) : read a i ∈ a := exists.intro i rfl
+
+lemma ext : ∀ {a₁ a₂ : array α n}, (∀ (i : fin n), a₁.read i = a₂.read i) → a₁ = a₂
+| ⟨d₁⟩ ⟨d₂⟩ h := congr_arg _ (funext h)
+
+lemma ext' : ∀ {a₁ a₂ : array α n}, (∀ (i : nat) (h : i < n), a₁.read ⟨i, h⟩ = a₂.read ⟨i, h⟩) → a₁ = a₂
+| ⟨d₁⟩ ⟨d₂⟩ h := congr_arg _ (funext (λ ⟨i, hlt⟩, h i hlt))
+
+instance has_dec_eq [decidable_eq α] (n : nat) : decidable_eq (array α n) :=
+λ a₁ a₂,
+  if h : ∀ (i : nat) (h : i < n), a₁.read ⟨i, h⟩ = a₂.read ⟨i, h⟩ then
+     decidable.is_true (ext' h)
+  else
+     decidable.is_false $ λ heq,
+       have ∀ (i : nat) (h : i < n), a₁.read ⟨i, h⟩ = a₂.read ⟨i, h⟩, from λ i h, eq.subst heq rfl,
+       absurd this h
 end array

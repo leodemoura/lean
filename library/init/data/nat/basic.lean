@@ -5,7 +5,7 @@ Authors: Floris van Doorn, Leonardo de Moura
 -/
 prelude
 import init.logic
-
+universes u
 notation `ℕ` := nat
 
 namespace nat
@@ -51,7 +51,7 @@ instance : decidable_eq ℕ
     | is_false xney := is_false (λ h, nat.no_confusion h (λ xeqy, absurd xeqy xney))
     end
 
-def {u} repeat {α : Type u} (f : ℕ → α → α) : ℕ → α → α
+def repeat {α : Type u} (f : ℕ → α → α) : ℕ → α → α
 | 0         a := a
 | (succ n)  a := f n (repeat n a)
 
@@ -161,5 +161,87 @@ nat.le_trans (le_succ n) h
 
 protected lemma le_of_lt {n m : ℕ} (h : n < m) : n ≤ m :=
 le_of_succ_le h
+
+def lt.base (n : ℕ) : n < succ n := nat.le_refl (succ n)
+
+lemma lt_succ_self (n : ℕ) : n < succ n := lt.base n
+
+lemma le_succ_of_le {n m : ℕ} (h : n ≤ m) : n ≤ succ m :=
+nat.le_trans h (le_succ m)
+
+lemma lt_succ_of_lt {a b : nat} (h : a < b) : a < succ b :=
+le_succ_of_le h
+
+protected lemma lt_or_ge : ∀ (a b : ℕ), a < b ∨ a ≥ b
+| a 0     := or.inr (zero_le a)
+| a (b+1) :=
+  match lt_or_ge a b with
+  | or.inl h := or.inl (le_succ_of_le h)
+  | or.inr h :=
+    match nat.eq_or_lt_of_le h with
+    | or.inl h1 := or.inl (h1 ▸ lt_succ_self b)
+    | or.inr h1 := or.inr h1
+    end
+  end
+protected def lt_ge_by_cases {a b : ℕ} {C : Sort u} (h₁ : a < b → C) (h₂ : a ≥ b → C) : C :=
+decidable.by_cases h₁ (λ h, h₂ (or.elim (nat.lt_or_ge a b) (λ a, absurd a h) (λ a, a)))
+
+protected lemma lt_of_le_of_lt {n m k : ℕ} (h₁ : n ≤ m) : m < k → n < k :=
+nat.le_trans (succ_le_succ h₁)
+
+protected lemma le_antisymm {n m : ℕ} (h₁ : n ≤ m) : m ≤ n → n = m :=
+less_than_or_equal.cases_on h₁ (λ a, rfl) (λ a b c, absurd (nat.lt_of_le_of_lt b c) (nat.lt_irrefl n))
+
+protected def lt_by_cases {a b : ℕ} {C : Sort u} (h₁ : a < b → C) (h₂ : a = b → C)
+  (h₃ : b < a → C) : C :=
+nat.lt_ge_by_cases h₁ (λ h₁,
+  nat.lt_ge_by_cases h₃ (λ h, h₂ (nat.le_antisymm h h₁)))
+
+protected theorem lt_trichotomy (a b : ℕ) : a < b ∨ a = b ∨ b < a :=
+nat.lt_by_cases (λ h, or.inl h) (λ h, or.inr (or.inl h)) (λ h, or.inr (or.inr h))
+
+protected lemma lt_of_not_ge {a b : nat} (h : ¬ a ≥ b) : a < b :=
+match nat.lt_trichotomy a b with
+| or.inl hlt          := hlt
+| or.inr (or.inl heq) := absurd (heq ▸ nat.le_refl a : a ≥ b) h
+| or.inr (or.inr hgt) := absurd (nat.le_of_lt hgt) h
+end
+
+protected lemma le_of_not_gt {a b : nat} (h :¬ a > b) : a ≤ b :=
+match nat.lt_trichotomy a b with
+| or.inl hlt          := nat.le_of_lt hlt
+| or.inr (or.inl heq) := eq.subst heq (nat.le_refl _)
+| or.inr (or.inr hgt) := absurd hgt h
+end
+
+protected lemma lt_or_eq_of_le {a b : nat} (hab : a ≤ b) : a < b ∨ a = b :=
+if hba : b ≤ a then or.inr (nat.le_antisymm hab hba)
+else or.inl (nat.lt_of_not_ge hba)
+
+section
+set_option eqn_compiler.zeta true
+
+def decidable_ball_aux : ∀ (n : nat) (p : Π i, i < n → Prop) (h : ∀ i h, decidable (p i h)), decidable (∀ i h, p i h)
+| 0     := λ p h, is_true (λ n h, absurd h (not_lt_zero _))
+| (n+1) := λ p h,
+  let h' := (λ k hlt, h k (lt_succ_of_lt hlt)) in
+  let p' := (λ k hlt, p k (lt_succ_of_lt hlt)) in
+  have ih : decidable (∀ i (h : i < n), p' i h), from decidable_ball_aux n p' h',
+  match ih with
+  | is_true  hp₁ :=
+    match h n (lt_succ_self n) with
+    | is_true hp₂  := is_true $ λ k h,
+      have k < n ∨ k = n, from nat.lt_or_eq_of_le (le_of_lt_succ h),
+      or.elim this (hp₁ k) (λ e, match k, e, h with _, rfl, h := hp₂ end)
+    | is_false hn₂ := is_false (mt (λ hn, hn _ _) hn₂)
+    end
+  | is_false hn₁ := is_false $ λ h₁,
+    have ∀ (i : ℕ) (h : i < n), p' i h, from λ i h, h₁ _ _,
+    absurd this hn₁
+  end
+
+instance decidable_ball (n : nat) (p : Π i, i < n → Prop) [h : ∀ i h, decidable (p i h)] : decidable (∀ i h, p i h) :=
+decidable_ball_aux n p h
+end
 
 end nat

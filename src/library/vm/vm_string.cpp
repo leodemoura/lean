@@ -6,14 +6,16 @@ Author: Leonardo de Moura
 */
 #include <string>
 #include "util/interrupt.h"
+#include "library/parray.h"
 #include "library/vm/vm_string.h"
+#include "library/vm/vm_array.h"
 
 namespace lean {
 static void to_string(vm_obj const & o, std::string & s) {
     check_system("to_string");
-    if (!is_simple(o)) {
-        to_string(cfield(o, 1), s);
-        s += static_cast<unsigned char>(cidx(cfield(o, 0)));
+    parray<vm_obj> const & a = to_array(cfield(o, 1));
+    for (size_t i = 0; i < a.size(); i++) {
+        s += static_cast<unsigned char>(cidx(a[i]));
     }
 }
 
@@ -24,11 +26,10 @@ std::string to_string(vm_obj const & o) {
 }
 
 vm_obj to_obj(std::string const & str) {
-    vm_obj r = mk_vm_simple(0);
-    for (unsigned i = 0; i < str.size(); i++) {
-        vm_obj args[2] = { mk_vm_simple(static_cast<unsigned char>(str[i])), r };
-        r = mk_vm_constructor(1, 2, args);
+    parray<vm_obj> a;
+    for (char c : str) {
+        a.push_back(mk_vm_simple(c));
     }
-    return r;
+    return mk_vm_constructor(2, mk_vm_simple(str.size()), to_obj(a));
 }
 }

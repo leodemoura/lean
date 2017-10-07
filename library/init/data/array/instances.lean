@@ -19,5 +19,4 @@ meta instance [has_to_format α] : has_to_format (array α n) :=
 
 meta instance [has_to_tactic_format α] : has_to_tactic_format (array α n) :=
 ⟨tactic.pp ∘ to_list⟩
-
 end array

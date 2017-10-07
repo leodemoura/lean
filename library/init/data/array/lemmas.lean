@@ -9,7 +9,7 @@ import init.data.nat
 
 namespace array
 universes u w
-variables {α : Type u} {β : Type w} {n : nat}
+variables {α : Type u} {β : Type w} {n m : nat}
 
 lemma read_eq_read' [inhabited α] (a : array α n) (i : nat) (h : i < n) : read a ⟨i, h⟩ = read' a i :=
 by unfold read'; rw [dif_pos h]
@@ -35,5 +35,41 @@ theorem write_ind (a : array α n) (i : fin n) (v : α) (C : fin n → α → So
 show C j (if i = j then v else read a j), from
 if h : i = j then by rwa [if_pos h, ← h]
 else by rw [if_neg h]; exact Hj j h
+
+lemma read_push_back (a : array α n) (c : α) : (a.push_back c).read ⟨n, nat.lt_succ_self n⟩ = c :=
+by simp [push_back, read]
+
+lemma read_push_back_of_lt (a : array α n) (c : α) {i : nat} (h₁ : i < n + 1) (h₂ : i < n) : (a.push_back c).read ⟨i, h₁⟩ = a.read ⟨i, h₂⟩  :=
+begin
+  have: i ≠ n, from ne_of_lt h₂,
+  simp [push_back, read, this]
+end
+
+lemma push_back_inj_left {a₁ a₂ : array α n} {c₁ c₂ : α} (h : a₁.push_back c₁ = a₂.push_back c₂) : a₁ = a₂ :=
+begin
+  cases a₁ with d₁,
+  cases a₂ with d₂,
+  congr, apply funext, intro i,
+  cases i with j hlt₁,
+  have hlt₂ : j < n + 1, from nat.lt.step hlt₁,
+  have: (push_back {data := d₁} c₁).read ⟨j, hlt₂⟩ = (push_back {data := d₂} c₂).read ⟨j, hlt₂⟩, by simp [h],
+  simp [read_push_back_of_lt _ _ hlt₂ hlt₁] at this,
+  simp [read] at this,
+  assumption
+end
+
+lemma push_back_inj_right {a₁ a₂ : array α n} {c₁ c₂ : α} (h : a₁.push_back c₁ = a₂.push_back c₂) : c₁ = c₂ :=
+have (a₁.push_back c₁).read ⟨n, nat.lt_succ_self n⟩ = (a₂.push_back c₂).read ⟨n, nat.lt_succ_self n⟩, by simp [h],
+begin
+  simp [read_push_back] at this,
+  assumption
+end
+
+lemma array0_eq (a₁ a₂ : array α 0) : a₁ = a₂ :=
+begin
+  cases a₁, cases a₂, congr,
+  apply funext, intro i,
+  apply i.elim0
+end
 
 end array

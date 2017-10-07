@@ -6,65 +6,61 @@ Author: Leonardo de Moura
 prelude
 import init.data.list.basic
 import init.data.char.basic
+import init.data.array.basic
 
 private structure string_imp :=
-(data : list char)
+(sz : nat) (data : array char sz)
 
 def string := string_imp
 
-def list.as_string (s : list char) : string :=
-⟨s.reverse⟩
-
 namespace string
 def empty : string :=
-⟨list.nil⟩
+{sz := 0, data := array.nil}
 
 instance : inhabited string :=
 ⟨empty⟩
 
 def length : string → nat
-| ⟨s⟩  := s.length
+| ⟨n, d⟩ := n
 
 instance : has_sizeof string :=
 ⟨string.length⟩
 
 def str : string → char → string
-| ⟨s⟩ c := ⟨c::s⟩
-
-def append : string → string → string
-| ⟨a⟩ ⟨b⟩ := ⟨b ++ a⟩
+| ⟨n, d⟩ c := ⟨n+1, d.push_back c⟩
 
 def is_empty : string → bool
-| ⟨[]⟩ := tt
-| _    := ff
+| ⟨0, n⟩ := tt
+| _      := ff
+
+def to_list : string → list char
+| ⟨n, d⟩ := d.to_list
+
+def pop_back : string → string
+| ⟨0,   d⟩ := ⟨0, d⟩
+| ⟨n+1, d⟩ := ⟨n, d.pop_back⟩
+
+def popn_back : string → nat → string
+| s 0     := s
+| s (n+1) := popn_back s.pop_back n
+
+def fold {α} (a : α) (f : α → char → α) (s : string) : α :=
+s.data.foldl a (λ c a, f a c)
+
+def append (s₁ s₂ : string) : string :=
+fold s₁ (λ r c, r.str c) s₂
 
 instance : has_append string :=
 ⟨string.append⟩
 
-def to_list : string → list char
-| ⟨s⟩ := s.reverse
-
-def pop_back : string → string
-| ⟨s⟩ := ⟨s.tail⟩
-
-def popn_back : string → nat → string
-| ⟨s⟩ n := ⟨s.drop n⟩
-
-def intercalate (s : string) (ss : list string) : string :=
-(list.intercalate s.to_list (ss.map to_list)).as_string
-
-def fold {α} (a : α) (f : α → char → α) (s : string) : α :=
-s.to_list.foldl f a
-
 def front (s : string) : char :=
-s.to_list.head
+s.data.read' 0
 
 def back : string → char
-| ⟨[]⟩    := default char
-| ⟨c::cs⟩ := c
+| ⟨n, d⟩ := d.read' (n-1)
 
-def backn : string → nat → string
-| ⟨s⟩ n := ⟨s.take n⟩
+-- def backn : string → nat → string :=
+-- sorry
 
 def join (l : list string) : string :=
 l.foldl (λ r s, r ++ s) ""
@@ -104,3 +100,22 @@ to_nat_core s.to_list 0
 
 protected def char.to_string (c : char) : string :=
 string.str "" c
+
+def list.as_string (s : list char) : string :=
+s.foldl (λ r c, r.str c) string.empty
+
+def string.intercalate (s : string) (ss : list string) : string :=
+(list.intercalate s.to_list (ss.map to_list)).as_string
+
+/- We have to define this instance here because we need to access the internal representation,
+   and string_imp is private. This is why we also have to show array has decidable equality
+   without using the tactic framework. -/
+instance : decidable_eq string :=
+λ ⟨n₁, a₁⟩ ⟨n₂, a₂⟩,
+  if h₁ : n₁ = n₂ then
+    match n₁, n₂, h₁, a₁, a₂ with
+    | n, _, rfl, a₁, a₂ :=
+      if h₂ : a₁ = a₂ then is_true (eq.subst h₂ rfl)
+      else is_false (λ h, string_imp.no_confusion h (λ e₁ e₂, absurd (eq_of_heq e₂) h₂))
+    end
+  else is_false (λ h, string_imp.no_confusion h (λ e₁ e₂, absurd e₁ h₁))

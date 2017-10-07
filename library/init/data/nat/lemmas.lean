@@ -157,9 +157,6 @@ instance : comm_semiring nat :=
 protected lemma le_of_eq {n m : ℕ} (p : n = m) : n ≤ m :=
 p ▸ less_than_or_equal.refl n
 
-lemma le_succ_of_le {n m : ℕ} (h : n ≤ m) : n ≤ succ m :=
-nat.le_trans h (le_succ m)
-
 lemma eq_zero_or_pos (n : ℕ) : n = 0 ∨ n > 0 :=
 by {cases n, exact or.inl rfl, exact or.inr (succ_pos _)}
 
@@ -168,28 +165,6 @@ or.resolve_left (eq_zero_or_pos n)
 
 protected lemma lt_trans {n m k : ℕ} (h₁ : n < m) : m < k → n < k :=
 nat.le_trans (less_than_or_equal.step h₁)
-
-protected lemma lt_of_le_of_lt {n m k : ℕ} (h₁ : n ≤ m) : m < k → n < k :=
-nat.le_trans (succ_le_succ h₁)
-
-def lt.base (n : ℕ) : n < succ n := nat.le_refl (succ n)
-
-lemma lt_succ_self (n : ℕ) : n < succ n := lt.base n
-
-protected lemma le_antisymm {n m : ℕ} (h₁ : n ≤ m) : m ≤ n → n = m :=
-less_than_or_equal.cases_on h₁ (λ a, rfl) (λ a b c, absurd (nat.lt_of_le_of_lt b c) (nat.lt_irrefl n))
-
-protected lemma lt_or_ge : ∀ (a b : ℕ), a < b ∨ a ≥ b
-| a 0     := or.inr (zero_le a)
-| a (b+1) :=
-  match lt_or_ge a b with
-  | or.inl h := or.inl (le_succ_of_le h)
-  | or.inr h :=
-    match nat.eq_or_lt_of_le h with
-    | or.inl h1 := or.inl (h1 ▸ lt_succ_self b)
-    | or.inr h1 := or.inr h1
-    end
-  end
 
 protected lemma le_total {m n : ℕ} : m ≤ n ∨ n ≤ m :=
 or.imp_left nat.le_of_lt (nat.lt_or_ge m n)
@@ -933,21 +908,8 @@ le_lt_antisymm h₂ h₁
 protected theorem nat.lt_asymm {n m : ℕ} (h₁ : n < m) : ¬ m < n :=
 le_lt_antisymm (nat.le_of_lt h₁)
 
-protected def lt_ge_by_cases {a b : ℕ} {C : Sort u} (h₁ : a < b → C) (h₂ : a ≥ b → C) : C :=
-decidable.by_cases h₁ (λ h, h₂ (or.elim (nat.lt_or_ge a b) (λ a, absurd a h) (λ a, a)))
-
-protected def lt_by_cases {a b : ℕ} {C : Sort u} (h₁ : a < b → C) (h₂ : a = b → C)
-  (h₃ : b < a → C) : C :=
-nat.lt_ge_by_cases h₁ (λ h₁,
-  nat.lt_ge_by_cases h₃ (λ h, h₂ (nat.le_antisymm h h₁)))
-
-protected theorem lt_trichotomy (a b : ℕ) : a < b ∨ a = b ∨ b < a :=
-nat.lt_by_cases (λ h, or.inl h) (λ h, or.inr (or.inl h)) (λ h, or.inr (or.inr h))
-
 protected theorem eq_or_lt_of_not_lt {a b : ℕ} (hnlt : ¬ a < b) : a = b ∨ b < a :=
 (nat.lt_trichotomy a b).resolve_left hnlt
-
-theorem lt_succ_of_lt {a b : nat} (h : a < b) : a < succ b := le_succ_of_le h
 
 def one_pos := nat.zero_lt_one
 
