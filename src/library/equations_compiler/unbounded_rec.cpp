@@ -22,6 +22,7 @@ static expr replace_rec_apps(type_context & ctx, expr const & e) {
     buffer<expr> macro_fns;
     for (unsigned fidx = 0; fidx < ues.get_num_fns(); fidx++) {
         expr const & fn = ues.get_fn(fidx);
+        tout() << "REPLACE: " << mlocal_pp_name(fn) << "\n";
         fns.push_back(fn);
 #ifdef NEW_CODE
         macro_fns.push_back(mk_rec_fn_macro(head(actual_names), ctx.infer(fn)));
@@ -47,9 +48,12 @@ static expr replace_rec_apps(type_context & ctx, expr const & e) {
 eqn_compiler_result unbounded_rec(environment & env, options const & opts,
                    metavar_context & mctx, local_context const & lctx,
                    expr const & e, elaborator & elab) {
+    tout() << "unbounded_rec\n";
     type_context ctx(env, opts, mctx, lctx, transparency_mode::Semireducible);
     expr e1 = replace_rec_apps(ctx, e);
     auto R = elim_match(env, opts, mctx, lctx, e1, elab);
+
+    tout() << "RESULT:\n" << R.m_fn << "\n";
 
     list<expr> counter_examples;
     if (R.m_counter_examples) {
