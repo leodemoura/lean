@@ -237,6 +237,19 @@ static environment compile_decl(parser & p, environment const & env,
     }
 }
 
+static expr refine_inst_implicit_args(expr const & t) {
+    if (is_pi(t)) {
+        expr new_body = refine_inst_implicit_args(binding_body(t));
+        if (binding_info(t).is_inst_implicit() && has_free_var_in_domain(new_body, 0)) {
+            return update_binding(t, binding_domain(t), new_body, mk_implicit_binder_info());
+        } else {
+            return update_binding(t, binding_domain(t), new_body);
+        }
+    } else {
+        return t;
+    }
+}
+
 static pair<environment, name>
 declare_definition(parser & p, environment const & env, decl_cmd_kind kind, buffer<name> const & lp_names,
                    name const & c_name, name const & prv_name, expr type, optional<expr> val, task<expr> const & proof, cmd_meta const & meta,
@@ -254,6 +267,7 @@ declare_definition(parser & p, environment const & env, decl_cmd_kind kind, buff
         std::tie(new_env, type) = abstract_nested_proofs(new_env, c_real_name, type);
         std::tie(new_env, *val) = abstract_nested_proofs(new_env, c_real_name, *val);
     }
+    type = refine_inst_implicit_args(type);
     bool use_conv_opt = true;
     bool is_trusted   = !meta.m_modifiers.m_is_meta;
     auto def          =

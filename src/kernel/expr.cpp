@@ -864,7 +864,7 @@ optional<expr> has_expr_metavar_strict(expr const & e) {
     return r;
 }
 
-static bool has_free_var_in_domain(expr const & b, unsigned vidx, bool strict) {
+bool has_free_var_in_domain(expr const & b, unsigned vidx, bool strict) {
     if (is_pi(b)) {
         return
             (has_free_var(binding_domain(b), vidx) && is_explicit(binding_info(b))) ||

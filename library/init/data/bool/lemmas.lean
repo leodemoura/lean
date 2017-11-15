@@ -113,7 +113,7 @@ theorem to_bool_tt {p : Prop} [decidable p] : p → to_bool p = tt := to_bool_tr
 
 theorem of_to_bool_true {p : Prop} [decidable p] : to_bool p → p := (to_bool_iff p).1
 
-theorem bool_iff_false {b : bool} : ¬ b ↔ b = ff := by cases b; exact dec_trivial
+theorem bool_iff_false {b : bool} : ¬ b ↔ b = ff := begin cases b, end -- ; exact dec_trivial
 
 theorem bool_eq_false {b : bool} : ¬ b → b = ff := bool_iff_false.1
 

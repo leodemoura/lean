@@ -677,6 +677,18 @@ expr update_let(expr const & e, expr const & new_type, expr const & new_value, e
 */
 expr infer_implicit(expr const & t, unsigned num_params, bool strict);
 expr infer_implicit(expr const & t, bool strict);
+
+/**
+  Return true if
+    1- t is of the form (Pi (x_1 : A_1) ..., (x_n : A_n), B)
+       and contains de-Bruijn variable vidx in an explicit parameter (x_i : A_i),
+       or B (if strict = false).
+    2- t is not a Pi-type, strict is false and t contains de-Bruijn variable vidx.
+
+    Recall that parameters of the form {x_j : A_j}, {{x_j : A_j}} and [x_j : A_j]
+    are implicit and are not considered by this function.
+*/
+bool has_free_var_in_domain(expr const & t, unsigned vidx, bool strict = true);
 // =======================================
 
 std::ostream & operator<<(std::ostream & out, expr_kind const & k);
