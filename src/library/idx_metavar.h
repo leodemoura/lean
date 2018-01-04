@@ -38,6 +38,11 @@ class metavar_context;
     New metavariables are added to new_us and new_ms. */
 expr to_idx_metavars(metavar_context const & mctx, expr const & e, buffer<level> & new_us, buffer<expr> & new_ms);
 
+/** \brief Return a new expression where index of idx_metauniv variables is increased by udelta,
+    and idx_metavars by mdelta */
+expr lift_idx_metavars(expr const & e, unsigned udelta, unsigned mdelta);
+level lift_idx_metaunivs(level const & l, unsigned udelta);
+
 void initialize_idx_metavar();
 void finalize_idx_metavar();
 }

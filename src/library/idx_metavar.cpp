@@ -162,4 +162,62 @@ expr to_idx_metavars(metavar_context const & mctx, expr const & e, buffer<level>
         return e;
     return to_idx_metavars_fn(mctx, new_us, new_ms)(e);
 }
+
+
+level lift_idx_metaunivs(level const & l, unsigned udelta) {
+    if (!has_meta(l) || udelta == 0)
+        return l;
+    return replace(l, [&](level const & l) {
+            if (!has_meta(l)) return some_level(l);
+            if (is_idx_metauniv(l))
+                return some_level(mk_idx_metauniv(to_meta_idx(l) + udelta));
+            else
+                return none_level();
+        });
+}
+
+levels lift_idx_metaunivs(levels const & ls, unsigned udelta) {
+    return map_reuse(ls,
+                     [&](level const & l) { return lift_idx_metaunivs(l, udelta); },
+                     [](level const & l1, level const & l2) { return is_eqp(l1, l2); });
+}
+
+class lift_idx_metavars_fn : public replace_visitor {
+    unsigned m_udelta;
+    unsigned m_mdelta;
+
+    virtual expr visit_meta(expr const & m) override {
+        if (is_idx_metavar(m)) {
+            expr new_type = visit(mlocal_type(m));
+            return mk_idx_metavar(to_meta_idx(m) + m_mdelta, new_type);
+        } else {
+            return replace_visitor::visit_meta(m);
+        }
+    }
+
+    virtual expr visit_sort(expr const & e) override {
+        return update_sort(e, lift_idx_metaunivs(sort_level(e), m_udelta));
+    }
+
+    virtual expr visit_constant(expr const & e) override {
+        return update_constant(e, lift_idx_metaunivs(const_levels(e), m_udelta));
+    }
+
+    virtual expr visit(expr const & e) override {
+        if ((!has_univ_metavar(e) || m_udelta == 0) && (!has_expr_metavar(e) || m_mdelta == 0))
+            return e;
+        return replace_visitor::visit(e);
+    }
+public:
+    lift_idx_metavars_fn(unsigned udelta, unsigned mdelta):
+        m_udelta(udelta), m_mdelta(mdelta) {
+    }
+};
+
+expr lift_idx_metavars(expr const & e, unsigned udelta, unsigned mdelta) {
+    // TODO(Leo): add cache if this function is a performance bottleneck
+    if ((!has_univ_metavar(e) || udelta == 0) && (!has_expr_metavar(e) || mdelta == 0))
+        return e;
+    return lift_idx_metavars_fn(udelta, mdelta)(e);
+}
 }
