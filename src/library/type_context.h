@@ -181,6 +181,8 @@ public:
     void recycle(type_context_cache_ptr const & ptr);
 };
 
+class simp_lemma;
+
 class type_context : public abstract_type_context {
     typedef type_context_cache_ptr cache_ptr;
     typedef type_context_cache_manager cache_manager;
@@ -549,6 +551,20 @@ public:
         tmp_data(tmp_uassignment & uassignment, tmp_eassignment & eassignment, local_context const & lctx):
             m_uassignment(uassignment), m_eassignment(eassignment), m_mvar_lctx(lctx) {}
     };
+
+    /* Auxiliary scope object for initializing refl lemma unfolding */
+    struct init_refl_lemma_scope {
+        type_context & m_ctx;
+        unsigned       m_old_uassignment_size;
+        unsigned       m_old_eassignment_size;
+        bool           m_old_update_left;
+        bool           m_old_update_right;
+        init_refl_lemma_scope(type_context & ctx, unsigned num_lemma_uvars, unsigned num_lemm_mvars);
+        ~init_refl_lemma_scope();
+    };
+
+    friend struct init_refl_lemma_scope;
+
 private:
     typedef buffer<scope_data> scopes;
     typedef list<pair<name, expr>> local_instances;
@@ -585,6 +601,9 @@ private:
     /* If m_update_right, then when processing `is_def_eq(t, s)`, metavariables
        occurring in `t` can be assigned. */
     bool               m_update_right{true};
+    /* If m_use_refl_lemmas is true, then we (try to) use refl simp lemmas for
+       unfolding definitions. */
+    bool               m_use_refl_lemmas{true};
 
     /* Auxiliary object used to temporarily swap `m_update_left` and `m_update_right`.
        We use it before invoking methods where we swap left/right. */
@@ -865,6 +884,11 @@ public:
             m_zeta_scope(ctx, true) {}
     };
 
+    struct use_refl_lemmas_scope : public flet<bool> {
+        use_refl_lemmas_scope(type_context & ctx, bool enable):
+            flet<bool>(ctx.m_use_refl_lemmas, enable) {}
+    };
+
     /* --------------------------
        Temporary assignment mode.
        It is used when performing type class resolution and matching.
@@ -930,7 +954,10 @@ public:
 
 private:
     void init_core(transparency_mode m);
-    optional<expr> unfold_definition_core(expr const & e);
+    optional<expr> unfold_using_refl_lemma(expr const & e, simp_lemma const & refl_lemma);
+    optional<expr> unfold_using_refl_lemmas_core(expr const & e, buffer<simp_lemma> const & refl_lemmas);
+    optional<expr> unfold_using_refl_lemmas(expr const & e, buffer<simp_lemma> const & refl_lemmas);
+    void get_refl_lemmas(name const & fn_name, buffer<simp_lemma> & refl_lemmas);
     optional<expr> unfold_definition(expr const & e);
     optional<expr> try_unfold_definition(expr const & e);
     bool should_unfold_macro(expr const & e);

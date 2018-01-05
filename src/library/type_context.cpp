@@ -32,6 +32,8 @@ Author: Leonardo de Moura
 #include "library/fun_info.h"
 #include "library/num.h"
 #include "library/quote.h"
+// TODO(Leo): move eqn_lemmas to library
+#include "library/tactic/eqn_lemmas.h"
 
 #ifndef LEAN_DEFAULT_CLASS_INSTANCE_MAX_DEPTH
 #define LEAN_DEFAULT_CLASS_INSTANCE_MAX_DEPTH 32
@@ -674,30 +676,149 @@ optional<declaration> type_context::is_transparent(name const & n) {
     return is_transparent(m_transparency_mode, n);
 }
 
-/* Unfold \c e if it is a constant */
-optional<expr> type_context::unfold_definition_core(expr const & e) {
-    if (is_constant(e)) {
-        if (auto d = is_transparent(const_name(e))) {
-            if (length(const_levels(e)) == d->get_num_univ_params())
-                return some_expr(instantiate_value_univ_params(*d, const_levels(e)));
+
+type_context::init_refl_lemma_scope::init_refl_lemma_scope(type_context & ctx, unsigned num_lemma_uvars, unsigned num_lemma_mvars):
+    m_ctx(ctx),
+    m_old_uassignment_size(m_ctx.m_tmp_data->m_uassignment.size()),
+    m_old_eassignment_size(m_ctx.m_tmp_data->m_eassignment.size()),
+    m_old_update_left(m_ctx.m_update_left),
+    m_old_update_right(m_ctx.m_update_right) {
+
+    m_ctx.m_tmp_data->m_uassignment.resize(m_old_uassignment_size + num_lemma_uvars);
+    m_ctx.m_tmp_data->m_eassignment.resize(m_old_eassignment_size + num_lemma_mvars);
+    m_ctx.m_update_left  = true;
+    m_ctx.m_update_right = false;
+}
+
+type_context::init_refl_lemma_scope::~init_refl_lemma_scope() {
+    m_ctx.m_tmp_data->m_uassignment.resize(m_old_uassignment_size);
+    m_ctx.m_tmp_data->m_eassignment.resize(m_old_eassignment_size);
+    m_ctx.m_update_left  = m_old_update_left;
+    m_ctx.m_update_right = m_old_update_right;
+}
+
+static unsigned DEPTH = 0;
+
+optional<expr> type_context::unfold_using_refl_lemma(expr const & e, simp_lemma const & refl_lemma) {
+    lean_assert(in_tmp_mode());
+    init_refl_lemma_scope S1(*this, refl_lemma.get_num_umeta(), refl_lemma.get_num_emeta());
+    scope S2(*this);
+    flet<unsigned> INC(DEPTH, DEPTH+1);
+    tout() << "LIFT[" << DEPTH << "]: " << S1.m_old_uassignment_size << ", " << S1.m_old_eassignment_size << "\n" << e << "\n======\n";
+    expr const & lhs = refl_lemma.get_lhs();
+    buffer<expr> lhs_args;
+    expr const & lhs_fn = get_app_args(lhs, lhs_args);
+    buffer<expr> args;
+    expr const & fn = get_app_args(e, args);
+    lean_assert(is_constant(lhs_fn) && is_constant(fn) && const_name(lhs_fn) == const_name(fn));
+    if (args.size() < lhs_args.size())
+        return none_expr(); // partial application
+    /* Match Levels */
+    buffer<level> lhs_fn_lvls;
+    buffer<level> fn_lvls;
+    to_buffer(const_levels(lhs_fn), lhs_fn_lvls);
+    to_buffer(const_levels(fn), fn_lvls);
+    if (lhs_fn_lvls.size() != fn_lvls.size())
+        return none_expr();
+    for (unsigned i = 0; i < lhs_fn_lvls.size(); i++) {
+        level lhs_lvl = lhs_fn_lvls[i];
+        lhs_lvl = lift_idx_metaunivs(lhs_lvl, S1.m_old_uassignment_size);
+        if (!is_def_eq(lhs_lvl, fn_lvls[i]))
+            return none_expr();
+    }
+    /* Match arguments */
+    for (unsigned i = 0; i < lhs_args.size(); i++) {
+        expr lhs_arg = lift_idx_metavars(lhs_args[i], S1.m_old_uassignment_size, S1.m_old_eassignment_size);
+        if (!is_def_eq_core(lhs_arg, args[i])) {
+/*
+            lean_trace(name({"type_context", "eqn_lemmas"}),
+                       scope_trace_env scope(env(), *this);
+                       tout() << "failed to reduce using " << refl_lemma.get_id() << ", argument #" << (i+1) << " did not match\n" << e << "\n";);
+*/
+            return none_expr();
         }
+    }
+    if (!process_postponed(S2))
+        return none_expr();
+#ifdef LEAN_DEBUG
+    /* Check whether all lemma metavars were assigned or not. */
+    for (unsigned i = S1.m_old_uassignment_size; i < m_tmp_data->m_uassignment.size(); i++) {
+        lean_assert(m_tmp_data->m_uassignment[i]);
+    }
+    for (unsigned i = S1.m_old_eassignment_size; i < m_tmp_data->m_eassignment.size(); i++) {
+        lean_assert(m_tmp_data->m_eassignment[i]);
+    }
+#endif
+    expr rhs = instantiate_mvars(lift_idx_metavars(refl_lemma.get_rhs(), S1.m_old_uassignment_size, S1.m_old_eassignment_size));
+    expr new_e = mk_app(rhs, args.size() - lhs_args.size(), args.data() + lhs_args.size());
+    lean_trace(name({"type_context", "eqn_lemmas"}),
+               scope_trace_env scope(env(), *this);
+               tout() << "reduced using refl-lemma " << refl_lemma.get_id() << "\n" <<
+               instantiate_mvars(e) << "\n==>\n" << new_e << "\n";);
+    return none_expr(); // some_expr(new_e);
+}
+
+optional<expr> type_context::unfold_using_refl_lemmas_core(expr const & e, buffer<simp_lemma> const & refl_lemmas) {
+    lean_assert(in_tmp_mode());
+    for (simp_lemma const & refl_lemma : refl_lemmas) {
+        if (auto r = unfold_using_refl_lemma(e, refl_lemma))
+            return r;
     }
     return none_expr();
 }
 
-/* Unfold head(e) if it is a constant */
+optional<expr> type_context::unfold_using_refl_lemmas(expr const & e, buffer<simp_lemma> const & refl_lemmas) {
+/*
+    if (is_refl_lemma_stuck(e)) {
+        expr new_e = try_to_unstuck_using_complete_instance(e);
+        if (new_e != e) {
+            tout() << "UNSTUCK: " << e << " ==> " << new_e << "\n";
+            return unfold_using_refl_lemmas(new_e, refl_lemmas);
+        }
+    }
+*/
+    if (in_tmp_mode()) {
+        flet<local_context> updt_lctx(m_tmp_data->m_mvar_lctx, lctx());
+        return unfold_using_refl_lemmas_core(e, refl_lemmas);
+    } else {
+        tmp_mode_scope scope(*this);
+        return unfold_using_refl_lemmas_core(e, refl_lemmas);
+    }
+}
+
+void type_context::get_refl_lemmas(name const & fn_name, buffer<simp_lemma> & refl_lemmas) {
+    if (m_use_refl_lemmas && !has_simple_eqn_lemma(env(), fn_name)) {
+       bool refl_only = true;
+       get_eqn_lemmas_for(env(), fn_name, refl_only, refl_lemmas);
+   }
+}
+
+/* Unfold e if it is a constant or a constant application */
 optional<expr> type_context::unfold_definition(expr const & e) {
     if (is_app(e)) {
         expr f0 = get_app_fn(e);
-        if (auto f  = unfold_definition_core(f0)) {
-            buffer<expr> args;
-            get_app_rev_args(e, args);
-            return some_expr(apply_beta(*f, args.size(), args.data()));
-        } else {
-            return none_expr();
+        if (!is_constant(f0)) return none_expr();
+        auto d = is_transparent(const_name(f0));
+        if (!d) return none_expr();
+        if (length(const_levels(f0)) != d->get_num_univ_params()) return none_expr();
+        buffer<simp_lemma> refl_lemmas;
+        get_refl_lemmas(const_name(f0), refl_lemmas);
+        if (!refl_lemmas.empty()) {
+            if (auto r = unfold_using_refl_lemmas(e, refl_lemmas)) {
+                return r;
+            }
         }
+        /* use delta reduction */
+        expr f = instantiate_value_univ_params(*d, const_levels(f0));
+        buffer<expr> args;
+        get_app_rev_args(e, args);
+        return some_expr(apply_beta(f, args.size(), args.data()));
     } else {
-        return unfold_definition_core(e);
+        if (!is_constant(e)) return none_expr();
+        auto d = is_transparent(const_name(e));
+        if (!d) return none_expr();
+        if (length(const_levels(e)) != d->get_num_univ_params()) return none_expr();
+        return some_expr(instantiate_value_univ_params(*d, const_levels(e)));
     }
 }
 
@@ -4193,6 +4314,7 @@ void initialize_type_context() {
     register_trace_class(name({"type_context", "univ_is_def_eq"}));
     register_trace_class(name({"type_context", "univ_is_def_eq_detail"}));
     register_trace_class(name({"type_context", "tmp_vars"}));
+    register_trace_class(name({"type_context", "eqn_lemmas"}));
     register_trace_class("type_context_cache");
     g_class_instance_max_depth     = new name{"class", "instance_max_depth"};
     register_unsigned_option(*g_class_instance_max_depth, LEAN_DEFAULT_CLASS_INSTANCE_MAX_DEPTH,
