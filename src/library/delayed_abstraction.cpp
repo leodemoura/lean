@@ -11,6 +11,8 @@ Author: Leonardo de Moura
 #include "library/replace_visitor.h"
 #include "library/metavar_context.h"
 
+#include "library/trace.h"
+
 namespace lean {
 static name * g_delayed_abstraction_macro = nullptr;
 /** \brief Delayed abstraction macro. This is an auxiliary temporary macro used by the tactic framework.

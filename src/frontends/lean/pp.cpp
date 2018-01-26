@@ -1063,6 +1063,7 @@ auto pretty_fn::pp_delayed_abstraction(expr const & e) -> result {
         for (unsigned i = 0; i < ns.size(); i++) {
             format r2;
             if (i) r2 += format(",") + line();
+            r2 += format(ns[i]) + format (" := ");
             r2 += pp(es[i]).fmt();
             r += group(r2);
         }

@@ -567,6 +567,12 @@ expr type_context::revert(buffer<expr> & to_revert, expr const & mvar, bool pres
             r = mk_app(r, a);
         }
     }
+    lean_trace(name({"type_context", "is_def_eq_detail"}),
+               scope_trace_env scope(env(), *this);
+               tout() << "revert assignment: " << mvar << " := " << r << "\n";
+               tout() << "mvar type:         " << infer(mvar) << "\n";
+               tout() << "new_mvar type:     " << infer(new_mvar) << "\n";
+        );
     m_mctx.assign(mvar, r);
     return r;
 }
@@ -3266,6 +3272,9 @@ lbool type_context::is_def_eq_proj(expr t, expr s) {
 }
 
 bool type_context::is_def_eq_core_core(expr t, expr s) {
+    lean_trace(name({"type_context", "is_def_eq_detail"}),
+               scope_trace_env scope(env(), *this);
+               tout() << "before quick [" << m_is_def_eq_depth << "]: " << t << " =?= " << s << "\n";);
     lbool r = quick_is_def_eq(t, s);
     if (r != l_undef) return r == l_true;
 
