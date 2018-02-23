@@ -200,7 +200,7 @@ struct wf_rec_fn {
                 if (!m_parent.m_elab.try_report(ex2)) throw ex2;
             }
 
-            return m_parent.m_elab.mk_sorry(y_R_x);
+            return mk_sorry(y_R_x);
         }
 
         virtual expr visit_app(expr const & e) {

@@ -293,6 +293,12 @@ bool is_equations_result(expr const & e) { return is_macro(e) && macro_def(e) ==
 unsigned get_equations_result_size(expr const & e) { return macro_num_args(e); }
 expr const & get_equations_result(expr const & e, unsigned i) { return macro_arg(e, i); }
 
+bool is_recursive_eqns(equations_context & ectx, expr const & eqns) {
+    equations_type_context_maker maker(ectx);
+    type_context & ctx = maker.ctx();
+    return is_recursive_eqns(ctx, eqns);
+}
+
 void initialize_equations() {
     g_equations_name            = new name("equations");
     g_equation_name             = new name("equation");

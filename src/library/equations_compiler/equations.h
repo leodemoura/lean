@@ -5,7 +5,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Author: Leonardo de Moura
 */
 #pragma once
-#include "kernel/expr.h"
+#include "kernel/environment.h"
+#include "library/io_state.h"
+#include "library/metavar_context.h"
 
 namespace lean {
 class io_state;
@@ -79,6 +81,51 @@ expr mk_equations_result(unsigned n, expr const * rs);
 inline expr mk_equations_result(expr const & e) { return mk_equations_result(1, &e); }
 unsigned get_equations_result_size(expr const & e);
 expr const & get_equations_result(expr const & e, unsigned i);
+
+/* Context for the equation compiler.
+
+   We use this class for two reasons:
+   1- Reduce the number of arguments we have to pass around.
+   2- Make sure the equation compiler does not depend on the elaborator. */
+class equations_context {
+public:
+    equations_context(equations_context const &) = delete;
+    equations_context(equations_context &&) = delete;
+    equations_context const & operator=(equations_context const &) = delete;
+    equations_context const & operator=(equations_context &&) = delete;
+
+    virtual ~equations_context() {}
+    virtual environment & env() = 0;
+    virtual metavar_context & mctx() = 0;
+    virtual local_context const & lctx() = 0;
+    virtual abstract_context_cache & get_cache() = 0;
+    virtual options const & get_options() = 0;
+    virtual bool try_report(std::exception const & ex) = 0;
+    virtual bool try_report(std::exception const & ex, optional<expr> const & ref) = 0;
+    virtual void report_or_throw(elaborator_exception const & ex) = 0;
+    type_context mk_type_context(transparency_mode m = transparency_mode::Semireducible)
+};
+
+/* Helper class for constructing a type_context object from a equations_context,
+   and updating the equations_context `metavar_context` later. */
+class equations_type_context_maker {
+    equations_context & m_ectx;
+    type_context        m_ctx;
+public:
+    equations_type_context_maker(equations_context & ectx, local_context & lctx, transparency_mode m = transparency_mode::Semireducible):
+        m_ectx(ectx),
+        m_ctx(ectx.env(), ectx.mctx(), lctx, elab.get_cache(), m) {
+    }
+    equations_type_context_maker(equations_context & ectx, transparency_mode m = transparency_mode::Semireducible):
+        equations_type_context_maker(ectx, ectx.lctx(), m) {
+    }
+    ~equations_type_context_maker() {
+        m_ectx.mctx() = m_ctx.mctx();
+    }
+    type_context & ctx() { return m_ctx; }
+};
+
+bool is_recursive_eqns(equations_context & ectx, expr const & eqns);
 
 void initialize_equations();
 void finalize_equations();
