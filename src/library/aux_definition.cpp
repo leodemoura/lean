@@ -189,6 +189,7 @@ struct mk_aux_definition_fn : public closure_helper {
 
 pair<environment, expr> mk_aux_definition(environment const & env, metavar_context const & mctx, local_context const & lctx,
                                           name const & c, expr const & type, expr const & value, optional<bool> const & is_meta) {
+    // Should not use cache metavar_context is not inout
     type_context ctx(env, options(), mctx, lctx, transparency_mode::All);
     bool is_lemma = false;
     return mk_aux_definition_fn(ctx)(c, type, value, is_lemma, is_meta);
@@ -196,6 +197,7 @@ pair<environment, expr> mk_aux_definition(environment const & env, metavar_conte
 
 pair<environment, expr> mk_aux_definition(environment const & env, metavar_context const & mctx, local_context const & lctx,
                                           name const & c, expr const & value, optional<bool> const & is_meta) {
+    // Should not use cache metavar_context is not inout
     type_context ctx(env, options(), mctx, lctx, transparency_mode::All);
     expr type     = ctx.infer(value);
     bool is_lemma = false;
@@ -204,6 +206,7 @@ pair<environment, expr> mk_aux_definition(environment const & env, metavar_conte
 
 pair<environment, expr> mk_aux_lemma(environment const & env, metavar_context const & mctx, local_context const & lctx,
                                      name const & c, expr const & type, expr const & value) {
+    // Should not use cache metavar_context is not inout
     type_context ctx(env, options(), mctx, lctx, transparency_mode::All);
     bool is_lemma = true;
     optional<bool> is_meta(false);

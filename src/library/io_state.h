@@ -7,8 +7,9 @@ Author: Leonardo de Moura
 #pragma once
 #include <string>
 #include "util/output_channel.h"
-#include "util/sexpr/options.h"
 #include "util/exception_with_pos.h"
+#include "util/sstream.h"
+#include "util/sexpr/options.h"
 #include "kernel/expr.h"
 #include "kernel/scope_pos_info_provider.h"
 
@@ -74,6 +75,23 @@ public:
     virtual void rethrow() const override { throw *this; }
     virtual optional<pos_info> get_pos() const override { return m_pos; }
     virtual format pp() const { return m_fmt; }
+};
+
+class elaborator_exception : public formatted_exception {
+protected:
+    bool m_ignore = false; // We ignore exceptions that mention synthetic sorrys.
+public:
+    elaborator_exception(optional<pos_info> const & p, format const & fmt):formatted_exception(p, fmt) {}
+    elaborator_exception(optional<expr> const & e, format const & fmt):formatted_exception(e, fmt) {}
+    elaborator_exception(expr const & e, format const & fmt):formatted_exception(e, fmt) {}
+    elaborator_exception(expr const & e, sstream const & strm):formatted_exception(e, format(strm.str())) {}
+    elaborator_exception(expr const & e, char const * msg):formatted_exception(e, format(msg)) {}
+
+    elaborator_exception && ignore_if(bool b) { m_ignore = b; return std::move(*this); }
+    bool is_ignored() const { return m_ignore; }
+
+    virtual throwable * clone() const override;
+    virtual void rethrow() const override { throw *this; }
 };
 
 struct scope_global_ios {

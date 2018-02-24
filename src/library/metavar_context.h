@@ -34,6 +34,7 @@ class metavar_context {
 
     struct interface_impl;
     friend struct interface_impl;
+    friend class metavar_context_scope;
     expr mk_metavar_decl(optional<name> const & pp_n, local_context const & ctx, expr const & type);
 public:
     metavar_context(name_generator & parent_ngen);
@@ -44,6 +45,7 @@ public:
     expr mk_metavar_decl(local_context const & ctx, expr const & type) {
         return mk_metavar_decl(optional<name>(), ctx, type);
     }
+
     expr mk_metavar_decl(name const & pp_name, local_context const & ctx, expr const & type) {
         return mk_metavar_decl(optional<name>(pp_name), ctx, type);
     }
@@ -110,6 +112,26 @@ public:
             is_eqp(ctx1.m_uassignment, ctx2.m_uassignment) &&
             is_eqp(ctx1.m_eassignment, ctx2.m_eassignment);
     }
+};
+
+/* Helper object used
+
+*/
+class metavar_context_scope {
+    metavar_context   m_saved_mctx;
+    metavar_context & m_mctx;
+    bool              m_keep{false};
+public:
+    metavar_context_scope(metavar_context & mctx):
+        m_saved_mctx(mctx), m_mctx(mctx) {}
+    ~metavar_context() {
+        if (!m_keep) {
+            name_generator ngen = m_mctx.m_ngen;
+            m_mctx              = m_saved_mctx;
+            m_mctx.m_ngen       = ngen;
+        }
+    }
+    void commit() { m_keep = true; }
 };
 
 /** \brief Check whether the local context lctx is well-formed and well-formed with respect to \c mctx.

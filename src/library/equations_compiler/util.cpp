@@ -805,6 +805,7 @@ environment mk_equation_lemma(environment const & env, options const & opts, met
                               name const & f_name, name const & f_actual_name, unsigned eqn_idx, bool is_private,
                               buffer<expr> const & Hs, expr const & lhs, expr const & rhs) {
     if (!get_eqn_compiler_lemmas(opts)) return env;
+    // Remark: we should not use persistent_context_cache here since metavar_context is not inout,
     type_context ctx(env, opts, mctx, lctx, transparency_mode::Semireducible);
     expr proof        = prove_eqn_lemma(ctx, Hs, lhs, rhs);
     expr new_rhs      = cleanup_equation_rhs(rhs);
