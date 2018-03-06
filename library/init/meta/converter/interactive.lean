@@ -130,6 +130,8 @@ do l ← conv.lhs,
    (new_lhs, prf, _) ← tactic.rewrite h l cfg,
    update_lhs new_lhs prf
 
+open tactic
+
 private meta def rw_core (rs : list rw_rule) (cfg : rewrite_cfg) : conv unit :=
 rs.mmap' $ λ r, do
  save_info r.pos,

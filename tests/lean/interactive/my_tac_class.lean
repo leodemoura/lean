@@ -14,7 +14,7 @@ namespace mytac
 
 meta def step {α : Type} (t : mytac α) : mytac unit :=
 t >> return ()
-
+open tactic
 meta def istep {α : Type} (line0 col0 line col : nat) (t : mytac α) : mytac unit :=
 λ v s, result.cases_on (@scope_trace _ line col (λ_, t v s))
   (λ ⟨a, v⟩ new_s, result.success ((), v) new_s)

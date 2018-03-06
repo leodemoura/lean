@@ -89,7 +89,9 @@ environment execute_open(environment env, io_state const & ios, export_decl cons
     name const & ns = edecl.m_ns;
     fingerprint = hash(fingerprint, ns.hash());
     unsigned old_export_decls_sz = length(get_active_export_decls(env));
-    env = activate_export_decls(env, ns);
+    if (!edecl.m_had_explicit) {
+        env = activate_export_decls(env, ns);
+    }
     for (auto const & p : edecl.m_renames) {
         fingerprint = hash(hash(fingerprint, p.first.hash()), p.second.hash());
         env = add_expr_alias(env, p.first, p.second);

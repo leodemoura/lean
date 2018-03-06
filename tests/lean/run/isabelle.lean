@@ -37,7 +37,7 @@ meta def lazy_tactic (α : Type u) :=
 tactic_state → lazy_list (α × tactic_state)
 
 namespace lazy_tactic
-open lazy_list
+open lazy_list tactic
 
 meta def of_tactic {α : Type u} (t : tactic α) : lazy_tactic α :=
 λ s, match t s with

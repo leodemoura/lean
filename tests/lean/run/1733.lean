@@ -1,5 +1,5 @@
 def f (a : nat) := (a, a)
-
+open tactic
 example (a : nat) (h : (f a).1 ≠ a) : false :=
 begin
   unfold_projs at h {md := semireducible},
