@@ -7,6 +7,30 @@ prelude
 import init.meta.tactic
 import init.meta.interactive
 
+/-
+This module has been temporarily disabled.
+Reason: we are refactoring the tactic framework using two states: a nonbacktrackable one and one that is backtrackable.
+The nonbacktrackable state is hidden inside a new opaque monad: tactic_core.
+We considered two ways of supporting run_async.
+
+1- We provide the APIs
+```
+mk_child_state : tactic_core child_state
+run_child : tactic_core α → child_state → α
+```
+The `mk_child_state` primitive would create a copy of a subset of the nonbacktrackable state.
+For example, it would contain a new child name generator.
+Then `run_child` would execute the given tactic using the new child name generator and a fresh cache object.
+The main disadvantage of this approach is that we cannot easily add more state to the nonbacktrackable state object.
+
+2- Implement `run_async` in C++. We would not need to add the primitives `mk_child_state` and `run_child`,
+but we could still have problems when adding more state to the nonbacktrackable state object.
+
+The `async` tactic is not being used. So, we just disable it for now.
+-/
+
+#exit
+
 namespace tactic
 
 private meta def report {α} (s : tactic_state) : option (unit → format) → α

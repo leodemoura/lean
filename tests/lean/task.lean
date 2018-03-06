@@ -1,3 +1,4 @@
+#exit
 run_cmd tactic.run_async (tactic.trace
   "trace message from a different task")
 
