@@ -1,3 +1,4 @@
+#exit
 protected def num_denum := ℤ × {d:ℤ // d > 0}
 
 protected def rel : num_denum → num_denum → Prop

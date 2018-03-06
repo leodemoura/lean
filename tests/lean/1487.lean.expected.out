@@ -1,5 +1,1 @@
-1487.lean:3:2: error: smt_tactic.close failed
-state:
-α : Sort ?,
-a b : α
-⊢ a = b
+1487.lean:1:0: warning: using 'exit' to interrupt Lean

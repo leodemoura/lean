@@ -1,3 +1,4 @@
+#exit
 /- "Proving in the Large" chapter of CPDT -/
 
 inductive exp : Type

@@ -1,3 +1,4 @@
+#exit
 run_cmd mk_hinst_lemma_attr_set `attr_main [`attr1, `attr2] [`sattr1, `sattr2]
 
 constant f : nat → nat

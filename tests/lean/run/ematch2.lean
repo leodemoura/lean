@@ -1,3 +1,4 @@
+#exit
 namespace foo
 universe variables u
 variables {α : Type u}

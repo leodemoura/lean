@@ -1,3 +1,4 @@
+#exit
 constant f : nat → nat
 constant p : nat → Prop
 /- The following axiom produces a matching loop -/

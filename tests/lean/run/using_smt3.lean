@@ -1,3 +1,4 @@
+#exit
 open tactic
 
 lemma ex1 : let x := 1 in ∀ y, x = y → y = 1 :=

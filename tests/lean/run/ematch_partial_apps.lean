@@ -1,3 +1,4 @@
+#exit
 open tactic
 
 set_option trace.smt.ematch true

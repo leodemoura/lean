@@ -1,3 +1,4 @@
+#exit
 open tactic
 
 example (a b : nat) (s t : list nat) : a::s = b::t → a ≠ b → false :=

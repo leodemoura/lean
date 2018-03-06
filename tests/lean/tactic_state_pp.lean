@@ -1,3 +1,4 @@
+#exit
 universe variables u
 
 inductive Vec (α : Type u) : nat → Type u

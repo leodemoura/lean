@@ -1,3 +1,4 @@
+#exit
 import data.vector open tactic
 
 universe variables u

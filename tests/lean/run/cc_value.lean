@@ -1,3 +1,4 @@
+#exit
 open tactic
 
 example (a b : nat) : a = 1 → b = 2 → a = b → false :=

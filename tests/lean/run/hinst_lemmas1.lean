@@ -1,3 +1,4 @@
+#exit
 run_cmd
 do
   tactic.trace "hinst_lemmas example:",

@@ -1,3 +1,4 @@
+#exit
 open tactic
 
 example (a b c d : nat) (f : nat → nat × nat) : (f d).1 ≠ a → f d = (b, c) → b = a → false :=

@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Leonardo de Moura
 -/
 prelude
+#exit
+
 import init.meta.interactive_base init.meta.tactic init.meta.set_get_option_tactics
 
 structure cc_config :=

@@ -1,3 +1,4 @@
+#exit
 namespace ex
 constant array : Type
 constant read : array → nat → nat

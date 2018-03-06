@@ -1,3 +1,4 @@
+#exit
 universe variables u
 
 def ex {α : Type u} [comm_semiring α] (a : α) : 0 + a = a :=

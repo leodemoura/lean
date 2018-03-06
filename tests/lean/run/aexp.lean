@@ -1,3 +1,4 @@
+#exit
 namespace imp
 open tactic
 

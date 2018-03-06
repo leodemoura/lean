@@ -1,3 +1,4 @@
+#exit
 constant {u} f {α : Type u} : α → α → α → α
 axiom {u} fax {α : Type u} [ring α] (a b : α) : f a b a = 0
 

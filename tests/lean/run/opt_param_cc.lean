@@ -1,3 +1,4 @@
+#exit
 def f (a : nat) (b : nat := a) (c : nat := a) :=
 a + b + c
 

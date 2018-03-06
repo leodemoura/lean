@@ -1,3 +1,4 @@
+#exit
 protected def rel : ℤ × ℤ → ℤ × ℤ → Prop
 | ⟨n₁, d₁⟩ ⟨n₂, d₂⟩ := n₁ * d₂ = n₂ * d₁
 

@@ -1,3 +1,4 @@
+#exit
 constant f : nat → nat
 constant g : nat → nat
 axiom Ax : ∀ x, (: f (g x) :) = x

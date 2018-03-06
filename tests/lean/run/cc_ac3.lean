@@ -1,3 +1,4 @@
+#exit
 open tactic
 
 example (a b c d e : nat) (f : nat → nat → nat) : b + a = d → b + c = e → f (a + b + c) (a + b + c) = f (c + d) (a + e) :=

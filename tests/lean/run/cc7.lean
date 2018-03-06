@@ -1,3 +1,4 @@
+#exit
 open tactic
 
 example (f g : Π {α : Type}, α → α → α) (h : nat → nat) (a b : nat) :

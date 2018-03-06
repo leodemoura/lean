@@ -1,3 +1,4 @@
+#exit
 open smt_tactic
 
 constant p : nat → nat → Prop

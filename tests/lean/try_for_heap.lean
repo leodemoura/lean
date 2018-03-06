@@ -1,3 +1,4 @@
+#exit
 constant heap   : Type
 constant ptr    : Type
 constant val    : Type

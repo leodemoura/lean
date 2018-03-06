@@ -1,3 +1,4 @@
+#exit
 example (f : nat → nat → nat) (a b c : nat) :
   f a = (λ x, x) → f a b = b :=
 begin [smt]

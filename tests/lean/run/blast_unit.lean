@@ -1,3 +1,4 @@
+#exit
 variables {A₁ A₂ A₃ A₄ B₁ B₂ B₃ B₄ : Prop}
 
 meta def blast : tactic unit :=

@@ -1,3 +1,4 @@
+#exit
 namespace tactic.interactive
 
 meta def smt (tac : smt_tactic.interactive.itactic) : tactic unit :=

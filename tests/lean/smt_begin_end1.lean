@@ -1,3 +1,4 @@
+#exit
 constant p : nat → nat → Prop
 constant f : nat → nat
 axiom pf (a : nat) : p (f a) (f a) → p a a

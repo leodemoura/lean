@@ -1,3 +1,4 @@
+#exit
 universe variables u
 
 def ex (p q : nat → nat → Prop) (h : ∃ x, p x x ∧ q x x) : ∃ x y, p x y :=

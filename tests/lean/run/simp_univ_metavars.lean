@@ -1,3 +1,4 @@
+#exit
 meta def blast : tactic unit := using_smt $ return ()
 
 structure { u v } Category :=

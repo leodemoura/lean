@@ -1,3 +1,4 @@
+#exit
 constant f (a b : nat) : a > b → nat
 constant g : nat → nat
 open tactic

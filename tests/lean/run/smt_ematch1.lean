@@ -1,3 +1,4 @@
+#exit
 constant f : nat → nat
 axiom fax : ∀ x, f x = x
 

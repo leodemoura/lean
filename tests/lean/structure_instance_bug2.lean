@@ -1,3 +1,4 @@
+#exit
 def default_smt_pre_config : smt_pre_config := {}
 
 def my_pre_config1 : smt_pre_config :=

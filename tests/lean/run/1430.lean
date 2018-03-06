@@ -1,3 +1,4 @@
+#exit
 universe variables u
 
 inductive foo_basic (A : Type u) : psum unit ℕ → Type u

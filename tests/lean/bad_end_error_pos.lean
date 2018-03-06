@@ -1,3 +1,4 @@
+#exit
 example (a b c : nat) (f : nat → nat) : f (a + b + c) = f (b + c + a) :=
 by ac_refl
 

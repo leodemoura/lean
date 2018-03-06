@@ -1,3 +1,4 @@
+#exit
 constant p {α} : α → α → Prop
 axiom pax {α} : ∀ n : α, p n n
 

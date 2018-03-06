@@ -1,3 +1,4 @@
+#exit
 universe variables u v u1 u2 v1 v2
 
 set_option pp.universes true

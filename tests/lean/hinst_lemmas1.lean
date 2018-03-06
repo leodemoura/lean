@@ -1,3 +1,4 @@
+#exit
 axiom foo1 : ∀ (a b c : nat), b > a → b < c  → a < c
 axiom foo2 : ∀ (a b c : nat), b > a → b < c → a < c
 axiom foo3 : ∀ (a b c : nat), b > a → b < c + c → a < c + c

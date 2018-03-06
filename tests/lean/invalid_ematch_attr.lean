@@ -1,3 +1,4 @@
+#exit
 constant f : ℕ → ℕ
 axiom foo {m n : ℕ} : f m = m
 

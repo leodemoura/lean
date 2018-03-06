@@ -1,3 +1,4 @@
+#exit
 lemma aux : nat.succ 0 = 1 :=
 rfl
 

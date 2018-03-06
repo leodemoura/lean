@@ -1,3 +1,4 @@
+#exit
 lemma {u} ring_add_comm {α : Type u} [ring α] : ∀ (a b : α), (: a + b :) = b + a :=
 add_comm
 

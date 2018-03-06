@@ -1,3 +1,4 @@
+#exit
 open smt_tactic tactic
 
 lemma ex1 (a b c : nat) : a = c → a = b → b = c :=

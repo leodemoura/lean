@@ -1,3 +1,4 @@
+#exit
 inductive Nat
 | Z : Nat
 | S : Nat → Nat

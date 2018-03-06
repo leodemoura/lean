@@ -1,3 +1,4 @@
+#exit
 section
 
   parameters x y : nat

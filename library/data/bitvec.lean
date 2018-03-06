@@ -197,7 +197,7 @@ section conversion
          , k_ih
          , bits_to_nat_to_bool
          , mod_pow_succ h],
-      ac_refl, }
+      simp [add_comm, add_assoc, add_left_comm] }
   end
 
   protected def to_int : Π {n : nat}, bitvec n → int

@@ -1,3 +1,4 @@
+#exit
 universe variables u
 variables {α : Type u}
 variables [comm_ring α]

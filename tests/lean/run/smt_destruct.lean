@@ -1,3 +1,4 @@
+#exit
 open smt_tactic
 
 lemma ex1 (p q : Prop) : p ∨ q → p ∨ ¬q → ¬p ∨ q → ¬p ∨ ¬q → false :=

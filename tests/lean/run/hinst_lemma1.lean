@@ -1,3 +1,4 @@
+#exit
 open tactic
 
 constant p : nat → nat → Prop

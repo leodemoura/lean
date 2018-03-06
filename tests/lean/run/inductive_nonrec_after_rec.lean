@@ -1,3 +1,4 @@
+#exit
 universe variables u
 
 inductive tree (α : Type u)

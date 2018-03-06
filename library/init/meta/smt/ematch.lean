@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Leonardo de Moura
 -/
 prelude
+#exit
+
 import init.meta.smt.congruence_closure
 import init.meta.attribute init.meta.simp_tactic
 import init.meta.interactive_base init.meta.derive

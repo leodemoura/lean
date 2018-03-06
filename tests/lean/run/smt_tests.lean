@@ -1,3 +1,4 @@
+#exit
 attribute [pre_smt] add_zero zero_add mul_one one_mul
 
 constant p    : nat → nat → Prop

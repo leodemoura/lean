@@ -1,3 +1,4 @@
+#exit
 lemma ex1 (a b c : nat) (f : nat → nat → nat) : f 0 1 = 1 → (λ x y : nat, x) = f → false :=
 begin [smt]
   intros

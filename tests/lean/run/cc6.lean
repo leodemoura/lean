@@ -1,3 +1,4 @@
+#exit
 open tactic
 
 example (a b c a' b' c' : nat) : a = a' → b = b' → c = c' → a + b + c + a = a' + b' + c' + a' :=
