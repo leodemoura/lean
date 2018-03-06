@@ -1,3 +1,4 @@
+#exit
 -- Backward chaining with hypotheses
 constants {P Q R S T U : Prop}
 constants (Huq : U → Q) (Hur : U → R) (Hus : U → S) (Hut : U → T)

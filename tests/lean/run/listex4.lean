@@ -1,3 +1,4 @@
+#exit
 universe variable u
 
 constant in_tail  {α : Type u} {a : α}   (b : α)      {l : list α} : a ∈ l → a ∈ b::l

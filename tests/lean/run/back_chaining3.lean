@@ -1,3 +1,4 @@
+#exit
 namespace ex
 open tactic
 

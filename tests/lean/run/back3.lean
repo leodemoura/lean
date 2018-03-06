@@ -1,3 +1,4 @@
+#exit
 /- Lean has a backward chaining tactic that can be configured using
    attributes. -/
 open list tactic

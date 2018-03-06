@@ -1,3 +1,4 @@
+#exit
 -- Backward chaining with tagged rules
 constants {P Q R S T U : Prop} (Hpq : P → Q) (Hqr : Q → R) (Hrs : R → S) (Hst : S → T)
 constants (Huq : U → Q) (Hur : U → R) (Hus : U → S) (Hut : U → T)
